@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-native",
+    "lib": ["ES2020"],
+    "moduleResolution": "bundler",
+    "paths": {
+      "@prompttree/shared": ["../shared/src"],
+      "@prompttree/shared/*": ["../shared/src/*"]
+    }
+  },
+  "extends": "expo/tsconfig.base"
+}

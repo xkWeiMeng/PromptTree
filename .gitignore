@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.output/
+.nuxt/
+.next/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Database
+*.db
+*.db-journal
+data/
+
+# Testing
+coverage/
+
+# Mobile
+packages/mobile/.expo/
+packages/mobile/ios/
+packages/mobile/android/
+*.apk
+*.ipa
+
+# Extension
+packages/extension/.output/
+*.crx
+*.xpi
