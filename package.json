@@ -12,10 +12,16 @@
     "build:backend": "pnpm --filter @prompttree/backend build",
     "build:extension": "pnpm --filter @prompttree/extension build",
     "build:all": "pnpm -r build",
+    "deploy": "bash scripts/deploy.sh",
+    "deploy:web": "bash scripts/deploy.sh web",
+    "deploy:backend": "bash scripts/deploy.sh backend",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test"
   },
   "keywords": ["prompt", "chatgpt", "ai", "productivity"],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "pnpm": {
+    "onlyBuiltDependencies": ["better-sqlite3"]
+  }
 }

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#007AFF"/>
+      <stop offset="100%" stop-color="#5856D6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 透明背景，前景图标居中（Android adaptive icon 要求内容在中间 66% 安全区） -->
+  <rect width="1024" height="1024" fill="none"/>
+
+  <!-- 树干 + 分支（缩小到安全区） -->
+  <path d="M384 340 L384 700 M384 420 L470 420 M384 550 L470 550 M384 680 L470 680"
+        stroke="white" stroke-opacity="0.95" stroke-width="42" stroke-linecap="round" fill="none"/>
+
+  <!-- 根节点 -->
+  <circle cx="384" cy="340" r="36" fill="#ffffff"/>
+
+  <!-- 节点卡片 -->
+  <rect x="484" y="396" width="220" height="48" rx="10" fill="#ffffff" fill-opacity="0.92"/>
+  <rect x="484" y="526" width="260" height="48" rx="10" fill="#ffffff"/>
+  <rect x="484" y="656" width="190" height="48" rx="10" fill="#ffffff" fill-opacity="0.92"/>
+</svg>

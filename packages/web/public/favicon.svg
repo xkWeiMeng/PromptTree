@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#007AFF"/>
+      <stop offset="100%" stop-color="#5856D6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 圆角矩形背景 -->
+  <rect width="512" height="512" rx="108" ry="108" fill="url(#bg)"/>
+
+  <!-- 树形结构：主干 + 分支，使用 path 避免 line 渐变渲染问题 -->
+  <path d="M176 140 L176 388 M176 192 L232 192 M176 280 L232 280 M176 368 L232 368"
+        stroke="white" stroke-opacity="0.9" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- 根节点圆点 -->
+  <circle cx="176" cy="140" r="22" fill="#ffffff"/>
+
+  <!-- 上分支 — 文件夹节点 -->
+  <rect x="240" y="168" width="152" height="48" rx="10" fill="#ffffff" fill-opacity="0.92"/>
+  <!-- 文件夹图标小标记 -->
+  <rect x="254" y="181" width="24" height="18" rx="3" fill="#007AFF" fill-opacity="0.6"/>
+  <rect x="254" y="178" width="12" height="6" rx="2" fill="#007AFF" fill-opacity="0.6"/>
+
+  <!-- 中分支 — Prompt 节点，高亮当前选中 -->
+  <rect x="240" y="256" width="192" height="48" rx="10" fill="#ffffff"/>
+  <!-- {{ }} 变量标记 -->
+  <text x="260" y="289" font-family="SF Mono, Menlo, monospace" font-size="24" font-weight="600" fill="#5856D6" letter-spacing="-1">
+    {{ P }}
+  </text>
+
+  <!-- 下分支 — 普通文本节点 -->
+  <rect x="240" y="344" width="136" height="48" rx="10" fill="#ffffff" fill-opacity="0.92"/>
+  <!-- 文本行条纹 -->
+  <line x1="258" y1="360" x2="354" y2="360" stroke="#007AFF" stroke-opacity="0.4" stroke-width="6" stroke-linecap="round"/>
+  <line x1="258" y1="376" x2="326" y2="376" stroke="#007AFF" stroke-opacity="0.3" stroke-width="6" stroke-linecap="round"/>
+</svg>

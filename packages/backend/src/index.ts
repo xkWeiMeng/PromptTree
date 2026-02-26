@@ -6,25 +6,42 @@ import { logger } from 'hono/logger'
 import authRoutes from './routes/auth'
 import syncRoutes from './routes/sync'
 import { authMiddleware } from './middleware/auth'
+import { errorHandler, notFoundHandler } from './middleware/error'
 
 const app = new Hono()
 
-// 中间件
+// 全局中间件
+app.use('*', errorHandler)
 app.use('*', logger())
-app.use('*', cors())
+app.use('*', cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://prompttree.tech', 'https://www.prompttree.tech'],
+  credentials: true
+}))
 
 // 健康检查
-app.get('/api/health', (c) => c.json({ status: 'ok' }))
+app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: Date.now() }))
 
-// 路由
+// 认证路由（公开）
 app.route('/api/auth', authRoutes)
+
+// 需要认证的用户信息接口
+app.use('/api/auth/me', authMiddleware)
+
+// 同步路由（需要认证）
 app.use('/api/sync/*', authMiddleware)
 app.route('/api/sync', syncRoutes)
+
+// 404 处理
+app.notFound(notFoundHandler)
 
 // 启动服务
 const port = parseInt(process.env.PORT || '3000')
 
-console.log(`🚀 Server running on http://localhost:${port}`)
+console.log('')
+console.log('🚀 PromptTree Backend')
+console.log(`   Server: http://localhost:${port}`)
+console.log(`   Health: http://localhost:${port}/api/health`)
+console.log('')
 
 serve({
   fetch: app.fetch,

@@ -1,49 +1,264 @@
-/* 全局样式 */
-* {
+/* =============================================================================
+   PromptTree — macOS 15 Sequoia Global Stylesheet
+   ============================================================================= */
+
+@import './tokens.css';
+@import './animations.css';
+@import './site.css';
+
+/* ===========================================================================
+   CSS Reset — Minimal, macOS-aware
+   =========================================================================== */
+
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-:root {
-  --color-primary: #4f46e5;
-  --color-primary-hover: #4338ca;
-  --color-bg: #ffffff;
-  --color-text: #1f2937;
-  --color-text-secondary: #6b7280;
-  --color-border: #e5e7eb;
-  --radius: 8px;
+/* ===========================================================================
+   Base Typography & Body
+   =========================================================================== */
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: var(--color-text);
-  background: var(--color-bg);
-  line-height: 1.5;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  overflow: hidden;
 }
 
+/* ===========================================================================
+   Base Elements — macOS Native Feel
+   =========================================================================== */
+
+/* Buttons */
 button {
   cursor: pointer;
   border: none;
-  background: var(--color-primary);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius);
-  font-size: 1rem;
+  background: none;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  padding: 0;
+  line-height: 1;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: all var(--duration-fast) ease;
 }
 
-button:hover {
-  background: var(--color-primary-hover);
-}
-
-input {
-  border: 1px solid var(--color-border);
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius);
-  font-size: 1rem;
-}
-
-input:focus {
+button:focus-visible {
   outline: none;
-  border-color: var(--color-primary);
+  box-shadow: var(--shadow-focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Inputs */
+input, textarea {
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  line-height: var(--line-height-normal);
+  transition: border-color var(--duration-fast) ease,
+              box-shadow var(--duration-fast) ease;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-focus-ring);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Selection */
+::selection {
+  background: var(--accent-bg-subtle);
+  color: var(--text-primary);
+}
+
+/* Scrollbar — macOS native style thin overlay */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+}
+
+/* Links */
+a {
+  color: var(--text-link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Lists */
+ul, ol {
+  list-style: none;
+}
+
+/* Images */
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ===========================================================================
+   Utility Classes
+   =========================================================================== */
+
+/* macOS-style icon button (toolbar, sidebar actions) */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast) ease,
+              color var(--duration-fast) ease;
+}
+
+.icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.icon-btn:active {
+  background: var(--bg-active);
+}
+
+/* macOS-style primary button */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-accent);
+  color: var(--text-on-accent);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  transition: background var(--duration-fast) ease;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+}
+
+.btn-primary:active {
+  background: var(--color-accent-active);
+}
+
+/* macOS-style secondary button */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  transition: background var(--duration-fast) ease;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-quaternary);
+}
+
+/* macOS-style kbd / shortcut key cap */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 var(--space-1);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 0.5px solid var(--border-primary);
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-xs);
+  line-height: 1;
+}
+
+/* ===========================================================================
+   Glass / Vibrancy support detection
+   =========================================================================== */
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glass {
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+    background: var(--glass-bg);
+  }
+  .glass-thick {
+    -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
+    backdrop-filter: blur(var(--glass-blur-heavy));
+    background: var(--glass-bg-thick);
+  }
 }

@@ -1,0 +1,15 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Allow: /features
+Allow: /docs
+Allow: /blog
+Allow: /login
+
+# 禁止爬取 API、工作台和内部资源
+Disallow: /api/
+Disallow: /app
+Disallow: /assets/
+
+# Sitemap
+Sitemap: https://prompttree.app/sitemap.xml

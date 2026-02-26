@@ -1,29 +1,33 @@
 import { Hono } from 'hono'
 import * as jose from 'jose'
+import { signJWT, getJWTExpiresAt } from '../utils/jwt'
+import { validateGoogleAuthPayload, validateMagicLinkPayload } from '../utils/validation'
+import * as usersRepo from '../db/users'
+import * as magicLinksRepo from '../db/magic-links'
 
 const auth = new Hono()
 
-// POST /api/auth/magic-link - 发送魔法链接
-auth.post('/magic-link', async (c) => {
-  const { email } = await c.req.json()
-  // TODO: 生成 token，发送邮件
-  return c.json({ success: true, message: 'Magic link sent' })
-})
+// ===================
+// Google 一键登录
+// ===================
 
-// GET /api/auth/verify - 验证魔法链接
-auth.get('/verify', async (c) => {
-  const token = c.req.query('token')
-  // TODO: 验证 token，签发 JWT
-  return c.json({ success: true, accessToken: '', expiresAt: Date.now() })
-})
-
-// POST /api/auth/google - Google 一键登录
 auth.post('/google', async (c) => {
-  const { idToken } = await c.req.json()
+  const body = await c.req.json()
+  const validation = validateGoogleAuthPayload(body)
+  
+  if (!validation.success) {
+    return c.json({ success: false, error: validation.error }, 400)
+  }
+  
+  const { idToken } = validation.data!
   
   try {
     // 验证 Google id_token
     const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
+    if (!GOOGLE_CLIENT_ID) {
+      return c.json({ success: false, error: 'Google OAuth not configured' }, 500)
+    }
+    
     const JWKS = jose.createRemoteJWKSet(
       new URL('https://www.googleapis.com/oauth2/v3/certs')
     )
@@ -40,34 +44,323 @@ auth.post('/google', async (c) => {
       picture?: string
     }
     
-    // TODO: 创建/更新用户，签发本地 JWT
-    // const user = await findOrCreateUser({ googleId, email, name, picture })
-    // const accessToken = await signJWT(user.id)
+    // 查找或创建用户
+    const user = usersRepo.findOrCreateByGoogleId({
+      googleId,
+      email,
+      displayName: name,
+      avatarUrl: picture
+    })
+    
+    // 签发本地 JWT
+    const accessToken = await signJWT({ userId: user.id, email: user.email || undefined })
+    const expiresAt = getJWTExpiresAt()
     
     return c.json({ 
       success: true, 
-      user: { googleId, email, name, picture },
-      accessToken: '',
-      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000
+      user: {
+        id: user.id,
+        email: user.email,
+        displayName: user.display_name,
+        avatarUrl: user.avatar_url
+      },
+      accessToken,
+      expiresAt
     })
   } catch (error) {
+    console.error('Google auth error:', error)
     return c.json({ success: false, error: 'Invalid Google token' }, 401)
   }
 })
 
-// GET /api/auth/github - GitHub OAuth 跳转
+// ===================
+// GitHub OAuth
+// ===================
+
 auth.get('/github', async (c) => {
   const clientId = process.env.GITHUB_CLIENT_ID
+  if (!clientId) {
+    return c.json({ success: false, error: 'GitHub OAuth not configured' }, 500)
+  }
+  
   const redirectUri = `${process.env.BASE_URL}/api/auth/github/callback`
-  const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email`
+  // 将 popup 标记编码到 state 中，回调时据此决定响应方式
+  const popup = c.req.query('popup') === '1'
+  const stateData = JSON.stringify({ nonce: Math.random().toString(36).substring(2), popup })
+  const state = Buffer.from(stateData).toString('base64url')
+  
+  const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email&state=${state}`
   return c.redirect(url)
 })
 
-// GET /api/auth/github/callback - GitHub OAuth 回调
 auth.get('/github/callback', async (c) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
   const code = c.req.query('code')
-  // TODO: 换取 access token，获取用户信息，签发 JWT
-  return c.redirect('/')
+  const stateParam = c.req.query('state')
+  
+  // 解析 state 中的 popup 标记
+  let isPopup = false
+  try {
+    if (stateParam) {
+      const stateData = JSON.parse(Buffer.from(stateParam, 'base64url').toString())
+      isPopup = stateData.popup === true
+    }
+  } catch { /* ignore parse errors */ }
+
+  // 辅助函数：根据模式返回重定向或 postMessage HTML
+  const respond = (params: { token?: string; error?: string }) => {
+    if (isPopup) {
+      const data = params.token
+        ? `{ type: 'github-auth', token: '${params.token}' }`
+        : `{ type: 'github-auth', error: '${params.error || 'unknown'}' }`
+      return c.html(`<!DOCTYPE html><html><body><script>
+        window.opener && window.opener.postMessage(${data}, '${frontendUrl}');
+        window.close();
+      </script><p>登录处理中，窗口将自动关闭...</p></body></html>`)
+    }
+    if (params.token) {
+      return c.redirect(`${frontendUrl}/login?token=${params.token}`)
+    }
+    return c.redirect(`${frontendUrl}/login?error=${params.error}`)
+  }
+  
+  if (!code) {
+    return respond({ error: 'no_code' })
+  }
+  
+  const clientId = process.env.GITHUB_CLIENT_ID
+  const clientSecret = process.env.GITHUB_CLIENT_SECRET
+  
+  if (!clientId || !clientSecret) {
+    return respond({ error: 'not_configured' })
+  }
+  
+  try {
+    // 1. 用 code 换取 access_token
+    const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        client_id: clientId,
+        client_secret: clientSecret,
+        code
+      })
+    })
+    
+    const tokenData = await tokenRes.json() as { access_token?: string; error?: string }
+    
+    if (!tokenData.access_token) {
+      console.error('GitHub token error:', tokenData)
+      return respond({ error: 'token_failed' })
+    }
+    
+    // 2. 获取用户信息
+    const userRes = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'PromptTree-App'
+      }
+    })
+    
+    const githubUser = await userRes.json() as {
+      id: number
+      login: string
+      email: string | null
+      name: string | null
+      avatar_url: string
+    }
+    
+    // 3. 如果邮箱为空，尝试获取邮箱列表
+    let email = githubUser.email
+    if (!email) {
+      const emailsRes = await fetch('https://api.github.com/user/emails', {
+        headers: {
+          'Authorization': `Bearer ${tokenData.access_token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'PromptTree-App'
+        }
+      })
+      const emails = await emailsRes.json() as { email: string; primary: boolean; verified: boolean }[]
+      const primaryEmail = emails.find(e => e.primary && e.verified)
+      email = primaryEmail?.email || null
+    }
+    
+    // 4. 查找或创建用户
+    const user = usersRepo.findOrCreateByGithubId({
+      githubId: githubUser.id.toString(),
+      email: email || undefined,
+      displayName: githubUser.name || githubUser.login,
+      avatarUrl: githubUser.avatar_url
+    })
+    
+    // 5. 签发 JWT
+    const accessToken = await signJWT({ userId: user.id, email: user.email || undefined })
+    
+    // 6. 返回 token（popup 用 postMessage，普通模式用重定向）
+    return respond({ token: accessToken })
+    
+  } catch (error) {
+    console.error('GitHub callback error:', error)
+    return respond({ error: 'callback_failed' })
+  }
+})
+
+// ===================
+// 邮箱魔法链接
+// ===================
+
+auth.post('/magic-link', async (c) => {
+  const body = await c.req.json()
+  const validation = validateMagicLinkPayload(body)
+  
+  if (!validation.success) {
+    return c.json({ success: false, error: validation.error }, 400)
+  }
+  
+  const { email } = validation.data!
+  
+  // 创建魔法链接
+  const magicLink = magicLinksRepo.create(email)
+  
+  // TODO: 发送邮件
+  // 开发阶段：直接返回 token 用于测试
+  const verifyUrl = `${process.env.BASE_URL}/api/auth/verify?token=${magicLink.token}`
+  
+  // 生产环境应该发送邮件而不是返回 token
+  if (process.env.NODE_ENV === 'production') {
+    // await sendEmail(email, verifyUrl)
+    return c.json({ 
+      success: true, 
+      message: 'Magic link sent to your email'
+    })
+  }
+  
+  // 开发环境：返回 token 用于测试
+  return c.json({ 
+    success: true, 
+    message: 'Magic link sent',
+    // 仅开发环境返回
+    _dev: {
+      token: magicLink.token,
+      verifyUrl,
+      expiresAt: magicLink.expires_at
+    }
+  })
+})
+
+auth.get('/verify', async (c) => {
+  const token = c.req.query('token')
+  
+  if (!token) {
+    return c.redirect('/?error=no_token')
+  }
+  
+  // 验证魔法链接
+  const magicLink = magicLinksRepo.verify(token)
+  
+  if (!magicLink) {
+    return c.redirect('/?error=invalid_or_expired_token')
+  }
+  
+  // 标记为已使用
+  magicLinksRepo.markUsed(token)
+  
+  // 查找或创建用户
+  const user = usersRepo.findOrCreateByEmail(magicLink.email)
+  
+  // 签发 JWT
+  const accessToken = await signJWT({ userId: user.id, email: user.email || undefined })
+  
+  // 重定向到前端
+  return c.redirect(`/?token=${accessToken}`)
+})
+
+// ===================
+// 用户信息
+// ===================
+
+auth.get('/me', async (c) => {
+  // 从中间件获取用户 ID
+  const userId = c.get('userId') as string
+  
+  if (!userId) {
+    return c.json({ success: false, error: 'Unauthorized' }, 401)
+  }
+  
+  const user = usersRepo.findById(userId)
+  
+  if (!user) {
+    return c.json({ success: false, error: 'User not found' }, 404)
+  }
+  
+  return c.json({
+    success: true,
+    user: {
+      id: user.id,
+      email: user.email,
+      displayName: user.display_name,
+      avatarUrl: user.avatar_url,
+      createdAt: user.created_at
+    }
+  })
+})
+
+// ===================
+// 更新用户资料
+// ===================
+
+auth.patch('/me', async (c) => {
+  const userId = c.get('userId') as string
+
+  if (!userId) {
+    return c.json({ success: false, error: 'Unauthorized' }, 401)
+  }
+
+  const body = await c.req.json()
+
+  // 验证输入
+  const { displayName, avatarUrl } = body as { displayName?: string; avatarUrl?: string | null }
+
+  if (displayName !== undefined) {
+    if (typeof displayName !== 'string' || displayName.trim().length === 0 || displayName.trim().length > 50) {
+      return c.json({ success: false, error: 'displayName must be a string between 1 and 50 characters' }, 400)
+    }
+  }
+
+  if (avatarUrl !== undefined && avatarUrl !== null) {
+    if (typeof avatarUrl !== 'string' || avatarUrl.length > 2048) {
+      return c.json({ success: false, error: 'avatarUrl must be a valid URL string (max 2048 chars)' }, 400)
+    }
+    try {
+      new URL(avatarUrl)
+    } catch {
+      return c.json({ success: false, error: 'avatarUrl must be a valid URL' }, 400)
+    }
+  }
+
+  const updated = usersRepo.updateProfile(userId, {
+    displayName: displayName?.trim(),
+    avatarUrl
+  })
+
+  if (!updated) {
+    return c.json({ success: false, error: 'User not found' }, 404)
+  }
+
+  return c.json({
+    success: true,
+    user: {
+      id: updated.id,
+      email: updated.email,
+      displayName: updated.display_name,
+      avatarUrl: updated.avatar_url,
+      createdAt: updated.created_at
+    }
+  })
 })
 
 export default auth

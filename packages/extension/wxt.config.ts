@@ -5,6 +5,11 @@ export default defineConfig({
   manifest: {
     name: 'PromptTree',
     description: 'Prompt 管理与一键填入',
+    icons: {
+      '16': 'icon-16.svg',
+      '48': 'icon-48.svg',
+      '128': 'icon-128.svg'
+    },
     permissions: ['storage', 'activeTab'],
     host_permissions: [
       '*://chat.openai.com/*',

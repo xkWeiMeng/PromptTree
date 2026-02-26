@@ -1,14 +1,103 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en" data-theme="system">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="PromptTree - Prompt 管理工具">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#007AFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0A84FF" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- Theme initialization (prevent FOUC) -->
+  <script>
+    (function() {
+      var t = localStorage.getItem('prompttree-theme') || 'system';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <!-- Google Sign-In SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3TSFMFNW9E"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-3TSFMFNW9E', { send_page_view: false });
+  </script>
+
+  <!-- SEO Meta (dynamically updated by useHead composable per locale) -->
+  <meta name="description" content="PromptTree — A tree-structured prompt management tool with variable filling, offline-first design, and multi-device sync.">
+  <meta name="keywords" content="PromptTree, Prompt Manager, AI Prompts, Tree Structure, Variable Filling, Offline First, Multi-Device Sync, prompt manager, AI tools">
+  <meta name="author" content="PromptTree Team">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://prompttree.app/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://prompttree.app/">
+  <meta property="og:title" content="PromptTree — Tree-Structured Prompt Manager">
+  <meta property="og:description" content="Manage your AI prompts with tree structure, variable filling, offline-first, and multi-device sync.">
+  <meta property="og:image" content="https://prompttree.app/og-image.png">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="PromptTree">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PromptTree — Tree-Structured Prompt Manager">
+  <meta name="twitter:description" content="Manage your AI prompts with tree structure, variable filling, offline-first, and multi-device sync.">
+  <meta name="twitter:image" content="https://prompttree.app/og-image.png">
+
+  <!-- Favicon & Icons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="icon" href="/favicon.ico">
-  <title>PromptTree</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "PromptTree",
+    "url": "https://prompttree.app",
+    "description": "A tree-structured prompt management tool with variable filling, offline-first design, and cloud sync.",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Web",
+    "inLanguage": ["en", "zh-CN", "zh-TW", "ja", "ko"],
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "Tree-structured prompt management",
+      "Variable filling with {{variable}} syntax",
+      "Offline-first design",
+      "Multi-device cloud sync",
+      "Mind map view",
+      "Outline view"
+    ]
+  }
+  </script>
+
+  <title>PromptTree — Tree-Structured Prompt Manager</title>
 </head>
 <body>
   <div id="app"></div>
+  <!-- Noscript fallback for SEO crawlers -->
+  <noscript>
+    <div style="padding: 2rem; text-align: center; font-family: system-ui, sans-serif;">
+      <h1>PromptTree — Tree-Structured Prompt Manager</h1>
+      <p>PromptTree is a tree-structured AI prompt management tool with variable filling, offline-first design, and multi-device cloud sync.</p>
+      <p>Please enable JavaScript to use PromptTree.</p>
+    </div>
+  </noscript>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

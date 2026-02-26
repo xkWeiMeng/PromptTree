@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#007AFF"/>
+      <stop offset="100%" stop-color="#5856D6"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="27" ry="27" fill="url(#bg)"/>
+  <!-- 树干 + 分支 -->
+  <path d="M44 35 L44 97 M44 48 L58 48 M44 70 L58 70 M44 92 L58 92"
+        stroke="white" stroke-opacity="0.9" stroke-width="6.5" stroke-linecap="round" fill="none"/>
+  <!-- 根节点 -->
+  <circle cx="44" cy="35" r="5.5" fill="#ffffff"/>
+  <!-- 文件夹节点 -->
+  <rect x="60" y="42" width="38" height="12" rx="2.5" fill="#ffffff" fill-opacity="0.92"/>
+  <!-- 变量节点 {{ P }} -->
+  <rect x="60" y="64" width="48" height="12" rx="2.5" fill="#ffffff"/>
+  <text x="65" y="73.5" font-family="SF Mono, Menlo, monospace" font-size="7" font-weight="600" fill="#5856D6">{{ P }}</text>
+  <!-- 文本节点 -->
+  <rect x="60" y="86" width="34" height="12" rx="2.5" fill="#ffffff" fill-opacity="0.92"/>
+  <line x1="64" y1="91" x2="86" y2="91" stroke="#007AFF" stroke-opacity="0.4" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="64" y1="95" x2="80" y2="95" stroke="#007AFF" stroke-opacity="0.3" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#007AFF"/>
+      <stop offset="100%" stop-color="#5856D6"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="10" ry="10" fill="url(#bg)"/>
+  <!-- 树干 + 分支 -->
+  <path d="M16.5 13 L16.5 36.5 M16.5 18 L22 18 M16.5 26.5 L22 26.5 M16.5 35 L22 35"
+        stroke="white" stroke-opacity="0.9" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+  <!-- 根节点 -->
+  <circle cx="16.5" cy="13" r="2.2" fill="#ffffff"/>
+  <!-- 节点卡片 -->
+  <rect x="23" y="15" width="14" height="5.5" rx="1.2" fill="#ffffff" fill-opacity="0.92"/>
+  <rect x="23" y="24" width="17" height="5.5" rx="1.2" fill="#ffffff"/>
+  <rect x="23" y="32.5" width="12" height="5.5" rx="1.2" fill="#ffffff" fill-opacity="0.92"/>
+</svg>

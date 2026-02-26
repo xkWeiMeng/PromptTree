@@ -1,5 +1,178 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* PromptTree Extension - Base Styles */
+
+/* CSS Reset 已在 App.vue 中处理 */
+
+/* =================== 通用按钮 =================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btn--secondary {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: var(--color-hover);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: var(--color-hover);
+  color: var(--color-text);
+}
+
+.btn--icon {
+  padding: 4px;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+/* =================== 输入框 =================== */
+.input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--color-text);
+  background: var(--color-bg);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+.input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+textarea.input {
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* =================== 空状态 =================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.empty-state .icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+/* =================== 文本截断 =================== */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =================== Transitions =================== */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.2s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(8px);
+  opacity: 0;
+}
+
+/* =================== 深色模式变量 =================== */
+
+/* 用户手动选择暗色 */
+:root.theme-dark {
+  --color-primary: #818cf8;
+  --color-primary-hover: #6366f1;
+  --color-bg: #1f2937;
+  --color-bg-secondary: #111827;
+  --color-text: #f9fafb;
+  --color-text-secondary: #9ca3af;
+  --color-border: #374151;
+  --color-hover: #374151;
+  --color-danger: #f87171;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+}
+
+/* 跟随系统（无 theme-light / theme-dark 时生效） */
+@media (prefers-color-scheme: dark) {
+  :root:not(.theme-light):not(.theme-dark) {
+    --color-primary: #818cf8;
+    --color-primary-hover: #6366f1;
+    --color-bg: #1f2937;
+    --color-bg-secondary: #111827;
+    --color-text: #f9fafb;
+    --color-text-secondary: #9ca3af;
+    --color-border: #374151;
+    --color-hover: #374151;
+    --color-danger: #f87171;
+    --color-success: #34d399;
+    --color-warning: #fbbf24;
+  }
+}
+
+:root.theme-dark .input,
+@media (prefers-color-scheme: dark) {
+  :root:not(.theme-light):not(.theme-dark) .input {
+    background: var(--color-bg-secondary);
+  }
+}
+
+:root.theme-dark .input:focus {
+  box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.15);
 }

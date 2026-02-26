@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#007AFF"/>
+      <stop offset="100%" stop-color="#5856D6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="1024" height="1024" rx="216" ry="216" fill="url(#bg)"/>
+
+  <!-- 树干 + 分支 -->
+  <path d="M352 280 L352 776 M352 384 L464 384 M352 560 L464 560 M352 736 L464 736"
+        stroke="white" stroke-opacity="0.9" stroke-width="52" stroke-linecap="round" fill="none"/>
+
+  <!-- 根节点 -->
+  <circle cx="352" cy="280" r="44" fill="#ffffff"/>
+
+  <!-- 文件夹节点 -->
+  <rect x="480" y="336" width="304" height="96" rx="20" fill="#ffffff" fill-opacity="0.92"/>
+  <rect x="508" y="362" width="48" height="36" rx="6" fill="#007AFF" fill-opacity="0.6"/>
+  <rect x="508" y="356" width="24" height="12" rx="4" fill="#007AFF" fill-opacity="0.6"/>
+
+  <!-- 变量节点 {{ P }} -->
+  <rect x="480" y="512" width="384" height="96" rx="20" fill="#ffffff"/>
+  <text x="520" y="578" font-family="SF Mono, Menlo, monospace" font-size="48" font-weight="600" fill="#5856D6" letter-spacing="-2">{{ P }}</text>
+
+  <!-- 文本节点 -->
+  <rect x="480" y="688" width="272" height="96" rx="20" fill="#ffffff" fill-opacity="0.92"/>
+  <line x1="516" y1="720" x2="708" y2="720" stroke="#007AFF" stroke-opacity="0.4" stroke-width="12" stroke-linecap="round"/>
+  <line x1="516" y1="752" x2="652" y2="752" stroke="#007AFF" stroke-opacity="0.3" stroke-width="12" stroke-linecap="round"/>
+</svg>
