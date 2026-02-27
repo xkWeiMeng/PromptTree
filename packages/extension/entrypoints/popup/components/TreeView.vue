@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useTreeStore } from '@/stores/tree'
 import { buildTree } from '@prompttree/shared'
 import TreeNode from './TreeNode.vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   mode: 'tree' | 'drill'
@@ -10,6 +13,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'contextmenu', event: MouseEvent, id: string): void
+  (e: 'rename', id: string, title: string): void
+  (e: 'cancelRename'): void
 }>()
 
 const treeStore = useTreeStore()
@@ -52,7 +57,7 @@ function handleContextMenu(event: MouseEvent, id: string) {
           :class="{ 'breadcrumb-item--current': i === treeStore.breadcrumb.length - 1 }"
           @click="treeStore.navigateToFolder(crumb.id)"
         >
-          {{ crumb.title || '(无标题)' }}
+          {{ crumb.title || $t('common.untitled') }}
         </span>
       </template>
     </div>
@@ -63,7 +68,7 @@ function handleContextMenu(event: MouseEvent, id: string) {
       class="back-btn"
       @click="treeStore.navigateUp()"
     >
-      ← 返回上级
+      ← {{ t('tree.backToParent') }}
     </div>
 
     <!-- 节点列表 -->
@@ -76,17 +81,20 @@ function handleContextMenu(event: MouseEvent, id: string) {
         :mode="mode"
         :expanded-ids="treeStore.expandedIds"
         :selected-id="treeStore.selectedNodeId"
+        :editing-id="treeStore.editingNodeId"
         @select="handleSelect"
         @toggle="handleToggle"
         @drill="handleDrill"
         @contextmenu="handleContextMenu"
+        @rename="(id, title) => emit('rename', id, title)"
+        @cancel-rename="emit('cancelRename')"
       />
 
       <!-- 空状态 -->
       <div v-if="displayNodes.length === 0" class="empty-state">
         <p>📝</p>
-        <p>暂无内容</p>
-        <p class="empty-hint">点击右上角 + 创建</p>
+        <p>{{ t('tree.emptyState') }}</p>
+        <p class="empty-hint">{{ t('tree.emptyHint') }}</p>
       </div>
     </div>
   </div>

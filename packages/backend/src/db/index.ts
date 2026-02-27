@@ -18,6 +18,8 @@ const schema = `
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE,
+    password_hash TEXT,
+    email_verified INTEGER DEFAULT 0,
     github_id TEXT UNIQUE,
     google_id TEXT UNIQUE,
     display_name TEXT,
@@ -62,4 +64,21 @@ CREATE INDEX IF NOT EXISTS idx_magic_links_email ON magic_links(email);
 
 console.log('Initializing database...')
 db.exec(schema)
+
+// 迁移：为已有数据库添加 password_hash 和 email_verified 列
+try {
+  const columns = db.pragma('table_info(users)') as { name: string }[]
+  const columnNames = columns.map(c => c.name)
+  if (!columnNames.includes('password_hash')) {
+    db.exec('ALTER TABLE users ADD COLUMN password_hash TEXT')
+    console.log('Migration: added password_hash column')
+  }
+  if (!columnNames.includes('email_verified')) {
+    db.exec('ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0')
+    console.log('Migration: added email_verified column')
+  }
+} catch (e) {
+  // 忽略，可能是全新数据库
+}
+
 console.log('Database initialized successfully!')

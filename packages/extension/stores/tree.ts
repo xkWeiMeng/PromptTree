@@ -4,6 +4,9 @@ import type { TreeNode, TreeNodeWithChildren } from '@prompttree/shared'
 import { buildTree, getDescendantIds, isAncestor, getBreadcrumb } from '@prompttree/shared'
 import type { LocalNode } from '@/utils/storage'
 import * as storage from '@/utils/storage'
+import i18n from '@/entrypoints/popup/i18n'
+
+export type ViewMode = 'tree' | 'drill' | 'outline' | 'mindmap'
 
 export const useTreeStore = defineStore('tree', () => {
   // ===================
@@ -14,6 +17,9 @@ export const useTreeStore = defineStore('tree', () => {
   const expandedIds = ref<Set<string>>(new Set())
   const currentFolderId = ref<string | null>(null) // 层级导航当前文件夹
   const isLoading = ref(false)
+  const editingNodeId = ref<string | null>(null) // 行内重命名节点
+  const viewMode = ref<ViewMode>('drill')
+  const mindmapRootId = ref<string | null>(null)
 
   // ===================
   // Getters
@@ -90,7 +96,7 @@ export const useTreeStore = defineStore('tree', () => {
       id: crypto.randomUUID(),
       parentId: parentId ?? null,
       type,
-      title: title || (type === 'folder' ? '新建文件夹' : '新建 Prompt'),
+      title: title || (type === 'folder' ? i18n.global.t('common.untitledFolder') : i18n.global.t('common.untitled')),
       content,
       isFavorite: false,
       sortOrder: maxOrder + 1,
@@ -179,16 +185,28 @@ export const useTreeStore = defineStore('tree', () => {
 
     const now = Date.now()
 
+    // 更新排序：移动同级其他节点
+    const newSiblings = nodes.value.filter(
+      n => n.parentId === newParentId && n.id !== id && n.deletedAt === null
+    )
+
+    // 为其他节点重新排序（sortOrder >= newSortOrder 的都 +1）
+    for (const sibling of newSiblings) {
+      if (sibling.sortOrder >= newSortOrder) {
+        sibling.sortOrder += 1
+        sibling.updatedAt = now
+        sibling._dirty = true
+      }
+    }
+
     // 更新移动的节点
     node.parentId = newParentId
     node.sortOrder = newSortOrder
     node.updatedAt = now
     node._dirty = true
 
-    await storage.updateNode(id, {
-      parentId: newParentId,
-      sortOrder: newSortOrder,
-    })
+    // 保存所有变更到 storage
+    await storage.setNodes(nodes.value)
   }
 
   /** 切换收藏 */
@@ -238,6 +256,16 @@ export const useTreeStore = defineStore('tree', () => {
     selectedNodeId.value = null
   }
 
+  /** 开始行内重命名 */
+  function startEditing(id: string) {
+    editingNodeId.value = id
+  }
+
+  /** 结束行内重命名 */
+  function stopEditing() {
+    editingNodeId.value = null
+  }
+
   /** 设置节点（同步后） */
   async function setNodes(newNodes: TreeNode[]) {
     await storage.upsertNodes(newNodes, false)
@@ -253,6 +281,16 @@ export const useTreeStore = defineStore('tree', () => {
     currentFolderId.value = null
   }
 
+  /** 设置视图模式 */
+  function setViewMode(mode: ViewMode) {
+    viewMode.value = mode
+  }
+
+  /** 设置脑图根节点 */
+  function setMindmapRoot(id: string | null) {
+    mindmapRootId.value = id
+  }
+
   return {
     // State
     nodes,
@@ -260,6 +298,9 @@ export const useTreeStore = defineStore('tree', () => {
     expandedIds,
     currentFolderId,
     isLoading,
+    editingNodeId,
+    viewMode,
+    mindmapRootId,
     // Getters
     rootNodes,
     currentFolderNodes,
@@ -280,7 +321,11 @@ export const useTreeStore = defineStore('tree', () => {
     collapseAll,
     navigateToFolder,
     navigateUp,
+    startEditing,
+    stopEditing,
     setNodes,
     clearNodes,
+    setViewMode,
+    setMindmapRoot,
   }
 })

@@ -1,26 +1,35 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useSyncStore } from '@/stores/sync'
 import { useTreeStore } from '@/stores/tree'
+import { useConfirm } from '@/composables/useConfirm'
+import { useToast } from '@/composables/useToast'
 import { getApiBaseUrl, setApiBaseUrl, getTheme, setTheme, type ThemeMode } from '@/utils/storage'
+import { setLocale as changeLocale } from '../i18n'
 
 const emit = defineEmits<{
   (e: 'back'): void
   (e: 'theme-change', mode: ThemeMode): void
 }>()
 
+const { t, locale } = useI18n()
 const authStore = useAuthStore()
 const syncStore = useSyncStore()
 const treeStore = useTreeStore()
+const { confirmDanger } = useConfirm()
+const { success: toastSuccess, error: toastError } = useToast()
 
 const apiBaseUrl = ref('')
 const currentTheme = ref<ThemeMode>('system')
+const editDisplayName = ref('')
+const isEditingName = ref(false)
 
-const themeOptions: { value: ThemeMode; label: string }[] = [
-  { value: 'system', label: '跟随系统' },
-  { value: 'light', label: '浅色' },
-  { value: 'dark', label: '深色' },
+const themeOptions: { value: ThemeMode; label: string; key: string }[] = [
+  { value: 'system', label: 'System', key: 'theme.system' },
+  { value: 'light', label: 'Light', key: 'theme.light' },
+  { value: 'dark', label: 'Dark', key: 'theme.dark' },
 ]
 
 onMounted(async () => {
@@ -28,10 +37,22 @@ onMounted(async () => {
   currentTheme.value = await getTheme()
 })
 
+const localeOptions = [
+  { value: 'en', label: 'English' },
+  { value: 'zh-CN', label: '简体中文' },
+  { value: 'zh-TW', label: '繁體中文' },
+  { value: 'ja', label: '日本語' },
+  { value: 'ko', label: '한국어' },
+]
+
 async function handleThemeChange(mode: ThemeMode) {
   currentTheme.value = mode
   await setTheme(mode)
   emit('theme-change', mode)
+}
+
+async function handleLocaleChange(lang: string) {
+  await changeLocale(lang)
 }
 
 async function handleSaveUrl() {
@@ -47,53 +68,99 @@ async function handleFullSync() {
 }
 
 async function handleClearData() {
-  if (confirm('确定清除所有本地数据？此操作不可恢复。')) {
+  const confirmed = await confirmDanger(
+    t('settings.clearDataConfirm'),
+    t('settings.clearDataTitle')
+  )
+  if (confirmed) {
     await treeStore.clearNodes()
     syncStore.reset()
   }
 }
 
 async function handleLogout() {
-  if (confirm('确定登出？本地数据将被清除。')) {
+  const confirmed = await confirmDanger(
+    t('settings.logoutConfirm'),
+    t('settings.logoutTitle')
+  )
+  if (confirmed) {
     await authStore.logout()
     syncStore.reset()
   }
+}
+
+function startEditName() {
+  editDisplayName.value = authStore.user?.displayName || ''
+  isEditingName.value = true
+}
+
+async function saveDisplayName() {
+  const name = editDisplayName.value.trim()
+  if (!name) return
+  const ok = await authStore.updateProfile({ displayName: name })
+  if (ok) {
+    toastSuccess(t('settings.nameUpdated'))
+  } else {
+    toastError(t('settings.updateFailed'))
+  }
+  isEditingName.value = false
+}
+
+function cancelEditName() {
+  isEditingName.value = false
 }
 </script>
 
 <template>
   <div class="settings-view">
     <div class="settings-header">
-      <button class="back-btn" @click="$emit('back')">← 返回</button>
-      <h3>设置</h3>
+      <button class="back-btn" @click="$emit('back')">← {{ $t('common.back') }}</button>
+      <h3>{{ $t('settings.title') }}</h3>
     </div>
 
     <div class="settings-body">
       <!-- 账号信息 -->
       <div class="section">
-        <h4 class="section-title">账号</h4>
+        <h4 class="section-title">{{ $t('settings.account') }}</h4>
         <template v-if="authStore.isLoggedIn">
           <div class="info-row">
-            <span class="info-label">邮箱</span>
+            <span class="info-label">{{ $t('settings.email') }}</span>
             <span class="info-value">{{ authStore.user?.email }}</span>
           </div>
           <div class="info-row">
-            <span class="info-label">显示名</span>
-            <span class="info-value">{{ authStore.user?.displayName || '-' }}</span>
+            <span class="info-label">{{ $t('settings.displayName') }}</span>
+            <template v-if="isEditingName">
+              <div class="input-row">
+                <input
+                  v-model="editDisplayName"
+                  type="text"
+                  :placeholder="$t('profile.namePlaceholder')"
+                  @keydown.enter="saveDisplayName"
+                  @keydown.escape="cancelEditName"
+                />
+                <button class="btn btn--small" @click="saveDisplayName">{{ $t('common.save') }}</button>
+                <button class="btn btn--small btn--secondary" @click="cancelEditName">{{ $t('common.cancel') }}</button>
+              </div>
+            </template>
+            <template v-else>
+              <span class="info-value info-value--editable" @click="startEditName">
+                {{ authStore.user?.displayName || '-' }} ✏️
+              </span>
+            </template>
           </div>
-          <button class="btn btn--danger btn--full" @click="handleLogout">登出</button>
+          <button class="btn btn--danger btn--full" @click="handleLogout">{{ $t('settings.logout') }}</button>
         </template>
         <template v-else-if="authStore.isOfflineMode">
           <div class="info-row">
-            <span class="info-label">模式</span>
-            <span class="info-value">离线模式</span>
+            <span class="info-label">{{ $t('settings.mode') }}</span>
+            <span class="info-value">{{ $t('settings.offlineMode') }}</span>
           </div>
         </template>
       </div>
 
       <!-- 外观 -->
       <div class="section">
-        <h4 class="section-title">外观</h4>
+        <h4 class="section-title">{{ $t('settings.appearance') }}</h4>
         <div class="theme-switcher">
           <button
             v-for="opt in themeOptions"
@@ -102,6 +169,22 @@ async function handleLogout() {
             :class="{ active: currentTheme === opt.value }"
             @click="handleThemeChange(opt.value)"
           >
+            {{ $t(opt.key) }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 语言 -->
+      <div class="section">
+        <h4 class="section-title">{{ $t('settings.language') }}</h4>
+        <div class="theme-switcher locale-switcher">
+          <button
+            v-for="opt in localeOptions"
+            :key="opt.value"
+            class="theme-btn"
+            :class="{ active: locale === opt.value }"
+            @click="handleLocaleChange(opt.value)"
+          >
             {{ opt.label }}
           </button>
         </div>
@@ -109,42 +192,42 @@ async function handleLogout() {
 
       <!-- 后端地址 -->
       <div class="section">
-        <h4 class="section-title">服务器</h4>
+        <h4 class="section-title">{{ $t('settings.server') }}</h4>
         <div class="form-item">
-          <label>后端地址</label>
+          <label>{{ $t('settings.backendUrl') }}</label>
           <div class="input-row">
             <input v-model="apiBaseUrl" type="text" placeholder="http://localhost:3000" />
-            <button class="btn btn--small" @click="handleSaveUrl">保存</button>
+            <button class="btn btn--small" @click="handleSaveUrl">{{ $t('common.save') }}</button>
           </div>
         </div>
       </div>
 
       <!-- 数据管理 -->
       <div class="section">
-        <h4 class="section-title">数据</h4>
+        <h4 class="section-title">{{ $t('settings.data') }}</h4>
         <div class="info-row">
-          <span class="info-label">本地节点</span>
-          <span class="info-value">{{ treeStore.nodes.length }} 个</span>
+          <span class="info-label">{{ $t('settings.localNodes') }}</span>
+          <span class="info-value">{{ $t('settings.items', { count: treeStore.nodes.length }) }}</span>
         </div>
         <div class="info-row">
-          <span class="info-label">待同步</span>
-          <span class="info-value">{{ syncStore.pendingCount }} 个</span>
+          <span class="info-label">{{ $t('settings.pendingSync') }}</span>
+          <span class="info-value">{{ $t('settings.items', { count: syncStore.pendingCount }) }}</span>
         </div>
         <div class="btn-group">
           <button class="btn btn--secondary btn--full" @click="handleFullSync">
-            🔄 全量同步
+            🔄 {{ $t('settings.fullSync') }}
           </button>
           <button class="btn btn--danger-outline btn--full" @click="handleClearData">
-            🗑 清除本地数据
+            🗑 {{ $t('settings.clearData') }}
           </button>
         </div>
       </div>
 
       <!-- 关于 -->
       <div class="section">
-        <h4 class="section-title">关于</h4>
+        <h4 class="section-title">{{ $t('settings.about') }}</h4>
         <div class="info-row">
-          <span class="info-label">版本</span>
+          <span class="info-label">{{ $t('settings.version') }}</span>
           <span class="info-value">0.1.0</span>
         </div>
       </div>
@@ -210,6 +293,8 @@ async function handleLogout() {
 
 .info-label { color: var(--color-text-secondary, #6b7280); }
 .info-value { color: var(--color-text, #1f2937); font-weight: 500; }
+.info-value--editable { cursor: pointer; }
+.info-value--editable:hover { color: var(--color-primary, #4f46e5); }
 
 .form-item { margin-bottom: 8px; }
 
@@ -287,6 +372,10 @@ async function handleLogout() {
   border: 1px solid var(--color-border, #e5e7eb);
   border-radius: 8px;
   overflow: hidden;
+}
+
+.locale-switcher {
+  flex-wrap: wrap;
 }
 
 .theme-btn {

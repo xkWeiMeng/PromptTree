@@ -5,8 +5,8 @@ import { useLoginModal } from '@/composables/useLoginModal'
 import { useAuthStore } from '@/stores/auth'
 import { useSyncStore } from '@/stores/sync'
 import { useTreeStore } from '@/stores/tree'
-import { googleLogin, sendMagicLink } from '@/api/auth'
-import { X, CheckCircle, Mail } from 'lucide-vue-next'
+import { googleLogin, loginWithPassword, register, resendVerification, sendMagicLink } from '@/api/auth'
+import { X, CheckCircle, Mail, Eye, EyeOff, UserPlus, LogIn } from 'lucide-vue-next'
 import BrandLogo from '@/components/common/BrandLogo.vue'
 
 const { t, locale } = useI18n()
@@ -14,11 +14,21 @@ const { t, locale } = useI18n()
 const { visible, close } = useLoginModal()
 const authStore = useAuthStore()
 
-// 状态
+// 模式：login | register
+type ModalMode = 'login' | 'register'
+const mode = ref<ModalMode>('login')
+
+// 共享状态
 const email = ref('')
+const password = ref('')
+const displayName = ref('')
 const isLoading = ref(false)
 const error = ref('')
-const magicLinkSent = ref(false)
+const showPassword = ref(false)
+
+// 成功状态
+const registrationSuccess = ref(false)
+const emailNotVerified = ref(false)
 
 // Google 登录
 const googleBtnRef = ref<HTMLDivElement>()
@@ -27,14 +37,30 @@ const googleReady = ref(false)
 // 弹窗打开时重置状态 & 初始化 Google 按钮
 watch(visible, async (v) => {
   if (v) {
-    email.value = ''
-    isLoading.value = false
-    error.value = ''
-    magicLinkSent.value = false
+    resetState()
     await nextTick()
     initGoogleSignIn()
   }
 })
+
+function resetState() {
+  email.value = ''
+  password.value = ''
+  displayName.value = ''
+  isLoading.value = false
+  error.value = ''
+  showPassword.value = false
+  registrationSuccess.value = false
+  emailNotVerified.value = false
+  mode.value = 'login'
+}
+
+function switchMode(newMode: ModalMode) {
+  mode.value = newMode
+  error.value = ''
+  registrationSuccess.value = false
+  emailNotVerified.value = false
+}
 
 // 登录成功后的通用处理
 async function onLoginSuccess() {
@@ -101,58 +127,93 @@ function handleGoogleFallback() {
   error.value = t('login.googleLoadError')
 }
 
-// GitHub 登录 — popup 窗口
-let githubPopup: Window | null = null
+// 邮箱+密码登录
+async function handlePasswordLogin() {
+  if (!email.value || !password.value) {
+    error.value = t('login.emailAndPasswordRequired')
+    return
+  }
 
-function handleGithubLogin() {
+  isLoading.value = true
+  error.value = ''
+  emailNotVerified.value = false
+
+  try {
+    const result = await loginWithPassword(email.value, password.value)
+    await authStore.setAuth(result.accessToken, result.user)
+    await onLoginSuccess()
+  } catch (err: any) {
+    if (err?.message?.includes('EMAIL_NOT_VERIFIED') || err?.status === 403) {
+      emailNotVerified.value = true
+      error.value = ''
+    } else if (err?.message?.includes('INVALID_CREDENTIALS') || err?.status === 401) {
+      error.value = t('login.invalidCredentials')
+    } else {
+      error.value = t('login.loginError')
+    }
+    console.error(err)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// 邮箱注册
+async function handleRegister() {
+  if (!email.value || !password.value) {
+    error.value = t('login.emailAndPasswordRequired')
+    return
+  }
+
+  if (password.value.length < 6) {
+    error.value = t('login.passwordTooShort')
+    return
+  }
+
   isLoading.value = true
   error.value = ''
 
-  const width = 600
-  const height = 700
-  const left = window.screenX + (window.outerWidth - width) / 2
-  const top = window.screenY + (window.outerHeight - height) / 2
-  const features = `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`
+  try {
+    const result = await register(email.value, password.value, displayName.value || undefined)
+    registrationSuccess.value = true
 
-  githubPopup = window.open('/api/auth/github?popup=1', 'github-oauth', features)
-
-  // 监听 popup 回传的 token
-  window.addEventListener('message', handleGithubMessage)
-
-  // 轮询检测 popup 是否被手动关闭
-  const pollTimer = setInterval(() => {
-    if (githubPopup && githubPopup.closed) {
-      clearInterval(pollTimer)
-      isLoading.value = false
-      window.removeEventListener('message', handleGithubMessage)
+    if (result._dev) {
+      console.log('开发模式验证链接:', result._dev.verifyUrl)
     }
-  }, 500)
+  } catch (err: any) {
+    if (err?.message?.includes('EMAIL_EXISTS') || err?.status === 409) {
+      error.value = t('login.emailExists')
+    } else {
+      error.value = t('login.registerError')
+    }
+    console.error(err)
+  } finally {
+    isLoading.value = false
+  }
 }
 
-async function handleGithubMessage(event: MessageEvent) {
-  // 安全校验 origin
-  if (event.origin !== window.location.origin) return
-  if (event.data?.type !== 'github-auth') return
+// 重新发送验证邮件
+async function handleResendVerification() {
+  if (!email.value) return
 
-  window.removeEventListener('message', handleGithubMessage)
+  isLoading.value = true
+  error.value = ''
 
-  const token = event.data.token
-  if (token) {
-    try {
-      await authStore.handleToken(token)
-      await onLoginSuccess()
-    } catch (err) {
-      error.value = t('login.githubError')
-      console.error(err)
-    }
-  } else {
-    error.value = event.data.error || t('login.githubErrorGeneric')
+  try {
+    await resendVerification(email.value)
+    // 显示成功提示
+    registrationSuccess.value = true
+    emailNotVerified.value = false
+  } catch (err) {
+    error.value = t('login.sendError')
+    console.error(err)
+  } finally {
+    isLoading.value = false
   }
-
-  isLoading.value = false
 }
 
 // 邮箱魔法链接
+const magicLinkSent = ref(false)
+
 async function handleMagicLink() {
   if (!email.value) {
     error.value = t('login.emailRequired')
@@ -213,8 +274,8 @@ function handleKeydown(e: KeyboardEvent) {
               <div class="modal-logo-icon" aria-hidden="true">
                 <BrandLogo :size="40" />
               </div>
-              <h2 class="modal-title">{{ t('login.title') }}</h2>
-              <p class="modal-subtitle">{{ t('login.subtitle') }}</p>
+              <h2 class="modal-title">{{ mode === 'login' ? t('login.title') : t('login.registerTitle') }}</h2>
+              <p class="modal-subtitle">{{ mode === 'login' ? t('login.subtitle') : t('login.registerSubtitle') }}</p>
             </header>
 
             <!-- 错误提示 -->
@@ -222,74 +283,193 @@ function handleKeydown(e: KeyboardEvent) {
               {{ error }}
             </div>
 
+            <!-- 邮箱未验证提示 -->
+            <div v-if="emailNotVerified" class="modal-warning" role="alert">
+              <p>{{ t('login.emailNotVerifiedHint') }}</p>
+              <button class="btn-link" @click="handleResendVerification" :disabled="isLoading">
+                {{ t('login.resendVerification') }}
+              </button>
+            </div>
+
+            <!-- 注册成功 / 验证邮件已发送 -->
+            <div v-if="registrationSuccess" class="modal-success" role="status">
+              <CheckCircle :size="20" class="success-icon" aria-hidden="true" />
+              <p>{{ t('login.registrationSuccess') }}</p>
+              <p class="hint">{{ t('login.checkVerifyEmailHint') }}</p>
+              <button class="btn-link" @click="switchMode('login')" style="margin-top: var(--space-3)">
+                {{ t('login.goToLogin') }}
+              </button>
+            </div>
+
             <!-- 魔法链接发送成功 -->
-            <div v-if="magicLinkSent" class="modal-success" role="status">
+            <div v-else-if="magicLinkSent" class="modal-success" role="status">
               <CheckCircle :size="20" class="success-icon" aria-hidden="true" />
               <p>{{ t('login.magicLinkSent') }} {{ email }}</p>
               <p class="hint">{{ t('login.checkEmailHint') }}</p>
             </div>
 
-            <template v-else>
-              <!-- 社交登录 -->
-              <section class="social-login">
-                <div class="google-btn-wrapper">
+            <template v-else-if="!registrationSuccess">
+              <!-- 登录模式 -->
+              <template v-if="mode === 'login'">
+                <!-- 邮箱密码登录 -->
+                <form class="auth-form" @submit.prevent="handlePasswordLogin">
+                  <div class="form-field">
+                    <label for="login-email" class="sr-only">{{ t('login.emailLabel') }}</label>
+                    <input
+                      id="login-email"
+                      v-model="email"
+                      type="email"
+                      :placeholder="t('login.emailPlaceholder')"
+                      autocomplete="email"
+                      class="input"
+                      :disabled="isLoading"
+                      aria-required="true"
+                    />
+                  </div>
+                  <div class="form-field password-field">
+                    <label for="login-password" class="sr-only">{{ t('login.passwordLabel') }}</label>
+                    <input
+                      id="login-password"
+                      v-model="password"
+                      :type="showPassword ? 'text' : 'password'"
+                      :placeholder="t('login.passwordPlaceholder')"
+                      autocomplete="current-password"
+                      class="input"
+                      :disabled="isLoading"
+                      aria-required="true"
+                    />
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      @click="showPassword = !showPassword"
+                      :aria-label="showPassword ? t('login.hidePassword') : t('login.showPassword')"
+                      tabindex="-1"
+                    >
+                      <EyeOff :size="16" v-if="showPassword" />
+                      <Eye :size="16" v-else />
+                    </button>
+                  </div>
                   <button
-                    class="btn btn-google"
-                    @click="handleGoogleFallback"
-                    :disabled="isLoading"
-                    :aria-label="t('login.googleAriaLabel')"
+                    type="submit"
+                    class="btn btn-primary"
+                    :disabled="isLoading || !email || !password"
                   >
-                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-                      <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
-                    </svg>
-                    {{ t('login.googleBtn') }}
+                    <LogIn :size="16" v-if="!isLoading" />
+                    {{ isLoading ? t('login.loggingIn') : t('login.loginBtn') }}
                   </button>
-                  <div
-                    ref="googleBtnRef"
-                    class="google-btn-overlay"
-                    :class="{ active: googleReady }"
-                  ></div>
+                </form>
+
+                <div class="divider" aria-hidden="true">
+                  <span>{{ t('login.or') }}</span>
                 </div>
 
-                <button
-                  class="btn btn-github"
-                  @click="handleGithubLogin"
-                  :disabled="isLoading"
-                  :aria-label="t('login.githubAriaLabel')"
-                >
-                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fill="currentColor" d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                  </svg>
-                  {{ t('login.githubBtn') }}
-                </button>
-              </section>
+                <!-- Google 登录 -->
+                <section class="social-login">
+                  <div class="google-btn-wrapper">
+                    <button
+                      class="btn btn-google"
+                      @click="handleGoogleFallback"
+                      :disabled="isLoading"
+                      :aria-label="t('login.googleAriaLabel')"
+                    >
+                      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+                      </svg>
+                      {{ t('login.googleBtn') }}
+                    </button>
+                    <div
+                      ref="googleBtnRef"
+                      class="google-btn-overlay"
+                      :class="{ active: googleReady }"
+                    ></div>
+                  </div>
 
-              <div class="divider" aria-hidden="true">
-                <span>{{ t('login.or') }}</span>
-              </div>
+                  <!-- 魔法链接 -->
+                  <button
+                    class="btn btn-magic-link"
+                    @click="handleMagicLink"
+                    :disabled="isLoading || !email"
+                    :aria-label="t('login.sendMagicLink')"
+                  >
+                    <Mail :size="16" />
+                    {{ t('login.sendMagicLink') }}
+                  </button>
+                </section>
 
-              <!-- 邮箱登录 -->
-              <form class="email-login" @submit.prevent="handleMagicLink">
-                <label for="login-modal-email" class="sr-only">{{ t('login.emailLabel') }}</label>
-                <input
-                  id="login-modal-email"
-                  v-model="email"
-                  type="email"
-                  :placeholder="t('login.emailPlaceholder')"
-                  autocomplete="email"
-                  class="input"
-                  :disabled="isLoading"
-                  aria-required="true"
-                />
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  :disabled="isLoading || !email"
-                >
-                  <Mail :size="16" v-if="!isLoading" />
-                  {{ isLoading ? t('login.sending') : t('login.sendMagicLink') }}
-                </button>
-              </form>
+                <!-- 切换到注册 -->
+                <p class="mode-switch">
+                  {{ t('login.noAccount') }}
+                  <button class="btn-link" @click="switchMode('register')">{{ t('login.goToRegister') }}</button>
+                </p>
+              </template>
+
+              <!-- 注册模式 -->
+              <template v-else>
+                <form class="auth-form" @submit.prevent="handleRegister">
+                  <div class="form-field">
+                    <label for="register-name" class="sr-only">{{ t('login.displayNameLabel') }}</label>
+                    <input
+                      id="register-name"
+                      v-model="displayName"
+                      type="text"
+                      :placeholder="t('login.displayNamePlaceholder')"
+                      autocomplete="name"
+                      class="input"
+                      :disabled="isLoading"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label for="register-email" class="sr-only">{{ t('login.emailLabel') }}</label>
+                    <input
+                      id="register-email"
+                      v-model="email"
+                      type="email"
+                      :placeholder="t('login.emailPlaceholder')"
+                      autocomplete="email"
+                      class="input"
+                      :disabled="isLoading"
+                      aria-required="true"
+                    />
+                  </div>
+                  <div class="form-field password-field">
+                    <label for="register-password" class="sr-only">{{ t('login.passwordLabel') }}</label>
+                    <input
+                      id="register-password"
+                      v-model="password"
+                      :type="showPassword ? 'text' : 'password'"
+                      :placeholder="t('login.passwordPlaceholderRegister')"
+                      autocomplete="new-password"
+                      class="input"
+                      :disabled="isLoading"
+                      aria-required="true"
+                    />
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      @click="showPassword = !showPassword"
+                      :aria-label="showPassword ? t('login.hidePassword') : t('login.showPassword')"
+                      tabindex="-1"
+                    >
+                      <EyeOff :size="16" v-if="showPassword" />
+                      <Eye :size="16" v-else />
+                    </button>
+                  </div>
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    :disabled="isLoading || !email || !password"
+                  >
+                    <UserPlus :size="16" v-if="!isLoading" />
+                    {{ isLoading ? t('login.registering') : t('login.registerBtn') }}
+                  </button>
+                </form>
+
+                <!-- 切换到登录 -->
+                <p class="mode-switch">
+                  {{ t('login.hasAccount') }}
+                  <button class="btn-link" @click="switchMode('login')">{{ t('login.goToLogin') }}</button>
+                </p>
+              </template>
             </template>
           </div>
         </Transition>
@@ -504,6 +684,17 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
+.btn-magic-link {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-input);
+  width: 100%;
+}
+
+.btn-magic-link:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
 .btn-primary {
   background: var(--color-accent);
   color: var(--text-on-accent);
@@ -538,12 +729,41 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 /* ===================
-   Email Login
+   Auth Form
    =================== */
-.email-login {
+.auth-form {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.form-field {
+  position: relative;
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: color var(--duration-fast) ease;
+}
+
+.password-toggle:hover {
+  color: var(--text-secondary);
 }
 
 .input {
@@ -554,8 +774,14 @@ function handleKeydown(e: KeyboardEvent) {
   color: var(--text-primary);
   background: var(--bg-input);
   outline: none;
+  width: 100%;
+  box-sizing: border-box;
   transition: border-color var(--duration-fast) ease,
               box-shadow var(--duration-fast) ease;
+}
+
+.password-field .input {
+  padding-right: var(--space-10, 40px);
 }
 
 .input:focus {
@@ -566,6 +792,63 @@ function handleKeydown(e: KeyboardEvent) {
 .input:disabled {
   background: var(--bg-tertiary);
   opacity: 0.6;
+}
+
+/* ===================
+   Warning Alert
+   =================== */
+.modal-warning {
+  background: var(--color-warning-bg, #fff3cd);
+  color: var(--color-warning, #856404);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  text-align: center;
+  font-size: var(--font-size-sm);
+}
+
+.modal-warning p {
+  margin: 0 0 var(--space-2);
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal-warning {
+    background: rgba(255, 204, 0, 0.1);
+    color: #ffd60a;
+  }
+}
+
+/* ===================
+   Mode Switch & Links
+   =================== */
+.mode-switch {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-4);
+  margin-bottom: 0;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: 0;
+  text-decoration: none;
+  transition: color var(--duration-fast) ease;
+}
+
+.btn-link:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+.btn-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ===================

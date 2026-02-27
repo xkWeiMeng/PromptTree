@@ -2,6 +2,9 @@ import { ref } from 'vue'
 import { extractVariables, fillVariables } from '@prompttree/shared'
 import { sendToCurrentTab } from '@/utils/messaging'
 import { useToast } from './useToast'
+import i18n from '@/entrypoints/popup/i18n'
+
+const t = i18n.global.t
 
 export function useClipboard() {
   const { success, error } = useToast()
@@ -13,10 +16,10 @@ export function useClipboard() {
     isCopying.value = true
     try {
       await navigator.clipboard.writeText(text)
-      success('已复制到剪贴板')
+      success(t('clipboard.copied'))
       return true
     } catch {
-      error('复制失败')
+      error(t('clipboard.copyFailed'))
       return false
     } finally {
       isCopying.value = false
@@ -46,12 +49,12 @@ export function useClipboard() {
 
     const response = await sendToCurrentTab({ type: 'INJECT_PROMPT', text: content })
     if (response.success) {
-      success('已填入页面')
+      success(t('clipboard.injected'))
       return true
     } else {
       // fallback 到剪贴板
       await copy(content)
-      error('当前页面不支持填入，已复制到剪贴板')
+      error(t('clipboard.injectFailed'))
       return false
     }
   }
@@ -61,11 +64,11 @@ export function useClipboard() {
     const filled = fillVariables(content, values)
     const response = await sendToCurrentTab({ type: 'INJECT_PROMPT', text: filled })
     if (response.success) {
-      success('已填入页面')
+      success(t('clipboard.injected'))
       return true
     } else {
       await copy(filled)
-      error('当前页面不支持填入，已复制到剪贴板')
+      error(t('clipboard.injectFailed'))
       return false
     }
   }

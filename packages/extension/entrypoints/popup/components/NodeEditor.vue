@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useTreeStore } from '@/stores/tree'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   visible: boolean
@@ -40,7 +43,7 @@ async function handleSave() {
     // 新建
     await treeStore.createNode({
       type: nodeType.value,
-      title: title.value || (nodeType.value === 'folder' ? '新建文件夹' : '新建 Prompt'),
+      title: title.value || (nodeType.value === 'folder' ? t('tree.newFolder') : t('tree.newPrompt')),
       content: content.value,
     })
   }
@@ -52,50 +55,50 @@ async function handleSave() {
 <template>
   <div v-if="visible" class="editor-panel">
     <div class="editor-header">
-      <h3>{{ editNodeId ? '编辑' : '新建' }}</h3>
+      <h3>{{ editNodeId ? t('editor.editTitle') : t('editor.newTitle') }}</h3>
       <button class="close-btn" @click="$emit('close')">✕</button>
     </div>
 
     <div class="editor-body">
       <!-- 类型选择（仅新建） -->
       <div v-if="!editNodeId" class="form-item">
-        <label>类型</label>
+        <label>{{ t('editor.typePlaceholder') }}</label>
         <div class="type-switch">
           <button
             :class="['type-btn', { active: nodeType === 'folder' }]"
             @click="nodeType = 'folder'"
-          >📁 文件夹</button>
+          >📁 {{ t('editor.typeFolder') }}</button>
           <button
             :class="['type-btn', { active: nodeType === 'prompt' }]"
             @click="nodeType = 'prompt'"
-          >📄 Prompt</button>
+          >📄 {{ t('editor.typePrompt') }}</button>
         </div>
       </div>
 
       <!-- 标题 -->
       <div class="form-item">
-        <label>标题</label>
+        <label>{{ t('editor.titlePlaceholder') }}</label>
         <input
           v-model="title"
           type="text"
-          :placeholder="nodeType === 'folder' ? '文件夹名称' : 'Prompt 标题'"
+          :placeholder="nodeType === 'folder' ? t('editor.typeFolder') : t('editor.typePrompt')"
         />
       </div>
 
       <!-- 内容（仅 Prompt） -->
       <div v-if="nodeType === 'prompt'" class="form-item">
-        <label>内容</label>
+        <label>{{ t('editor.contentPlaceholder') }}</label>
         <textarea
           v-model="content"
-          placeholder="输入 Prompt 内容...&#10;支持 {{variable}} 变量语法"
+          :placeholder="t('editor.contentPlaceholder')"
           rows="8"
         />
       </div>
     </div>
 
     <div class="editor-footer">
-      <button class="btn btn--secondary" @click="$emit('close')">取消</button>
-      <button class="btn btn--primary" @click="handleSave">保存</button>
+      <button class="btn btn--secondary" @click="$emit('close')">{{ t('common.cancel') }}</button>
+      <button class="btn btn--primary" @click="handleSave">{{ t('common.save') }}</button>
     </div>
   </div>
 </template>

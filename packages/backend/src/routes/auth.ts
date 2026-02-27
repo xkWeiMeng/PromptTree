@@ -1,7 +1,9 @@
 import { Hono } from 'hono'
 import * as jose from 'jose'
 import { signJWT, getJWTExpiresAt } from '../utils/jwt'
-import { validateGoogleAuthPayload, validateMagicLinkPayload } from '../utils/validation'
+import { validateGoogleAuthPayload, validateMagicLinkPayload, validateRegisterPayload, validatePasswordLoginPayload } from '../utils/validation'
+import { hashPassword, verifyPassword } from '../utils/password'
+import { sendVerificationEmail } from '../utils/email'
 import * as usersRepo from '../db/users'
 import * as magicLinksRepo from '../db/magic-links'
 
@@ -207,6 +209,206 @@ auth.get('/github/callback', async (c) => {
     console.error('GitHub callback error:', error)
     return respond({ error: 'callback_failed' })
   }
+})
+
+// ===================
+// 邮箱注册（密码 + 邮箱验证）
+// ===================
+
+auth.post('/register', async (c) => {
+  const body = await c.req.json()
+  const validation = validateRegisterPayload(body)
+
+  if (!validation.success) {
+    return c.json({ success: false, error: validation.error }, 400)
+  }
+
+  const { email, password, displayName } = validation.data!
+
+  try {
+    // 检查邮箱是否已被注册
+    const existing = usersRepo.findByEmail(email)
+    if (existing) {
+      // 如果已有用户且已设置密码，说明已注册
+      if (existing.password_hash) {
+        return c.json({ success: false, error: 'EMAIL_EXISTS' }, 409)
+      }
+      // 已有用户但没有密码（之前通过 OAuth 或魔法链接注册），允许设置密码
+      const passwordHash = await hashPassword(password)
+      usersRepo.setPassword(existing.id, passwordHash)
+      if (displayName) {
+        usersRepo.updateProfile(existing.id, { displayName })
+      }
+      // 如果邮箱未验证，发送验证邮件
+      if (!existing.email_verified) {
+        const magicLink = magicLinksRepo.create(email)
+        const verifyUrl = `${process.env.BASE_URL}/api/auth/verify-email?token=${magicLink.token}`
+        const emailSent = await sendVerificationEmail(email, verifyUrl)
+
+        if (process.env.NODE_ENV !== 'production') {
+          return c.json({
+            success: true,
+            message: 'Password set. Please verify your email.',
+            _dev: { token: magicLink.token, verifyUrl }
+          })
+        }
+      }
+      return c.json({ success: true, message: 'Password set. Please verify your email.' })
+    }
+
+    // 创建新用户
+    const passwordHash = await hashPassword(password)
+    const user = usersRepo.create({
+      email,
+      passwordHash,
+      emailVerified: false,
+      displayName: displayName || email.split('@')[0]
+    })
+
+    // 创建验证链接并发送邮件
+    const magicLink = magicLinksRepo.create(email)
+    const verifyUrl = `${process.env.BASE_URL}/api/auth/verify-email?token=${magicLink.token}`
+    const emailSent = await sendVerificationEmail(email, verifyUrl)
+
+    if (process.env.NODE_ENV !== 'production') {
+      return c.json({
+        success: true,
+        message: 'Registration successful. Please verify your email.',
+        _dev: { token: magicLink.token, verifyUrl }
+      })
+    }
+
+    return c.json({
+      success: true,
+      message: 'Registration successful. Please check your email to verify your account.'
+    })
+  } catch (error) {
+    console.error('Register error:', error)
+    return c.json({ success: false, error: 'Registration failed' }, 500)
+  }
+})
+
+// ===================
+// 密码登录
+// ===================
+
+auth.post('/login', async (c) => {
+  const body = await c.req.json()
+  const validation = validatePasswordLoginPayload(body)
+
+  if (!validation.success) {
+    return c.json({ success: false, error: validation.error }, 400)
+  }
+
+  const { email, password } = validation.data!
+
+  try {
+    const user = usersRepo.findByEmail(email)
+
+    if (!user || !user.password_hash) {
+      return c.json({ success: false, error: 'INVALID_CREDENTIALS' }, 401)
+    }
+
+    const valid = await verifyPassword(password, user.password_hash)
+    if (!valid) {
+      return c.json({ success: false, error: 'INVALID_CREDENTIALS' }, 401)
+    }
+
+    // 检查邮箱是否已验证
+    if (!user.email_verified) {
+      return c.json({ success: false, error: 'EMAIL_NOT_VERIFIED' }, 403)
+    }
+
+    // 签发 JWT
+    const accessToken = await signJWT({ userId: user.id, email: user.email || undefined })
+    const expiresAt = getJWTExpiresAt()
+
+    return c.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        displayName: user.display_name,
+        avatarUrl: user.avatar_url
+      },
+      accessToken,
+      expiresAt
+    })
+  } catch (error) {
+    console.error('Login error:', error)
+    return c.json({ success: false, error: 'Login failed' }, 500)
+  }
+})
+
+// ===================
+// 邮箱验证（注册激活）
+// ===================
+
+auth.get('/verify-email', async (c) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
+  const token = c.req.query('token')
+
+  if (!token) {
+    return c.redirect(`${frontendUrl}/app?error=no_token`)
+  }
+
+  const magicLink = magicLinksRepo.verify(token)
+
+  if (!magicLink) {
+    return c.redirect(`${frontendUrl}/app?error=invalid_or_expired_token`)
+  }
+
+  // 标记链接已使用
+  magicLinksRepo.markUsed(token)
+
+  // 标记用户邮箱已验证
+  const user = usersRepo.findByEmail(magicLink.email)
+  if (user) {
+    usersRepo.setEmailVerified(user.id)
+
+    // 签发 JWT 让用户自动登录
+    const accessToken = await signJWT({ userId: user.id, email: user.email || undefined })
+    return c.redirect(`${frontendUrl}/app?token=${accessToken}&verified=1`)
+  }
+
+  return c.redirect(`${frontendUrl}/app?error=user_not_found`)
+})
+
+// ===================
+// 重新发送验证邮件
+// ===================
+
+auth.post('/resend-verification', async (c) => {
+  const body = await c.req.json()
+  const { email } = body as { email?: string }
+
+  if (!email || typeof email !== 'string') {
+    return c.json({ success: false, error: 'email is required' }, 400)
+  }
+
+  const user = usersRepo.findByEmail(email)
+  if (!user) {
+    // 不泄露用户是否存在
+    return c.json({ success: true, message: 'If the email is registered, a verification link has been sent.' })
+  }
+
+  if (user.email_verified) {
+    return c.json({ success: false, error: 'EMAIL_ALREADY_VERIFIED' }, 400)
+  }
+
+  const magicLink = magicLinksRepo.create(email)
+  const verifyUrl = `${process.env.BASE_URL}/api/auth/verify-email?token=${magicLink.token}`
+  await sendVerificationEmail(email, verifyUrl)
+
+  if (process.env.NODE_ENV !== 'production') {
+    return c.json({
+      success: true,
+      message: 'Verification email sent.',
+      _dev: { token: magicLink.token, verifyUrl }
+    })
+  }
+
+  return c.json({ success: true, message: 'Verification email sent.' })
 })
 
 // ===================

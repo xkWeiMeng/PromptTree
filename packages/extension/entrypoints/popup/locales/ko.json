@@ -1,0 +1,157 @@
+{
+  "common": {
+    "untitled": "제목 없음",
+    "untitledFolder": "이름 없는 폴더",
+    "delete": "삭제",
+    "cancel": "취소",
+    "close": "닫기",
+    "copy": "복사",
+    "save": "저장",
+    "confirm": "확인",
+    "loading": "로딩 중...",
+    "back": "뒤로"
+  },
+  "theme": {
+    "system": "시스템",
+    "light": "라이트",
+    "dark": "다크"
+  },
+  "tree": {
+    "newFolder": "새 폴더",
+    "newPrompt": "새 프롬프트",
+    "emptyState": "콘텐츠 없음",
+    "emptyHint": "오른쪽 상단의 +를 눌러 만드세요",
+    "unfavorite": "즐겨찾기 해제",
+    "addFavorite": "즐겨찾기 추가",
+    "deleteConfirmTitle": "삭제 확인",
+    "deleteConfirmMsg": "\"{name}\"을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    "searchPlaceholder": "프롬프트 검색...",
+    "noResults": "검색 결과 없음",
+    "rename": "이름 바꾸기",
+    "inject": "입력창에 삽입",
+    "copy": "내용 복사",
+    "drillMode": "계층",
+    "treeMode": "트리",
+    "backToParent": "상위 레벨로",
+    "noFavorites": "즐겨찾기 없음",
+    "favorites": "즐겨찾기"
+  },
+  "editor": {
+    "titlePlaceholder": "제목 입력...",
+    "contentPlaceholder": "여기에 프롬프트를 작성하세요...",
+    "typePlaceholder": "유형 선택",
+    "typeFolder": "폴더",
+    "typePrompt": "프롬프트",
+    "create": "만들기",
+    "update": "업데이트",
+    "editTitle": "편집",
+    "newTitle": "새로 만들기"
+  },
+  "sync": {
+    "syncing": "동기화 중...",
+    "synced": "동기화됨",
+    "error": "동기화 실패",
+    "pendingSync": "{count}개 동기화 대기 중",
+    "notSynced": "동기화되지 않음",
+    "justNow": "방금",
+    "minutesAgo": "{n}분 전",
+    "hoursAgo": "{n}시간 전",
+    "clickToSync": "클릭하여 동기화"
+  },
+  "confirm": {
+    "defaultTitle": "확인",
+    "ok": "확인",
+    "deleteTitle": "삭제 확인"
+  },
+  "clipboard": {
+    "copied": "클립보드에 복사되었습니다",
+    "copyFailed": "복사에 실패했습니다. 수동으로 복사해 주세요",
+    "injected": "입력창에 삽입되었습니다",
+    "injectFailed": "삽입에 실패했습니다"
+  },
+  "settings": {
+    "title": "설정",
+    "account": "계정",
+    "email": "이메일",
+    "displayName": "표시 이름",
+    "mode": "모드",
+    "offlineMode": "오프라인 모드",
+    "appearance": "외관",
+    "server": "서버",
+    "backendUrl": "백엔드 URL",
+    "data": "데이터",
+    "localNodes": "로컬 노드",
+    "pendingSync": "동기화 대기",
+    "fullSync": "전체 동기화",
+    "clearData": "로컬 데이터 삭제",
+    "clearDataConfirm": "모든 로컬 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    "clearDataTitle": "데이터 삭제",
+    "about": "정보",
+    "version": "버전",
+    "logout": "로그아웃",
+    "logoutConfirm": "로그아웃하시겠습니까? 로컬 데이터가 삭제됩니다.",
+    "logoutTitle": "로그아웃 확인",
+    "nameUpdated": "표시 이름이 업데이트되었습니다",
+    "updateFailed": "업데이트 실패",
+    "items": "{count}개",
+    "language": "언어"
+  },
+  "login": {
+    "title": "로그인",
+    "subtitle": "로그인하여 디바이스 간 동기화",
+    "emailPlaceholder": "이메일 주소 입력",
+    "sendMagicLink": "Magic Link 보내기",
+    "sending": "전송 중...",
+    "sent": "Magic Link를 보냈습니다. 이메일을 확인해 주세요.",
+    "tokenPlaceholder": "토큰 붙여넣기",
+    "verify": "확인",
+    "verifying": "확인 중...",
+    "offlineMode": "오프라인 모드 사용",
+    "offlineHint": "로그인 필요 없음, 데이터는 로컬에 저장",
+    "googleLogin": "Google로 로그인",
+    "githubLogin": "GitHub로 로그인",
+    "or": "또는",
+    "networkError": "네트워크 오류입니다. 나중에 다시 시도해 주세요",
+    "verifyFailed": "확인 실패"
+  },
+  "variableModal": {
+    "fillTitle": "변수 채우기",
+    "inputPlaceholder": "{name}의 값을 입력...",
+    "preview": "미리보기",
+    "copyToClipboard": "클립보드에 복사",
+    "injectToInput": "입력창에 삽입"
+  },
+  "view": {
+    "outline": "개요",
+    "mindmap": "마인드맵"
+  },
+  "outline": {
+    "title": "프롬프트 개요",
+    "searchPlaceholder": "프롬프트 검색...",
+    "noMatch": "일치하는 프롬프트가 없습니다",
+    "empty": "프롬프트가 없습니다",
+    "emptyHint": "먼저 프롬프트를 만들어 주세요",
+    "variableTag": "[변수]",
+    "varCount": "{count}개 변수",
+    "items": "{count}개 항목"
+  },
+  "mindmapView": {
+    "title": "마인드맵",
+    "goUpLevel": "상위 레벨로",
+    "all": "전체",
+    "zoomIn": "확대",
+    "zoomOut": "축소",
+    "resetView": "뷰 초기화",
+    "variables": "변수:",
+    "clickToDrill": "클릭하여 드릴다운",
+    "clickToEdit": "클릭하여 편집",
+    "more": "더 보기"
+  },
+  "profile": {
+    "displayName": "표시 이름",
+    "namePlaceholder": "표시 이름 입력",
+    "notSet": "설정되지 않음",
+    "saved": "프로필이 업데이트되었습니다",
+    "saveFailed": "프로필 업데이트에 실패했습니다"
+  }
+}

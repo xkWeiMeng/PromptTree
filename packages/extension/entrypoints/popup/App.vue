@@ -9,6 +9,7 @@ import LoginView from './views/LoginView.vue'
 import MainView from './views/MainView.vue'
 import SettingsView from './views/SettingsView.vue'
 import Toast from './components/Toast.vue'
+import ConfirmDialog from './components/ConfirmDialog.vue'
 
 type ViewName = 'login' | 'main' | 'settings'
 

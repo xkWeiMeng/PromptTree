@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, nextTick, watch } from 'vue'
 import type { TreeNodeWithChildren } from '@prompttree/shared'
 
 const props = defineProps<{
@@ -7,6 +8,7 @@ const props = defineProps<{
   mode: 'tree' | 'drill' // 树模式 或 层级下钻模式
   expandedIds: Set<string>
   selectedId: string | null
+  editingId: string | null
 }>()
 
 const emit = defineEmits<{
@@ -14,12 +16,46 @@ const emit = defineEmits<{
   (e: 'toggle', id: string): void
   (e: 'drill', id: string): void
   (e: 'contextmenu', event: MouseEvent, id: string): void
+  (e: 'rename', id: string, title: string): void
+  (e: 'cancelRename'): void
 }>()
 
 const isFolder = props.node.type === 'folder'
 const isExpanded = props.expandedIds.has(props.node.id)
 
+// 行内重命名
+const renameInput = ref<HTMLInputElement | null>(null)
+const renameTitle = ref('')
+
+watch(() => props.editingId, (newId) => {
+  if (newId === props.node.id) {
+    renameTitle.value = props.node.title || ''
+    nextTick(() => {
+      renameInput.value?.focus()
+      renameInput.value?.select()
+    })
+  }
+})
+
+function commitRename() {
+  const t = renameTitle.value.trim()
+  if (t && t !== props.node.title) {
+    emit('rename', props.node.id, t)
+  } else {
+    emit('cancelRename')
+  }
+}
+
+function handleRenameKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter') {
+    commitRename()
+  } else if (e.key === 'Escape') {
+    emit('cancelRename')
+  }
+}
+
 function handleClick() {
+  if (props.editingId === props.node.id) return
   if (isFolder && props.mode === 'drill') {
     emit('drill', props.node.id)
   } else if (isFolder && props.mode === 'tree') {
@@ -56,8 +92,17 @@ function handleContextMenu(e: MouseEvent) {
       <!-- 图标 -->
       <span class="tree-icon">{{ isFolder ? '📁' : '📄' }}</span>
 
-      <!-- 标题 -->
-      <span class="tree-title">{{ node.title || '(无标题)' }}</span>
+      <!-- 标题 or 行内编辑 -->
+      <input
+        v-if="editingId === node.id"
+        ref="renameInput"
+        v-model="renameTitle"
+        class="tree-rename-input"
+        @blur="commitRename"
+        @keydown="handleRenameKeydown"
+        @click.stop
+      />
+      <span v-else class="tree-title">{{ node.title || $t('common.untitled') }}</span>
 
       <!-- 收藏标记 -->
       <span v-if="node.isFavorite" class="tree-fav">⭐</span>
@@ -76,10 +121,13 @@ function handleContextMenu(e: MouseEvent) {
         :mode="mode"
         :expanded-ids="expandedIds"
         :selected-id="selectedId"
+        :editing-id="editingId"
         @select="$emit('select', $event)"
         @toggle="$emit('toggle', $event)"
         @drill="$emit('drill', $event)"
         @contextmenu="(ev, id) => $emit('contextmenu', ev, id)"
+        @rename="(id, title) => $emit('rename', id, title)"
+        @cancel-rename="$emit('cancelRename')"
       />
     </template>
   </div>
@@ -135,6 +183,18 @@ export default { name: 'TreeNode' }
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--color-text, #1f2937);
+}
+
+.tree-rename-input {
+  flex: 1;
+  border: 1px solid var(--color-primary, #4f46e5);
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 13px;
+  outline: none;
+  background: var(--color-bg, #fff);
+  color: var(--color-text, #1f2937);
+  min-width: 0;
 }
 
 .tree-fav {

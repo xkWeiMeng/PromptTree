@@ -8,6 +8,8 @@ import { generateId, now } from '../utils/id'
 export interface User {
   id: string
   email: string | null
+  password_hash: string | null
+  email_verified: number // 0 or 1
   github_id: string | null
   google_id: string | null
   display_name: string | null
@@ -18,6 +20,8 @@ export interface User {
 
 export interface CreateUserInput {
   email?: string
+  passwordHash?: string
+  emailVerified?: boolean
   githubId?: string
   googleId?: string
   displayName?: string
@@ -45,8 +49,8 @@ const findByGithubIdStmt = db.prepare<string>(`
 `)
 
 const insertStmt = db.prepare(`
-  INSERT INTO users (id, email, github_id, google_id, display_name, avatar_url, created_at, last_sync_at)
-  VALUES (@id, @email, @github_id, @google_id, @display_name, @avatar_url, @created_at, @last_sync_at)
+  INSERT INTO users (id, email, password_hash, email_verified, github_id, google_id, display_name, avatar_url, created_at, last_sync_at)
+  VALUES (@id, @email, @password_hash, @email_verified, @github_id, @google_id, @display_name, @avatar_url, @created_at, @last_sync_at)
 `)
 
 const updateLastSyncStmt = db.prepare<[number, string]>(`
@@ -73,6 +77,14 @@ const updateProfileStmt = db.prepare(`
   SET display_name = @display_name,
       avatar_url = @avatar_url
   WHERE id = @id
+`)
+
+const updatePasswordStmt = db.prepare(`
+  UPDATE users SET password_hash = @password_hash WHERE id = @id
+`)
+
+const updateEmailVerifiedStmt = db.prepare(`
+  UPDATE users SET email_verified = 1 WHERE id = @id
 `)
 
 // ===================
@@ -117,6 +129,8 @@ export function create(input: CreateUserInput): User {
   const user = {
     id,
     email: input.email || null,
+    password_hash: input.passwordHash || null,
+    email_verified: input.emailVerified ? 1 : 0,
     github_id: input.githubId || null,
     google_id: input.googleId || null,
     display_name: input.displayName || null,
@@ -127,6 +141,20 @@ export function create(input: CreateUserInput): User {
   
   insertStmt.run(user)
   return user
+}
+
+/**
+ * 设置用户密码
+ */
+export function setPassword(userId: string, passwordHash: string): void {
+  updatePasswordStmt.run({ id: userId, password_hash: passwordHash })
+}
+
+/**
+ * 标记邮箱已验证
+ */
+export function setEmailVerified(userId: string): void {
+  updateEmailVerifiedStmt.run(userId)
 }
 
 /**
@@ -177,15 +205,16 @@ export function findOrCreateByGoogleId(input: {
   const existingByEmail = findByEmail(input.email)
   if (existingByEmail) {
     // 关联 Google ID 到现有用户
-    db.prepare('UPDATE users SET google_id = ? WHERE id = ?')
+    db.prepare('UPDATE users SET google_id = ?, email_verified = 1 WHERE id = ?')
       .run(input.googleId, existingByEmail.id)
     return findById(existingByEmail.id)!
   }
   
-  // 创建新用户
+  // 创建新用户（OAuth 用户邮箱已验证）
   return create({
     googleId: input.googleId,
     email: input.email,
+    emailVerified: true,
     displayName: input.displayName,
     avatarUrl: input.avatarUrl
   })
@@ -217,7 +246,7 @@ export function findOrCreateByGithubId(input: {
   if (input.email) {
     const existingByEmail = findByEmail(input.email)
     if (existingByEmail) {
-      db.prepare('UPDATE users SET github_id = ? WHERE id = ?')
+      db.prepare('UPDATE users SET github_id = ?, email_verified = 1 WHERE id = ?')
         .run(input.githubId, existingByEmail.id)
       return findById(existingByEmail.id)!
     }
@@ -226,20 +255,25 @@ export function findOrCreateByGithubId(input: {
   return create({
     githubId: input.githubId,
     email: input.email,
+    emailVerified: true,
     displayName: input.displayName,
     avatarUrl: input.avatarUrl
   })
 }
 
 /**
- * 查找或创建邮箱用户
+ * 查找或创建邮箱用户（magic link 验证后自动标记邮箱已验证）
  */
 export function findOrCreateByEmail(email: string): User {
   let user = findByEmail(email)
   
   if (user) {
-    return user
+    // magic link 登录成功，标记邮箱已验证
+    if (!user.email_verified) {
+      setEmailVerified(user.id)
+    }
+    return findById(user.id) || user
   }
   
-  return create({ email })
+  return create({ email, emailVerified: true })
 }

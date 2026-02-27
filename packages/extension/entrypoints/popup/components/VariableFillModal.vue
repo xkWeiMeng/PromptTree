@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { extractVariables, fillVariables } from '@prompttree/shared'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   visible: boolean
@@ -47,7 +50,7 @@ function handleCopy() {
   <div v-if="visible" class="modal-backdrop" @click.self="$emit('close')">
     <div class="modal">
       <div class="modal-header">
-        <h3>填充变量</h3>
+        <h3>{{ t('variableModal.fillTitle') }}</h3>
         <button class="close-btn" @click="$emit('close')">✕</button>
       </div>
 
@@ -58,21 +61,21 @@ function handleCopy() {
             <input
               v-model="variableValues[v]"
               type="text"
-              :placeholder="`输入 ${v} 的值...`"
+              :placeholder="t('variableModal.inputPlaceholder', { name: v })"
             />
           </div>
         </div>
 
         <div class="preview-section">
-          <h4>预览</h4>
+          <h4>{{ t('variableModal.preview') }}</h4>
           <div class="preview-content">{{ previewContent }}</div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn--secondary" @click="$emit('close')">取消</button>
-        <button class="btn btn--secondary" :disabled="!allFilled" @click="handleCopy">复制</button>
-        <button class="btn btn--primary" :disabled="!allFilled" @click="handleInject">填入页面</button>
+        <button class="btn btn--secondary" @click="$emit('close')">{{ t('common.cancel') }}</button>
+        <button class="btn btn--secondary" :disabled="!allFilled" @click="handleCopy">{{ t('common.copy') }}</button>
+        <button class="btn btn--primary" :disabled="!allFilled" @click="handleInject">{{ t('variableModal.injectToInput') }}</button>
       </div>
     </div>
   </div>

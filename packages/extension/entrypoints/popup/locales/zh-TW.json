@@ -1,0 +1,157 @@
+{
+  "common": {
+    "untitled": "未命名",
+    "untitledFolder": "未命名資料夾",
+    "delete": "刪除",
+    "cancel": "取消",
+    "close": "關閉",
+    "copy": "複製",
+    "save": "儲存",
+    "confirm": "確定",
+    "loading": "載入中...",
+    "back": "返回"
+  },
+  "theme": {
+    "system": "跟隨系統",
+    "light": "淺色",
+    "dark": "深色"
+  },
+  "tree": {
+    "newFolder": "新建資料夾",
+    "newPrompt": "新建 Prompt",
+    "emptyState": "暫無內容",
+    "emptyHint": "點擊右上角 + 建立",
+    "unfavorite": "取消收藏",
+    "addFavorite": "加入收藏",
+    "deleteConfirmTitle": "刪除確認",
+    "deleteConfirmMsg": "確定要刪除「{name}」嗎？此操作無法復原。",
+    "searchPlaceholder": "搜尋 Prompt...",
+    "noResults": "無搜尋結果",
+    "rename": "重新命名",
+    "inject": "一鍵填入",
+    "copy": "複製內容",
+    "drillMode": "層級",
+    "treeMode": "樹形",
+    "backToParent": "返回上級",
+    "noFavorites": "暫無收藏",
+    "favorites": "收藏"
+  },
+  "editor": {
+    "titlePlaceholder": "輸入標題...",
+    "contentPlaceholder": "在這裡編寫你的 Prompt...",
+    "typePlaceholder": "選擇類型",
+    "typeFolder": "資料夾",
+    "typePrompt": "Prompt",
+    "create": "建立",
+    "update": "更新",
+    "editTitle": "編輯",
+    "newTitle": "新建"
+  },
+  "sync": {
+    "syncing": "同步中...",
+    "synced": "已同步",
+    "error": "同步失敗",
+    "pendingSync": "{count} 項待同步",
+    "notSynced": "未同步",
+    "justNow": "剛剛",
+    "minutesAgo": "{n} 分鐘前",
+    "hoursAgo": "{n} 小時前",
+    "clickToSync": "點擊同步"
+  },
+  "confirm": {
+    "defaultTitle": "確認",
+    "ok": "確定",
+    "deleteTitle": "確認刪除"
+  },
+  "clipboard": {
+    "copied": "已複製到剪貼簿",
+    "copyFailed": "複製失敗，請手動複製",
+    "injected": "已填入輸入框",
+    "injectFailed": "填入失敗"
+  },
+  "settings": {
+    "title": "設定",
+    "account": "帳號",
+    "email": "電子郵件",
+    "displayName": "顯示名稱",
+    "mode": "模式",
+    "offlineMode": "離線模式",
+    "appearance": "外觀",
+    "server": "伺服器",
+    "backendUrl": "後端地址",
+    "data": "資料",
+    "localNodes": "本機節點",
+    "pendingSync": "待同步",
+    "fullSync": "全量同步",
+    "clearData": "清除本機資料",
+    "clearDataConfirm": "確定清除所有本機資料？此操作不可恢復。",
+    "clearDataTitle": "清除資料",
+    "about": "關於",
+    "version": "版本",
+    "logout": "登出",
+    "logoutConfirm": "確定登出？本機資料將被清除。",
+    "logoutTitle": "確認登出",
+    "nameUpdated": "顯示名稱已更新",
+    "updateFailed": "更新失敗",
+    "items": "{count} 個",
+    "language": "語言"
+  },
+  "login": {
+    "title": "登入",
+    "subtitle": "登入後可多端同步資料",
+    "emailPlaceholder": "請輸入電子郵件",
+    "sendMagicLink": "發送 Magic Link",
+    "sending": "發送中...",
+    "sent": "Magic Link 已發送，請查看電子郵件。",
+    "tokenPlaceholder": "貼上驗證碼",
+    "verify": "驗證",
+    "verifying": "驗證中...",
+    "offlineMode": "離線模式使用",
+    "offlineHint": "無需登入，資料儲存在本機",
+    "googleLogin": "使用 Google 登入",
+    "githubLogin": "使用 GitHub 登入",
+    "or": "或",
+    "networkError": "網路錯誤，請稍後重試",
+    "verifyFailed": "驗證失敗"
+  },
+  "variableModal": {
+    "fillTitle": "填充變數",
+    "inputPlaceholder": "輸入 {name} 的值...",
+    "preview": "預覽",
+    "copyToClipboard": "複製到剪貼簿",
+    "injectToInput": "填入輸入框"
+  },
+  "view": {
+    "outline": "大綱",
+    "mindmap": "心智圖"
+  },
+  "outline": {
+    "title": "Prompt 大綱",
+    "searchPlaceholder": "搜尋 Prompt...",
+    "noMatch": "未找到匹配的 Prompt",
+    "empty": "暫無 Prompt",
+    "emptyHint": "先建立一些 Prompt 吧",
+    "variableTag": "[變數]",
+    "varCount": "{count} 個變數",
+    "items": "{count} 項"
+  },
+  "mindmapView": {
+    "title": "心智圖",
+    "goUpLevel": "返回上層",
+    "all": "全部",
+    "zoomIn": "放大",
+    "zoomOut": "縮小",
+    "resetView": "重置檢視",
+    "variables": "變數:",
+    "clickToDrill": "點擊下探查看",
+    "clickToEdit": "點擊開啟編輯",
+    "more": "更多"
+  },
+  "profile": {
+    "displayName": "顯示名稱",
+    "namePlaceholder": "輸入顯示名稱",
+    "notSet": "未設定",
+    "saved": "資料已更新",
+    "saveFailed": "更新資料失敗"
+  }
+}

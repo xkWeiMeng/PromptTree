@@ -57,8 +57,8 @@ export const siteAdapters: SiteAdapter[] = [
     name: 'Claude',
     match: /claude\.ai/,
     getInputElement: () =>
-      document.querySelector('[contenteditable="true"].ProseMirror') as HTMLElement |
-      document.querySelector('[contenteditable="true"]') as HTMLElement | null,
+      (document.querySelector('[contenteditable="true"].ProseMirror') ||
+       document.querySelector('[contenteditable="true"]')) as HTMLElement | null,
     insertText: (el, text) => {
       el.innerHTML = `<p>${text}</p>`
       el.dispatchEvent(new InputEvent('input', { bubbles: true }))

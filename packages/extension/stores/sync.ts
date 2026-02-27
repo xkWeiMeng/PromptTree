@@ -30,10 +30,12 @@ export const useSyncStore = defineStore('sync', () => {
   // ===================
   // API Client
   // ===================
+  let _apiBaseUrl = 'http://localhost:3000'
+
   function getApiClient() {
     const authStore = useAuthStore()
     return createApiClient({
-      baseUrl: 'http://localhost:3000', // 将在 init 中从 storage 读取
+      baseUrl: _apiBaseUrl,
       getToken: () => authStore.accessToken,
       onUnauthorized: () => {
         authStore.logout()
@@ -47,6 +49,7 @@ export const useSyncStore = defineStore('sync', () => {
 
   /** 初始化 */
   async function init() {
+    _apiBaseUrl = await storage.getApiBaseUrl()
     lastSyncTime.value = await storage.getLastSyncTime()
     await updatePendingCount()
   }
@@ -130,6 +133,26 @@ export const useSyncStore = defineStore('sync', () => {
       console.error('Sync error:', err)
       lastError.value = err instanceof Error ? err.message : 'Unknown error'
       status.value = 'error'
+
+      // 恢复脏标记（同步失败时）
+      try {
+        const stillDirty = await storage.getDirtyNodes()
+        const pendingIds = stillDirty.filter(n => n._pendingSync).map(n => n.id)
+        if (pendingIds.length > 0) {
+          // 重新标记为 dirty（清除 pendingSync 状态）
+          const allNodes = await storage.getNodes()
+          for (const node of allNodes) {
+            if (pendingIds.includes(node.id)) {
+              node._dirty = true
+              node._pendingSync = false
+            }
+          }
+          await storage.setNodes(allNodes)
+        }
+      } catch {
+        // 恢复脏标记失败，忽略
+      }
+
       return false
     }
   }

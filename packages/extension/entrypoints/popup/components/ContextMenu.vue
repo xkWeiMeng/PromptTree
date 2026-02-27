@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   visible: boolean
@@ -12,7 +13,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'action', action: string): void
-}>()
+}>()  
+
+const { t } = useI18n()
 
 function handleAction(action: string) {
   emit('action', action)
@@ -42,20 +45,20 @@ onUnmounted(() => {
     :style="{ left: `${x}px`, top: `${y}px` }"
     @click.stop
   >
-    <div class="menu-item" @click="handleAction('newFolder')">📁 新建文件夹</div>
-    <div class="menu-item" @click="handleAction('newPrompt')">📄 新建 Prompt</div>
+    <div class="menu-item" @click="handleAction('newFolder')">📁 {{ t('tree.newFolder') }}</div>
+    <div class="menu-item" @click="handleAction('newPrompt')">📄 {{ t('tree.newPrompt') }}</div>
     <div class="menu-divider" />
-    <div class="menu-item" @click="handleAction('rename')">✏️ 重命名</div>
+    <div class="menu-item" @click="handleAction('rename')">✏️ {{ t('tree.rename') }}</div>
     <div class="menu-item" @click="handleAction('toggleFavorite')">
-      {{ isFavorite ? '☆ 取消收藏' : '⭐ 收藏' }}
+      {{ isFavorite ? '☆ ' + t('tree.unfavorite') : '⭐ ' + t('tree.addFavorite') }}
     </div>
     <template v-if="nodeType === 'prompt'">
       <div class="menu-divider" />
-      <div class="menu-item" @click="handleAction('inject')">📋 一键填入</div>
-      <div class="menu-item" @click="handleAction('copy')">📎 复制内容</div>
+      <div class="menu-item" @click="handleAction('inject')">📋 {{ t('tree.inject') }}</div>
+      <div class="menu-item" @click="handleAction('copy')">📎 {{ t('tree.copy') }}</div>
     </template>
     <div class="menu-divider" />
-    <div class="menu-item menu-item--danger" @click="handleAction('delete')">🗑 删除</div>
+    <div class="menu-item menu-item--danger" @click="handleAction('delete')">🗑 {{ t('common.delete') }}</div>
   </div>
 </template>
 

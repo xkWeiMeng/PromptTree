@@ -1,0 +1,157 @@
+{
+  "common": {
+    "untitled": "未命名",
+    "untitledFolder": "未命名文件夹",
+    "delete": "删除",
+    "cancel": "取消",
+    "close": "关闭",
+    "copy": "复制",
+    "save": "保存",
+    "confirm": "确定",
+    "loading": "加载中...",
+    "back": "返回"
+  },
+  "theme": {
+    "system": "跟随系统",
+    "light": "浅色",
+    "dark": "深色"
+  },
+  "tree": {
+    "newFolder": "新建文件夹",
+    "newPrompt": "新建 Prompt",
+    "emptyState": "暂无内容",
+    "emptyHint": "点击右上角 + 创建",
+    "unfavorite": "取消收藏",
+    "addFavorite": "收藏",
+    "deleteConfirmTitle": "删除确认",
+    "deleteConfirmMsg": "确定要删除「{name}」吗？此操作不可撤销。",
+    "searchPlaceholder": "搜索 Prompt...",
+    "noResults": "无搜索结果",
+    "rename": "重命名",
+    "inject": "一键填入",
+    "copy": "复制内容",
+    "drillMode": "层级",
+    "treeMode": "树形",
+    "backToParent": "返回上级",
+    "noFavorites": "暂无收藏",
+    "favorites": "收藏"
+  },
+  "editor": {
+    "titlePlaceholder": "输入标题...",
+    "contentPlaceholder": "在这里编写你的 Prompt...",
+    "typePlaceholder": "选择类型",
+    "typeFolder": "文件夹",
+    "typePrompt": "Prompt",
+    "create": "创建",
+    "update": "更新",
+    "editTitle": "编辑",
+    "newTitle": "新建"
+  },
+  "sync": {
+    "syncing": "同步中...",
+    "synced": "已同步",
+    "error": "同步失败",
+    "pendingSync": "{count} 项待同步",
+    "notSynced": "未同步",
+    "justNow": "刚刚",
+    "minutesAgo": "{n} 分钟前",
+    "hoursAgo": "{n} 小时前",
+    "clickToSync": "点击同步"
+  },
+  "confirm": {
+    "defaultTitle": "确认",
+    "ok": "确定",
+    "deleteTitle": "确认删除"
+  },
+  "clipboard": {
+    "copied": "已复制到剪贴板",
+    "copyFailed": "复制失败，请手动复制",
+    "injected": "已填入输入框",
+    "injectFailed": "填入失败"
+  },
+  "settings": {
+    "title": "设置",
+    "account": "账号",
+    "email": "邮箱",
+    "displayName": "显示名",
+    "mode": "模式",
+    "offlineMode": "离线模式",
+    "appearance": "外观",
+    "server": "服务器",
+    "backendUrl": "后端地址",
+    "data": "数据",
+    "localNodes": "本地节点",
+    "pendingSync": "待同步",
+    "fullSync": "全量同步",
+    "clearData": "清除本地数据",
+    "clearDataConfirm": "确定清除所有本地数据？此操作不可恢复。",
+    "clearDataTitle": "清除数据",
+    "about": "关于",
+    "version": "版本",
+    "logout": "登出",
+    "logoutConfirm": "确定登出？本地数据将被清除。",
+    "logoutTitle": "确认登出",
+    "nameUpdated": "显示名已更新",
+    "updateFailed": "更新失败",
+    "items": "{count} 个",
+    "language": "语言"
+  },
+  "login": {
+    "title": "登录",
+    "subtitle": "登录后可多端同步数据",
+    "emailPlaceholder": "请输入邮箱地址",
+    "sendMagicLink": "发送 Magic Link",
+    "sending": "发送中...",
+    "sent": "Magic Link 已发送，请查看邮箱。",
+    "tokenPlaceholder": "粘贴验证码",
+    "verify": "验证",
+    "verifying": "验证中...",
+    "offlineMode": "离线模式使用",
+    "offlineHint": "无需登录，数据存储在本地",
+    "googleLogin": "使用 Google 登录",
+    "githubLogin": "使用 GitHub 登录",
+    "or": "或",
+    "networkError": "网络错误，请稍后重试",
+    "verifyFailed": "验证失败"
+  },
+  "variableModal": {
+    "fillTitle": "填充变量",
+    "inputPlaceholder": "输入 {name} 的值...",
+    "preview": "预览",
+    "copyToClipboard": "复制到剪贴板",
+    "injectToInput": "填入输入框"
+  },
+  "view": {
+    "outline": "大纲",
+    "mindmap": "导图"
+  },
+  "outline": {
+    "title": "Prompt 大纲",
+    "searchPlaceholder": "搜索 Prompt...",
+    "noMatch": "未找到匹配的 Prompt",
+    "empty": "暂无 Prompt",
+    "emptyHint": "先创建一些 Prompt 吧",
+    "variableTag": "[变量]",
+    "varCount": "{count} 个变量",
+    "items": "{count} 项"
+  },
+  "mindmapView": {
+    "title": "思维导图",
+    "goUpLevel": "返回上级",
+    "all": "全部",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "resetView": "重置视图",
+    "variables": "变量:",
+    "clickToDrill": "点击下钻查看",
+    "clickToEdit": "点击编辑",
+    "more": "更多"
+  },
+  "profile": {
+    "displayName": "显示名称",
+    "namePlaceholder": "输入显示名称",
+    "notSet": "未设置",
+    "saved": "资料已更新",
+    "saveFailed": "更新资料失败"
+  }
+}

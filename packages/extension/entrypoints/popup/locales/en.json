@@ -1,0 +1,157 @@
+{
+  "common": {
+    "untitled": "Untitled",
+    "untitledFolder": "Untitled Folder",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "close": "Close",
+    "copy": "Copy",
+    "save": "Save",
+    "confirm": "OK",
+    "loading": "Loading...",
+    "back": "Back"
+  },
+  "theme": {
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "tree": {
+    "newFolder": "New Folder",
+    "newPrompt": "New Prompt",
+    "emptyState": "No content yet",
+    "emptyHint": "Tap + to create",
+    "unfavorite": "Remove from Favorites",
+    "addFavorite": "Add to Favorites",
+    "deleteConfirmTitle": "Confirm Delete",
+    "deleteConfirmMsg": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+    "searchPlaceholder": "Search prompts...",
+    "noResults": "No matching results",
+    "rename": "Rename",
+    "inject": "Insert",
+    "copy": "Copy Content",
+    "drillMode": "Drill",
+    "treeMode": "Tree",
+    "backToParent": "Back",
+    "noFavorites": "No favorites yet",
+    "favorites": "Favorites"
+  },
+  "editor": {
+    "titlePlaceholder": "Enter title...",
+    "contentPlaceholder": "Write your prompt here...",
+    "typePlaceholder": "Choose type",
+    "typeFolder": "Folder",
+    "typePrompt": "Prompt",
+    "create": "Create",
+    "update": "Update",
+    "editTitle": "Edit",
+    "newTitle": "New"
+  },
+  "sync": {
+    "syncing": "Syncing...",
+    "synced": "Synced",
+    "error": "Sync Failed",
+    "pendingSync": "{count} pending",
+    "notSynced": "Not synced",
+    "justNow": "Just now",
+    "minutesAgo": "{n} min ago",
+    "hoursAgo": "{n} hr ago",
+    "clickToSync": "Click to sync"
+  },
+  "confirm": {
+    "defaultTitle": "Confirm",
+    "ok": "OK",
+    "deleteTitle": "Confirm Delete"
+  },
+  "clipboard": {
+    "copied": "Copied to clipboard",
+    "copyFailed": "Copy failed, please copy manually",
+    "injected": "Injected to input",
+    "injectFailed": "Inject failed"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "email": "Email",
+    "displayName": "Display Name",
+    "mode": "Mode",
+    "offlineMode": "Offline Mode",
+    "appearance": "Appearance",
+    "server": "Server",
+    "backendUrl": "Backend URL",
+    "data": "Data",
+    "localNodes": "Local Nodes",
+    "pendingSync": "Pending Sync",
+    "fullSync": "Full Sync",
+    "clearData": "Clear Local Data",
+    "clearDataConfirm": "Are you sure you want to clear all local data? This cannot be undone.",
+    "clearDataTitle": "Clear Data",
+    "about": "About",
+    "version": "Version",
+    "logout": "Log Out",
+    "logoutConfirm": "Are you sure you want to log out? Local data will be cleared.",
+    "logoutTitle": "Confirm Logout",
+    "nameUpdated": "Display name updated",
+    "updateFailed": "Update failed",
+    "items": "{count} items",
+    "language": "Language"
+  },
+  "login": {
+    "title": "Log In",
+    "subtitle": "Log in to sync across devices",
+    "emailPlaceholder": "Enter your email",
+    "sendMagicLink": "Send Magic Link",
+    "sending": "Sending...",
+    "sent": "Magic Link sent! Check your email.",
+    "tokenPlaceholder": "Paste the token here",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "offlineMode": "Use Offline Mode",
+    "offlineHint": "No login required, data stored locally",
+    "googleLogin": "Continue with Google",
+    "githubLogin": "Continue with GitHub",
+    "or": "or",
+    "networkError": "Network error, please try later",
+    "verifyFailed": "Verification failed"
+  },
+  "variableModal": {
+    "fillTitle": "Fill Variables",
+    "inputPlaceholder": "Enter value for {name}...",
+    "preview": "Preview",
+    "copyToClipboard": "Copy to Clipboard",
+    "injectToInput": "Insert to Input"
+  },
+  "view": {
+    "outline": "Outline",
+    "mindmap": "Mind Map"
+  },
+  "outline": {
+    "title": "Prompt Outline",
+    "searchPlaceholder": "Search Prompts...",
+    "noMatch": "No matching Prompts found",
+    "empty": "No Prompts yet",
+    "emptyHint": "Create some prompts first",
+    "variableTag": "[var]",
+    "varCount": "{count} variables",
+    "items": "{count} items"
+  },
+  "mindmapView": {
+    "title": "Mind Map",
+    "goUpLevel": "Go up level",
+    "all": "All",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetView": "Reset view",
+    "variables": "Variables:",
+    "clickToDrill": "Click to drill down",
+    "clickToEdit": "Click to edit",
+    "more": "more"
+  },
+  "profile": {
+    "displayName": "Display Name",
+    "namePlaceholder": "Enter display name",
+    "notSet": "Not set",
+    "saved": "Profile updated",
+    "saveFailed": "Failed to update profile"
+  }
+}

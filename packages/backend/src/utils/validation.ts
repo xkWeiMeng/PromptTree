@@ -173,3 +173,59 @@ export function validateMagicLinkPayload(data: unknown): ValidationResult<{ emai
 
   return { success: true, data: { email: body.email } }
 }
+
+/**
+ * 验证注册请求
+ */
+export function validateRegisterPayload(data: unknown): ValidationResult<{ email: string; password: string; displayName?: string }> {
+  if (!data || typeof data !== 'object') {
+    return { success: false, error: 'Request body must be an object' }
+  }
+
+  const body = data as Record<string, unknown>
+
+  if (!body.email || typeof body.email !== 'string') {
+    return { success: false, error: 'email is required' }
+  }
+
+  if (!validateEmail(body.email)) {
+    return { success: false, error: 'Invalid email format' }
+  }
+
+  if (!body.password || typeof body.password !== 'string') {
+    return { success: false, error: 'password is required' }
+  }
+
+  if (body.password.length < 6) {
+    return { success: false, error: 'Password must be at least 6 characters' }
+  }
+
+  if (body.password.length > 128) {
+    return { success: false, error: 'Password must be at most 128 characters' }
+  }
+
+  const displayName = body.displayName && typeof body.displayName === 'string' ? body.displayName.trim() : undefined
+
+  return { success: true, data: { email: body.email, password: body.password, displayName } }
+}
+
+/**
+ * 验证密码登录请求
+ */
+export function validatePasswordLoginPayload(data: unknown): ValidationResult<{ email: string; password: string }> {
+  if (!data || typeof data !== 'object') {
+    return { success: false, error: 'Request body must be an object' }
+  }
+
+  const body = data as Record<string, unknown>
+
+  if (!body.email || typeof body.email !== 'string') {
+    return { success: false, error: 'email is required' }
+  }
+
+  if (!body.password || typeof body.password !== 'string') {
+    return { success: false, error: 'password is required' }
+  }
+
+  return { success: true, data: { email: body.email, password: body.password } }
+}

@@ -81,7 +81,10 @@ async function backgroundSync(): Promise<{ success: boolean; error?: string }> {
     if (!token) return { success: false, error: 'not_authenticated' }
 
     const baseUrl = await getApiBaseUrl()
-    const api = createApiClient(baseUrl, token)
+    const api = createApiClient({
+      baseUrl,
+      getToken: () => token,
+    })
 
     const allNodes = await getNodes()
     const dirtyNodes = allNodes.filter(n => n._dirty)

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 
 const step = ref<'email' | 'verify'>('email')
@@ -19,7 +21,7 @@ async function handleSendMagicLink() {
   if (result.success) {
     step.value = 'verify'
   } else {
-    errorMsg.value = result.error || '发送失败'
+    errorMsg.value = result.error || t('login.networkError')
   }
 }
 
@@ -30,7 +32,7 @@ async function handleVerify() {
   const result = await authStore.verifyMagicLink(verifyToken.value.trim())
   isLoading.value = false
   if (!result.success) {
-    errorMsg.value = result.error || '验证失败'
+    errorMsg.value = result.error || t('login.verifyFailed')
   }
 }
 
@@ -43,18 +45,18 @@ async function handleOfflineMode() {
   <div class="login-view">
     <div class="login-header">
       <h1>🌳 PromptTree</h1>
-      <p class="login-subtitle">Prompt 管理与一键填入</p>
+      <p class="login-subtitle">{{ t('login.subtitle') }}</p>
     </div>
 
     <div class="login-body">
       <!-- 邮箱输入步骤 -->
       <template v-if="step === 'email'">
         <div class="form-item">
-          <label>邮箱地址</label>
+          <label>{{ t('settings.email') }}</label>
           <input
             v-model="email"
             type="email"
-            placeholder="your@email.com"
+            :placeholder="t('login.emailPlaceholder')"
             @keydown.enter="handleSendMagicLink"
           />
         </div>
@@ -63,19 +65,19 @@ async function handleOfflineMode() {
           :disabled="isLoading || !email.trim()"
           @click="handleSendMagicLink"
         >
-          {{ isLoading ? '发送中...' : '📧 发送登录链接' }}
+          {{ isLoading ? t('login.sending') : '📧 ' + t('login.sendMagicLink') }}
         </button>
       </template>
 
       <!-- 验证步骤 -->
       <template v-if="step === 'verify'">
-        <p class="verify-hint">登录链接已发送到 <strong>{{ email }}</strong>，请从邮件中复制验证码：</p>
+        <p class="verify-hint">{{ t('login.sent') }}</p>
         <div class="form-item">
-          <label>验证码</label>
+          <label>{{ t('login.tokenPlaceholder') }}</label>
           <input
             v-model="verifyToken"
             type="text"
-            placeholder="粘贴验证码..."
+            :placeholder="t('login.tokenPlaceholder')"
             @keydown.enter="handleVerify"
           />
         </div>
@@ -84,20 +86,20 @@ async function handleOfflineMode() {
           :disabled="isLoading || !verifyToken.trim()"
           @click="handleVerify"
         >
-          {{ isLoading ? '验证中...' : '✓ 验证登录' }}
+          {{ isLoading ? t('login.verifying') : '✓ ' + t('login.verify') }}
         </button>
-        <button class="btn btn--link" @click="step = 'email'">← 重新发送</button>
+        <button class="btn btn--link" @click="step = 'email'">← {{ t('login.sendMagicLink') }}</button>
       </template>
 
       <!-- 错误信息 -->
       <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
 
       <!-- 分隔线 -->
-      <div class="divider"><span>或</span></div>
+      <div class="divider"><span>{{ t('login.or') }}</span></div>
 
       <!-- 离线模式 -->
       <button class="btn btn--secondary btn--full" @click="handleOfflineMode">
-        📡 离线使用
+        📡 {{ t('login.offlineMode') }}
       </button>
     </div>
   </div>

@@ -13,6 +13,8 @@ export type MessageType =
   | 'SYNC_NOW'
   | 'SYNC_COMPLETE'
   | 'AUTH_STATUS_CHANGED'
+  | 'TOGGLE_QUICK_INSERT'
+  | 'GET_SYNC_STATUS'
 
 export interface ExtensionMessage {
   type: MessageType

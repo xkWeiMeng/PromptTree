@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import type { User } from '@prompttree/shared'
 import { createApiClient } from '@prompttree/shared'
 import * as storage from '@/utils/storage'
+import i18n from '@/entrypoints/popup/i18n'
 
 export const useAuthStore = defineStore('auth', () => {
   // ===================
@@ -84,11 +85,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     try {
       const baseUrl = await storage.getApiBaseUrl()
-      const api = createApiClient({
-        baseUrl,
-        getToken: () => accessToken.value,
-        onUnauthorized: () => logout(),
-      })
 
       // 使用 fetch 直接检查 /api/auth/me
       const response = await fetch(`${baseUrl}/api/auth/me`, {
@@ -121,7 +117,7 @@ export const useAuthStore = defineStore('auth', () => {
       const result = await api.sendMagicLink(email)
       return { success: result.success, error: result.error }
     } catch (err) {
-      return { success: false, error: '网络错误，请稍后重试' }
+      return { success: false, error: i18n.global.t('login.networkError') }
     }
   }
 
@@ -146,10 +142,37 @@ export const useAuthStore = defineStore('auth', () => {
           return { success: true }
         }
       }
-      return { success: false, error: result.error || '验证失败' }
+      return { success: false, error: result.error || i18n.global.t('login.verifyFailed') }
     } catch (err) {
-      return { success: false, error: '网络错误，请稍后重试' }
+      return { success: false, error: i18n.global.t('login.networkError') }
     }
+  }
+
+  /** 更新用户资料 */
+  async function updateProfile(data: { displayName?: string }): Promise<boolean> {
+    if (!accessToken.value) return false
+    try {
+      const baseUrl = await storage.getApiBaseUrl()
+      const res = await fetch(`${baseUrl}/api/auth/me`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken.value}`,
+        },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json.success && json.user) {
+          user.value = json.user
+          await storage.setUser(json.user)
+          return true
+        }
+      }
+    } catch (err) {
+      console.error('Failed to update profile:', err)
+    }
+    return false
   }
 
   return {
@@ -170,5 +193,6 @@ export const useAuthStore = defineStore('auth', () => {
     checkAuth,
     sendMagicLink,
     verifyMagicLink,
+    updateProfile,
   }
 })

@@ -1,0 +1,157 @@
+{
+  "common": {
+    "untitled": "無題",
+    "untitledFolder": "無題フォルダ",
+    "delete": "削除",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "copy": "コピー",
+    "save": "保存",
+    "confirm": "OK",
+    "loading": "読み込み中...",
+    "back": "戻る"
+  },
+  "theme": {
+    "system": "システム",
+    "light": "ライト",
+    "dark": "ダーク"
+  },
+  "tree": {
+    "newFolder": "新規フォルダ",
+    "newPrompt": "新規Prompt",
+    "emptyState": "コンテンツがありません",
+    "emptyHint": "右上の + をタップして作成",
+    "unfavorite": "お気に入りから削除",
+    "addFavorite": "お気に入りに追加",
+    "deleteConfirmTitle": "削除の確認",
+    "deleteConfirmMsg": "「{name}」を削除してもよろしいですか？この操作は元に戻せません。",
+    "searchPlaceholder": "Promptを検索...",
+    "noResults": "検索結果がありません",
+    "rename": "名前を変更",
+    "inject": "入力欄に挿入",
+    "copy": "内容をコピー",
+    "drillMode": "階層",
+    "treeMode": "ツリー",
+    "backToParent": "上の階層へ",
+    "noFavorites": "お気に入りがありません",
+    "favorites": "お気に入り"
+  },
+  "editor": {
+    "titlePlaceholder": "タイトルを入力...",
+    "contentPlaceholder": "ここにPromptを書く...",
+    "typePlaceholder": "タイプを選択",
+    "typeFolder": "フォルダ",
+    "typePrompt": "Prompt",
+    "create": "作成",
+    "update": "更新",
+    "editTitle": "編集",
+    "newTitle": "新規"
+  },
+  "sync": {
+    "syncing": "同期中...",
+    "synced": "同期済み",
+    "error": "同期失敗",
+    "pendingSync": "{count} 件同期待ち",
+    "notSynced": "未同期",
+    "justNow": "たった今",
+    "minutesAgo": "{n} 分前",
+    "hoursAgo": "{n} 時間前",
+    "clickToSync": "クリックして同期"
+  },
+  "confirm": {
+    "defaultTitle": "確認",
+    "ok": "OK",
+    "deleteTitle": "削除の確認"
+  },
+  "clipboard": {
+    "copied": "クリップボードにコピーしました",
+    "copyFailed": "コピーに失敗しました。手動でコピーしてください",
+    "injected": "入力欄に挿入しました",
+    "injectFailed": "挿入に失敗しました"
+  },
+  "settings": {
+    "title": "設定",
+    "account": "アカウント",
+    "email": "メール",
+    "displayName": "表示名",
+    "mode": "モード",
+    "offlineMode": "オフラインモード",
+    "appearance": "外観",
+    "server": "サーバー",
+    "backendUrl": "バックエンドURL",
+    "data": "データ",
+    "localNodes": "ローカルノード",
+    "pendingSync": "同期待ち",
+    "fullSync": "全同期",
+    "clearData": "ローカルデータを消去",
+    "clearDataConfirm": "すべてのローカルデータを消去しますか？この操作は元に戻せません。",
+    "clearDataTitle": "データ消去",
+    "about": "情報",
+    "version": "バージョン",
+    "logout": "ログアウト",
+    "logoutConfirm": "ログアウトしますか？ローカルデータは消去されます。",
+    "logoutTitle": "ログアウト確認",
+    "nameUpdated": "表示名を更新しました",
+    "updateFailed": "更新に失敗しました",
+    "items": "{count} 個",
+    "language": "言語"
+  },
+  "login": {
+    "title": "ログイン",
+    "subtitle": "ログインしてデバイス間でデータを同期",
+    "emailPlaceholder": "メールアドレスを入力",
+    "sendMagicLink": "Magic Linkを送信",
+    "sending": "送信中...",
+    "sent": "Magic Linkを送信しました。メールを確認してください。",
+    "tokenPlaceholder": "トークンを貼り付け",
+    "verify": "確認",
+    "verifying": "確認中...",
+    "offlineMode": "オフラインモードを使用",
+    "offlineHint": "ログイン不要、データはローカルに保存",
+    "googleLogin": "Googleでログイン",
+    "githubLogin": "GitHubでログイン",
+    "or": "または",
+    "networkError": "ネットワークエラーです。後でもう一度お試しください",
+    "verifyFailed": "確認に失敗しました"
+  },
+  "variableModal": {
+    "fillTitle": "変数を入力",
+    "inputPlaceholder": "{name} の値を入力...",
+    "preview": "プレビュー",
+    "copyToClipboard": "クリップボードにコピー",
+    "injectToInput": "入力欄に挿入"
+  },
+  "view": {
+    "outline": "アウトライン",
+    "mindmap": "マインドマップ"
+  },
+  "outline": {
+    "title": "プロンプト概要",
+    "searchPlaceholder": "プロンプトを検索...",
+    "noMatch": "一致するプロンプトが見つかりません",
+    "empty": "プロンプトがありません",
+    "emptyHint": "まずプロンプトを作成してください",
+    "variableTag": "[変数]",
+    "varCount": "{count} 個の変数",
+    "items": "{count} 項目"
+  },
+  "mindmapView": {
+    "title": "マインドマップ",
+    "goUpLevel": "上の階層へ",
+    "all": "すべて",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "resetView": "ビューをリセット",
+    "variables": "変数:",
+    "clickToDrill": "クリックしてドリルダウン",
+    "clickToEdit": "クリックして編集",
+    "more": "他"
+  },
+  "profile": {
+    "displayName": "表示名",
+    "namePlaceholder": "表示名を入力",
+    "notSet": "未設定",
+    "saved": "プロフィールを更新しました",
+    "saveFailed": "プロフィールの更新に失敗しました"
+  }
+}

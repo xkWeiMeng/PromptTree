@@ -1,25 +1,19 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSearch } from '@/composables/useSearch'
-import { useTreeStore } from '@/stores/tree'
+
+const { t } = useI18n()
 
 const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const treeStore = useTreeStore()
-const { query, results, hasQuery, search, clear } = useSearch()
+const { query, results, hasQuery, isSearching, clear, selectResult } = useSearch()
 const inputRef = ref<HTMLInputElement | null>(null)
 
-// 防抖搜索
-let debounceTimer: ReturnType<typeof setTimeout> | null = null
-watch(query, (val) => {
-  if (debounceTimer) clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => search(val), 150)
-})
-
 function handleSelect(id: string) {
-  treeStore.selectNode(id)
+  selectResult(id)
   emit('close')
 }
 
@@ -50,7 +44,7 @@ defineExpose({ focusInput })
         ref="inputRef"
         v-model="query"
         type="text"
-        placeholder="搜索 Prompt..."
+        :placeholder="t('tree.searchPlaceholder')"
         class="search-input"
       />
       <span v-if="hasQuery" class="search-clear" @click="handleClear">✕</span>
@@ -80,7 +74,7 @@ defineExpose({ focusInput })
         </div>
       </div>
 
-      <div v-if="results.length === 0" class="search-empty">无搜索结果</div>
+      <div v-if="results.length === 0" class="search-empty">{{ t('tree.noResults') }}</div>
     </div>
   </div>
 </template>

@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { extractVariables } from '@prompttree/shared'
 import { useTreeStore } from '@/stores/tree'
 import { useSyncStore } from '@/stores/sync'
 import { useClipboard } from '@/composables/useClipboard'
+import { useConfirm } from '@/composables/useConfirm'
+import { useKeyboard } from '@/composables/useKeyboard'
 import TreeView from '../components/TreeView.vue'
 import SearchBar from '../components/SearchBar.vue'
 import ContextMenu from '../components/ContextMenu.vue'
 import NodeEditor from '../components/NodeEditor.vue'
 import VariableFillModal from '../components/VariableFillModal.vue'
 import SyncStatus from '../components/SyncStatus.vue'
+import ViewSwitcher from '../components/ViewSwitcher.vue'
+import OutlineView from '../components/OutlineView.vue'
+import MindMapView from '../components/MindMapView.vue'
 
 const emit = defineEmits<{
   (e: 'settings'): void
@@ -18,11 +24,23 @@ const emit = defineEmits<{
 const treeStore = useTreeStore()
 const syncStore = useSyncStore()
 const clipboard = useClipboard()
+const { confirmDanger } = useConfirm()
+const { t } = useI18n()
+
+// 键盘快捷键
+useKeyboard({
+  onSearch: () => { showSearch.value = true },
+  onCreatePrompt: () => { editorDefaultType.value = 'prompt'; editNodeId.value = null; showEditor.value = true },
+  onCreateFolder: () => { editorDefaultType.value = 'folder'; editNodeId.value = null; showEditor.value = true },
+  onCopyWithVariables: () => {
+    const node = treeStore.selectedNode
+    if (node?.type === 'prompt') handleCopy(node.content)
+  },
+})
 
 // ===================
 // UI State
 // ===================
-const viewMode = ref<'tree' | 'drill'>('drill')
 const showSearch = ref(false)
 const showFavoritesOnly = ref(false)
 const showEditor = ref(false)
@@ -67,8 +85,7 @@ async function handleContextAction(action: string) {
       showEditor.value = true
       break
     case 'rename':
-      editNodeId.value = nodeId
-      showEditor.value = true
+      treeStore.startEditing(nodeId)
       break
     case 'toggleFavorite':
       await treeStore.toggleFavorite(nodeId)
@@ -79,11 +96,16 @@ async function handleContextAction(action: string) {
     case 'copy':
       await handleCopy(node.content)
       break
-    case 'delete':
-      if (confirm(`确定删除「${node.title}」吗？`)) {
+    case 'delete': {
+      const confirmed = await confirmDanger(
+        t('tree.deleteConfirmMsg', { name: node.title }),
+        t('tree.deleteConfirmTitle')
+      )
+      if (confirmed) {
         await treeStore.deleteNode(nodeId)
       }
       break
+    }
   }
   syncStore.triggerSync()
 }
@@ -92,6 +114,16 @@ function handleNewNode() {
   editorDefaultType.value = 'prompt'
   editNodeId.value = null
   showEditor.value = true
+}
+
+async function handleInlineRename(id: string, title: string) {
+  await treeStore.updateNode(id, { title })
+  treeStore.stopEditing()
+  syncStore.triggerSync()
+}
+
+function handleCancelRename() {
+  treeStore.stopEditing()
 }
 
 async function handleInject(content: string) {
@@ -153,18 +185,18 @@ onMounted(async () => {
           <button
             class="tool-btn"
             :class="{ active: showSearch }"
-            title="搜索"
+            :title="$t('tree.searchPlaceholder')"
             @click="showSearch = !showSearch"
           >🔍</button>
           <button
             class="tool-btn"
             :class="{ active: showFavoritesOnly }"
-            title="收藏"
+            :title="$t('tree.favorites')"
             @click="showFavoritesOnly = !showFavoritesOnly"
           >⭐</button>
-          <button class="tool-btn" title="新建" @click="handleNewNode">+</button>
+          <button class="tool-btn" :title="$t('tree.newPrompt')" @click="handleNewNode">+</button>
           <SyncStatus />
-          <button class="tool-btn" title="设置" @click="$emit('settings')">⚙</button>
+          <button class="tool-btn" :title="$t('settings.title')" @click="$emit('settings')">⚙</button>
         </div>
       </div>
 
@@ -172,18 +204,10 @@ onMounted(async () => {
       <SearchBar v-if="showSearch" @close="showSearch = false" />
 
       <!-- 视图模式切换 -->
-      <div v-if="!showSearch" class="view-tabs">
-        <button
-          v-if="!showFavoritesOnly"
-          :class="['tab-btn', { active: viewMode === 'drill' }]"
-          @click="viewMode = 'drill'"
-        >📂 层级</button>
-        <button
-          v-if="!showFavoritesOnly"
-          :class="['tab-btn', { active: viewMode === 'tree' }]"
-          @click="viewMode = 'tree'"
-        >🌳 树形</button>
-      </div>
+      <ViewSwitcher
+        v-if="!showSearch && !showFavoritesOnly"
+        v-model="treeStore.viewMode"
+      />
 
       <!-- 收藏列表 -->
       <div v-if="showFavoritesOnly && !showSearch" class="favorites-list">
@@ -198,27 +222,39 @@ onMounted(async () => {
           <span class="fav-star">⭐</span>
         </div>
         <div v-if="treeStore.favoriteNodes.length === 0" class="empty-state">
-          <p>暂无收藏</p>
+          <p>{{ $t('tree.noFavorites') }}</p>
         </div>
       </div>
 
       <!-- 树视图 -->
       <TreeView
-        v-if="!showFavoritesOnly && !showSearch"
-        :mode="viewMode"
+        v-if="!showFavoritesOnly && !showSearch && (treeStore.viewMode === 'tree' || treeStore.viewMode === 'drill')"
+        :mode="treeStore.viewMode === 'drill' ? 'drill' : 'tree'"
         @contextmenu="handleContextMenu"
+        @rename="handleInlineRename"
+        @cancel-rename="handleCancelRename"
+      />
+
+      <!-- 大纲视图 -->
+      <OutlineView
+        v-if="!showFavoritesOnly && !showSearch && treeStore.viewMode === 'outline'"
+      />
+
+      <!-- 脑图视图 -->
+      <MindMapView
+        v-if="!showFavoritesOnly && !showSearch && treeStore.viewMode === 'mindmap'"
       />
 
       <!-- 底部操作栏（选中 Prompt 时） -->
       <div v-if="selectedNode && selectedNode.type === 'prompt'" class="action-bar">
         <button class="action-btn action-btn--primary" @click="handleInject(selectedNode.content)">
-          📋 填入
+          📋 {{ $t('tree.inject') }}
         </button>
         <button class="action-btn" @click="handleCopy(selectedNode.content)">
-          📎 复制
+          📎 {{ $t('tree.copy') }}
         </button>
         <button class="action-btn" @click="editNodeId = selectedNode.id; showEditor = true">
-          ✏️ 编辑
+          ✏️ {{ $t('editor.editTitle') }}
         </button>
       </div>
     </template>
@@ -285,30 +321,6 @@ onMounted(async () => {
 .tool-btn:hover,
 .tool-btn.active {
   background: var(--color-hover, #f3f4f6);
-}
-
-/* View Tabs */
-.view-tabs {
-  display: flex;
-  gap: 0;
-  padding: 0 8px;
-  border-bottom: 1px solid var(--color-border, #e5e7eb);
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 6px 8px;
-  font-size: 12px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: var(--color-text-secondary, #9ca3af);
-  border-bottom: 2px solid transparent;
-}
-
-.tab-btn.active {
-  color: var(--color-primary, #4f46e5);
-  border-bottom-color: var(--color-primary, #4f46e5);
 }
 
 /* Favorites */

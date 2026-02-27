@@ -13,13 +13,14 @@
     "lint": "eslint src --ext .vue,.ts"
   },
   "dependencies": {
-    "vue": "^3.4.0",
+    "@prompttree/shared": "workspace:*",
     "pinia": "^2.1.0",
-    "@prompttree/shared": "workspace:*"
+    "vue": "^3.4.0",
+    "vue-i18n": "^9.9.0"
   },
   "devDependencies": {
-    "wxt": "^0.17.0",
     "@wxt-dev/module-vue": "^1.0.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "wxt": "^0.20.18"
   }
 }
