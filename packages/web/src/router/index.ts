@@ -51,6 +51,14 @@ const router = createRouter({
       meta: { requiresAuth: false, isPublic: true }
     },
 
+    // =================== 分享页（公开访问） ===================
+    {
+      path: '/share/:token',
+      name: 'shared',
+      component: () => import('@/views/SharedView.vue'),
+      meta: { requiresAuth: false, isPublic: true, titleKey: 'share.pageTitle' }
+    },
+
     // =================== 应用（不加 locale 前缀） ===================
     {
       path: '/app',

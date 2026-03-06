@@ -36,7 +36,7 @@ export function setupRouterGuards(router: Router) {
 
     // =================== 认证处理 ===================
 
-    // 优先处理 URL 中的 token（OAuth 回调），不论页面是否公开
+    // 优先处理 URL 中的 token（OAuth 回调 / 邮箱验证），不论页面是否公开
     if (to.query.token) {
       // 确保 auth store 已初始化
       if (authStore.isLoading) {
@@ -44,8 +44,10 @@ export function setupRouterGuards(router: Router) {
       }
       const success = await authStore.handleTokenFromUrl()
       if (success) {
-        // 登录成功，跳转到工作台
-        return next({ path: '/app' })
+        // 登录成功，跳转到工作台（保留 verified 标记）
+        const query: Record<string, string> = {}
+        if (to.query.verified) query.verified = '1'
+        return next({ path: '/app', query })
       }
     }
 

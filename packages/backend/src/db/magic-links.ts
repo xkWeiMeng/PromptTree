@@ -23,8 +23,14 @@ const findByTokenStmt = db.prepare<string>(`
   SELECT * FROM magic_links WHERE token = ?
 `)
 
-const findByEmailStmt = db.prepare<string>(`
-  SELECT * FROM magic_links WHERE email = ? AND used = 0 AND expires_at > ?
+const findByEmailStmt = db.prepare(`
+  SELECT * FROM magic_links WHERE email = @email AND used = 0 AND expires_at > @now
+  ORDER BY expires_at DESC
+  LIMIT 1
+`)
+
+const findRecentByEmailStmt = db.prepare(`
+  SELECT * FROM magic_links WHERE email = @email AND expires_at > @minTime
   ORDER BY expires_at DESC
   LIMIT 1
 `)
@@ -114,5 +120,16 @@ export function cleanExpired(): number {
  * 获取邮箱最新的有效魔法链接（用于开发调试）
  */
 export function getLatestForEmail(email: string): MagicLink | null {
-  return findByEmailStmt.get(email, now()) as MagicLink | null
+  return findByEmailStmt.get({ email, now: now() }) as MagicLink | null
+}
+
+/**
+ * 查找最近发送给某邮箱的链接（用于频率限制）
+ * @param email 邮箱
+ * @param withinMs 时间窗口（毫秒），默认 60s
+ */
+export function findRecentByEmail(email: string, withinMs = 60_000): MagicLink | null {
+  // expires_at = created_at + 30min。通过 expires_at - 30min + withinMs > now 反推 created_at
+  const minTime = now() + MAGIC_LINK_EXPIRY_MS - withinMs
+  return findRecentByEmailStmt.get({ email, minTime }) as MagicLink | null
 }

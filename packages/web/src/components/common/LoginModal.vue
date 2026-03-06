@@ -203,8 +203,12 @@ async function handleResendVerification() {
     // 显示成功提示
     registrationSuccess.value = true
     emailNotVerified.value = false
-  } catch (err) {
-    error.value = t('login.sendError')
+  } catch (err: any) {
+    if (err?.status === 429 || err?.message?.includes('RATE_LIMIT')) {
+      error.value = t('login.rateLimited')
+    } else {
+      error.value = t('login.sendError')
+    }
     console.error(err)
   } finally {
     isLoading.value = false

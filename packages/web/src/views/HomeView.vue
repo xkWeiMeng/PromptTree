@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { extractVariables } from '@prompttree/shared'
 import { useTreeStore } from '@/stores/tree'
-import { useSync, useKeyboard, useHead } from '@/composables'
+import { useSync, useKeyboard, useHead, useToast } from '@/composables'
 import { Folder, List, Network, FileText } from 'lucide-vue-next'
 import MainLayout from '@/components/layout/MainLayout.vue'
 import TreeView from '@/components/tree/TreeView.vue'
@@ -13,12 +14,37 @@ import VariableFillModal from '@/components/editor/VariableFillModal.vue'
 import ViewSwitcher from '@/components/overview/ViewSwitcher.vue'
 import OutlineView from '@/components/overview/OutlineView.vue'
 import MindMapView from '@/components/overview/MindMapView.vue'
+import ShareModal from '@/components/common/ShareModal.vue'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const toast = useToast()
 const treeStore = useTreeStore()
 
 // 启用同步
 useSync()
+
+// 处理邮箱验证成功的提示
+const errorMessages: Record<string, string> = {
+  invalid_or_expired_token: 'login.linkExpired',
+  no_token: 'login.linkInvalid',
+  user_not_found: 'login.userNotFound',
+  link_already_used: 'login.linkAlreadyUsed',
+}
+
+onMounted(() => {
+  if (route.query.verified === '1') {
+    toast.success(t('login.emailVerifiedSuccess'), 5000)
+  } else if (route.query.error) {
+    const key = errorMessages[route.query.error as string] || 'login.linkExpired'
+    toast.error(t(key), 6000)
+  }
+  // 清除 URL 中的查询参数
+  if (route.query.verified || route.query.error) {
+    router.replace({ path: '/app' })
+  }
+})
 
 // 当前选中的节点
 const selectedNode = computed(() => {
@@ -45,6 +71,8 @@ const showViewSwitcher = computed(() => treeStore.viewMode !== 'welcome')
 
 // 变量填充弹窗
 const showVariableModal = ref(false)
+const showShareModal = ref(false)
+const shareTargetNodeId = ref<string | null>(null)
 const currentVariables = computed(() => {
   if (!selectedNode.value?.content) return []
   return extractVariables(selectedNode.value.content)
@@ -79,6 +107,16 @@ function handleShowVariables() {
   showVariableModal.value = true
 }
 
+function handleShare(nodeId: string) {
+  shareTargetNodeId.value = nodeId
+  showShareModal.value = true
+}
+
+function closeShareModal() {
+  showShareModal.value = false
+  shareTargetNodeId.value = null
+}
+
 // 欢迎页快捷入口
 function goToOutline() {
   treeStore.setViewMode('outline')
@@ -109,7 +147,7 @@ useKeyboard({
     <!-- 侧边栏：工具栏 + 树视图 -->
     <template #sidebar>
       <TreeToolbar ref="treeToolbarRef" @create="handleToolbarCreate" />
-      <TreeView @create="handleCreate" />
+      <TreeView @create="handleCreate" @share="handleShare" />
     </template>
     
     <!-- 主内容：视图切换 -->
@@ -123,6 +161,7 @@ useKeyboard({
           v-if="showEditor && treeStore.selectedNodeId"
           :node-id="treeStore.selectedNodeId"
           @show-variables="handleShowVariables"
+          @share="handleShare"
         />
 
         <!-- 大纲视图 -->
@@ -195,6 +234,12 @@ useKeyboard({
     :content="currentContent"
     @close="showVariableModal = false"
     @copy="showVariableModal = false"
+  />
+
+  <ShareModal
+    :visible="showShareModal"
+    :node-id="shareTargetNodeId"
+    @close="closeShareModal"
   />
 </template>
 

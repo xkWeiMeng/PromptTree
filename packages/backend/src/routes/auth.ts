@@ -9,6 +9,10 @@ import * as magicLinksRepo from '../db/magic-links'
 
 const auth = new Hono()
 
+function getBackendBaseUrl(): string {
+  return process.env.BASE_URL || 'http://localhost:3000'
+}
+
 // ===================
 // Google 一键登录
 // ===================
@@ -239,18 +243,13 @@ auth.post('/register', async (c) => {
       if (displayName) {
         usersRepo.updateProfile(existing.id, { displayName })
       }
-      // 如果邮箱未验证，发送验证邮件
+      // 如果邮箱未验证，发送验证邮件（带频率限制）
       if (!existing.email_verified) {
-        const magicLink = magicLinksRepo.create(email)
-        const verifyUrl = `${process.env.BASE_URL}/api/auth/verify-email?token=${magicLink.token}`
-        const emailSent = await sendVerificationEmail(email, verifyUrl)
-
-        if (process.env.NODE_ENV !== 'production') {
-          return c.json({
-            success: true,
-            message: 'Password set. Please verify your email.',
-            _dev: { token: magicLink.token, verifyUrl }
-          })
+        const recent = magicLinksRepo.findRecentByEmail(email, 60_000)
+        if (!recent) {
+          const magicLink = magicLinksRepo.create(email)
+          const verifyUrl = `${getBackendBaseUrl()}/api/auth/verify-email?token=${magicLink.token}`
+          await sendVerificationEmail(email, verifyUrl)
         }
       }
       return c.json({ success: true, message: 'Password set. Please verify your email.' })
@@ -267,16 +266,8 @@ auth.post('/register', async (c) => {
 
     // 创建验证链接并发送邮件
     const magicLink = magicLinksRepo.create(email)
-    const verifyUrl = `${process.env.BASE_URL}/api/auth/verify-email?token=${magicLink.token}`
-    const emailSent = await sendVerificationEmail(email, verifyUrl)
-
-    if (process.env.NODE_ENV !== 'production') {
-      return c.json({
-        success: true,
-        message: 'Registration successful. Please verify your email.',
-        _dev: { token: magicLink.token, verifyUrl }
-      })
-    }
+    const verifyUrl = `${getBackendBaseUrl()}/api/auth/verify-email?token=${magicLink.token}`
+    await sendVerificationEmail(email, verifyUrl)
 
     return c.json({
       success: true,
@@ -352,21 +343,35 @@ auth.get('/verify-email', async (c) => {
     return c.redirect(`${frontendUrl}/app?error=no_token`)
   }
 
-  const magicLink = magicLinksRepo.verify(token)
+  // 先查找 token 是否存在（不检查 used/过期）
+  const rawLink = magicLinksRepo.findByToken(token)
 
-  if (!magicLink) {
+  if (!rawLink) {
     return c.redirect(`${frontendUrl}/app?error=invalid_or_expired_token`)
   }
 
-  // 标记链接已使用
+  // 已使用的 token：检查用户是否已验证，是则直接登录
+  if (rawLink.used === 1) {
+    const user = usersRepo.findByEmail(rawLink.email)
+    if (user && user.email_verified) {
+      const accessToken = await signJWT({ userId: user.id, email: user.email || undefined })
+      return c.redirect(`${frontendUrl}/app?token=${accessToken}&verified=1`)
+    }
+    return c.redirect(`${frontendUrl}/app?error=link_already_used`)
+  }
+
+  // 已过期
+  if (rawLink.expires_at < Date.now()) {
+    return c.redirect(`${frontendUrl}/app?error=invalid_or_expired_token`)
+  }
+
+  // 有效 token：标记已使用 + 验证邮箱
   magicLinksRepo.markUsed(token)
 
-  // 标记用户邮箱已验证
-  const user = usersRepo.findByEmail(magicLink.email)
+  const user = usersRepo.findByEmail(rawLink.email)
   if (user) {
     usersRepo.setEmailVerified(user.id)
 
-    // 签发 JWT 让用户自动登录
     const accessToken = await signJWT({ userId: user.id, email: user.email || undefined })
     return c.redirect(`${frontendUrl}/app?token=${accessToken}&verified=1`)
   }
@@ -396,8 +401,14 @@ auth.post('/resend-verification', async (c) => {
     return c.json({ success: false, error: 'EMAIL_ALREADY_VERIFIED' }, 400)
   }
 
+  // 频率限制：60s 内不允许重复发送
+  const recent = magicLinksRepo.findRecentByEmail(email, 60_000)
+  if (recent) {
+    return c.json({ success: false, error: 'RATE_LIMIT', message: 'Please wait 60 seconds before requesting another email.' }, 429)
+  }
+
   const magicLink = magicLinksRepo.create(email)
-  const verifyUrl = `${process.env.BASE_URL}/api/auth/verify-email?token=${magicLink.token}`
+  const verifyUrl = `${getBackendBaseUrl()}/api/auth/verify-email?token=${magicLink.token}`
   await sendVerificationEmail(email, verifyUrl)
 
   if (process.env.NODE_ENV !== 'production') {
@@ -430,7 +441,7 @@ auth.post('/magic-link', async (c) => {
   
   // TODO: 发送邮件
   // 开发阶段：直接返回 token 用于测试
-  const verifyUrl = `${process.env.BASE_URL}/api/auth/verify?token=${magicLink.token}`
+  const verifyUrl = `${getBackendBaseUrl()}/api/auth/verify?token=${magicLink.token}`
   
   // 生产环境应该发送邮件而不是返回 token
   if (process.env.NODE_ENV === 'production') {

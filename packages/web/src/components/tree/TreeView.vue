@@ -6,13 +6,14 @@ import { useTreeStore } from '@/stores/tree'
 import { useConfirm } from '@/composables/useConfirm'
 import TreeNode from './TreeNode.vue'
 import {
-  FolderPlus, FilePlus, Star, StarOff, Trash2, FolderOpen, Pencil
+  FolderPlus, FilePlus, Star, StarOff, Trash2, FolderOpen, Pencil, Share2
 } from 'lucide-vue-next'
 
 const { t } = useI18n()
 
 const emit = defineEmits<{
   (e: 'create', type: 'folder' | 'prompt', parentId: string | null): void
+  (e: 'share', nodeId: string): void
 }>()
 
 const treeStore = useTreeStore()
@@ -91,6 +92,14 @@ async function handleToggleFavorite() {
   hideContextMenu()
 }
 
+// 分享节点
+function handleShare() {
+  if (contextMenu.value.node) {
+    emit('share', contextMenu.value.node.id)
+  }
+  hideContextMenu()
+}
+
 // 在空白处右键
 function handleEmptyContextMenu(e: MouseEvent) {
   e.preventDefault()
@@ -164,6 +173,10 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
             <div class="menu-item" @click="handleToggleFavorite">
               <component :is="contextMenu.node.isFavorite ? StarOff : Star" :size="15" />
               <span>{{ contextMenu.node.isFavorite ? t('tree.unfavorite') : t('tree.addFavorite') }}</span>
+            </div>
+            <div class="menu-item" @click="handleShare">
+              <Share2 :size="15" />
+              <span>{{ t('share.action') }}</span>
             </div>
             <div class="menu-divider"></div>
             <div class="menu-item danger" @click="handleDelete">

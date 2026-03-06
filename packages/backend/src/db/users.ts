@@ -83,8 +83,8 @@ const updatePasswordStmt = db.prepare(`
   UPDATE users SET password_hash = @password_hash WHERE id = @id
 `)
 
-const updateEmailVerifiedStmt = db.prepare(`
-  UPDATE users SET email_verified = 1 WHERE id = @id
+const updateEmailVerifiedStmt = db.prepare<string>(`
+  UPDATE users SET email_verified = 1 WHERE id = ?
 `)
 
 // ===================

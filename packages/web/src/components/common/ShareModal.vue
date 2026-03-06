@@ -1,0 +1,429 @@
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { Copy, Share2, Users, Trash2, Loader2, LogIn } from 'lucide-vue-next'
+import { createShare, deleteShare, getMyShare, type ShareInfo, type ShareStats } from '@/api/share'
+import { useAuthStore } from '@/stores/auth'
+import { useTreeStore } from '@/stores/tree'
+import { useToast, useLoginModal } from '@/composables'
+import { getShareEligibility } from '@/utils/share'
+
+const props = defineProps<{
+  visible: boolean
+  nodeId: string | null
+}>()
+
+const emit = defineEmits<{
+  (e: 'close'): void
+}>()
+
+const { t } = useI18n()
+const toast = useToast()
+const loginModal = useLoginModal()
+const authStore = useAuthStore()
+const treeStore = useTreeStore()
+
+const loading = ref(false)
+const operating = ref(false)
+const shareInfo = ref<ShareInfo | null>(null)
+const shareStats = ref<ShareStats>({ readerCount: 0, readCount: 0 })
+const errorMessage = ref('')
+
+const currentNode = computed(() => {
+  if (!props.nodeId) return null
+  return treeStore.nodes.find((node) => node.id === props.nodeId && node.deletedAt === null) || null
+})
+
+const eligibility = computed(() => {
+  if (!props.nodeId) {
+    return { allowed: false, reason: 'nodeNotFound' as const }
+  }
+
+  return getShareEligibility(props.nodeId, treeStore.nodes, {
+    isLoggedIn: authStore.isLoggedIn,
+    isOfflineMode: authStore.isOfflineMode
+  })
+})
+
+const blockedMessage = computed(() => {
+  switch (eligibility.value.reason) {
+    case 'notLoggedIn':
+      return t('share.mustLogin')
+    case 'offlineMode':
+      return t('share.offlineModeBlocked')
+    case 'nodeDirty':
+      return t('share.nodeNotSynced')
+    case 'descendantDirty':
+      return t('share.folderHasPendingChanges')
+    default:
+      return t('share.nodeUnavailable')
+  }
+})
+
+function closeModal() {
+  emit('close')
+}
+
+function handleBackdropClick(event: MouseEvent) {
+  if ((event.target as HTMLElement).classList.contains('share-backdrop')) {
+    closeModal()
+  }
+}
+
+async function loadShareState() {
+  if (!props.visible || !props.nodeId) return
+
+  shareInfo.value = null
+  shareStats.value = { readerCount: 0, readCount: 0 }
+  errorMessage.value = ''
+
+  if (!eligibility.value.allowed) {
+    return
+  }
+
+  loading.value = true
+  try {
+    const response = await getMyShare(props.nodeId)
+    shareInfo.value = response.share
+    shareStats.value = response.stats
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : t('share.loadFailed')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function handleCreateShare() {
+  if (!props.nodeId) return
+
+  if (!eligibility.value.allowed) {
+    if (eligibility.value.reason === 'notLoggedIn') {
+      loginModal.open()
+    }
+    toast.warning(blockedMessage.value)
+    return
+  }
+
+  operating.value = true
+  errorMessage.value = ''
+  try {
+    const response = await createShare(props.nodeId)
+    shareInfo.value = response.share
+    shareStats.value = response.stats
+    toast.success(t('share.created'))
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : t('share.createFailed')
+  } finally {
+    operating.value = false
+  }
+}
+
+async function handleCopyLink() {
+  if (!shareInfo.value) return
+
+  try {
+    await navigator.clipboard.writeText(shareInfo.value.link)
+    toast.success(t('share.linkCopied'))
+  } catch {
+    toast.error(t('share.copyFailed'))
+  }
+}
+
+async function handleDisableShare() {
+  if (!shareInfo.value) return
+
+  operating.value = true
+  errorMessage.value = ''
+  try {
+    await deleteShare(shareInfo.value.id)
+    shareInfo.value = null
+    shareStats.value = { readerCount: 0, readCount: 0 }
+    toast.success(t('share.revoked'))
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : t('share.revokeFailed')
+  } finally {
+    operating.value = false
+  }
+}
+
+watch(
+  () => [props.visible, props.nodeId, treeStore.nodes.length],
+  () => {
+    if (props.visible) {
+      loadShareState()
+    }
+  },
+  { immediate: true }
+)
+</script>
+
+<template>
+  <Teleport to="body">
+    <Transition name="backdrop">
+      <div v-if="visible" class="share-backdrop" @click="handleBackdropClick">
+        <Transition name="modal" appear>
+          <div v-if="visible" class="share-dialog">
+            <div class="share-header">
+              <h3>{{ t('share.title') }}</h3>
+              <p class="sub-title">{{ currentNode?.title || t('common.untitled') }}</p>
+            </div>
+
+            <div v-if="loading" class="loading">
+              <Loader2 :size="16" class="spin" />
+              <span>{{ t('share.loading') }}</span>
+            </div>
+
+            <template v-else>
+              <div v-if="!eligibility.allowed" class="blocked">
+                <p>{{ blockedMessage }}</p>
+                <button
+                  v-if="eligibility.reason === 'notLoggedIn'"
+                  class="btn-primary"
+                  @click="loginModal.open()"
+                >
+                  <LogIn :size="14" />
+                  {{ t('share.goLogin') }}
+                </button>
+              </div>
+
+              <div v-else-if="shareInfo" class="share-body">
+                <label class="label">{{ t('share.linkLabel') }}</label>
+                <div class="link-row">
+                  <input :value="shareInfo.link" readonly class="link-input" />
+                  <button class="icon-btn" @click="handleCopyLink" :title="t('share.copyLink')">
+                    <Copy :size="14" />
+                  </button>
+                </div>
+
+                <div class="stats">
+                  <span class="stat-item">
+                    <Users :size="14" />
+                    {{ t('share.readerCount', { count: shareStats.readerCount }) }}
+                  </span>
+                </div>
+
+                <div class="actions">
+                  <button class="btn-secondary" :disabled="operating" @click="closeModal">
+                    {{ t('common.close') }}
+                  </button>
+                  <button class="btn-danger" :disabled="operating" @click="handleDisableShare">
+                    <Trash2 :size="14" />
+                    {{ t('share.revoke') }}
+                  </button>
+                </div>
+              </div>
+
+              <div v-else class="share-body">
+                <p class="hint">{{ t('share.description') }}</p>
+                <div class="actions">
+                  <button class="btn-secondary" :disabled="operating" @click="closeModal">
+                    {{ t('common.close') }}
+                  </button>
+                  <button class="btn-primary" :disabled="operating" @click="handleCreateShare">
+                    <Share2 :size="14" />
+                    {{ t('share.create') }}
+                  </button>
+                </div>
+              </div>
+
+              <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+            </template>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+  </Teleport>
+</template>
+
+<style scoped>
+.share-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--glass-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+}
+
+.share-dialog {
+  width: 100%;
+  max-width: 420px;
+  margin: var(--space-5);
+  border-radius: var(--radius-modal);
+  border: 0.5px solid var(--border-secondary);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .share-dialog {
+    background: var(--glass-bg-thick);
+    backdrop-filter: blur(var(--glass-blur-heavy));
+    -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
+  }
+}
+
+.share-header {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 0.5px solid var(--border-secondary);
+}
+
+.share-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+}
+
+.sub-title {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.share-body {
+  padding: var(--space-4) var(--space-5);
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.link-row {
+  margin-top: var(--space-2);
+  display: flex;
+  gap: var(--space-2);
+}
+
+.link-input {
+  flex: 1;
+  border: 0.5px solid var(--border-secondary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  border: 0.5px solid var(--border-secondary);
+}
+
+.icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.stats {
+  margin-top: var(--space-3);
+}
+
+.stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.actions {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  padding: var(--space-2) var(--space-3);
+  border: 0.5px solid transparent;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--text-on-accent);
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+}
+
+.btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-secondary);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-hover);
+}
+
+.btn-danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.btn-danger:hover {
+  background: var(--color-danger);
+  color: var(--text-on-accent);
+}
+
+.hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.blocked {
+  padding: var(--space-4) var(--space-5);
+}
+
+.blocked p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.blocked .btn-primary {
+  margin-top: var(--space-3);
+}
+
+.error {
+  margin: 0;
+  padding: 0 var(--space-5) var(--space-4);
+  color: var(--color-danger);
+  font-size: var(--font-size-xs);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>

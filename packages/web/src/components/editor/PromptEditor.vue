@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { extractVariables } from '@prompttree/shared'
 import { useTreeStore } from '@/stores/tree'
-import { Pencil, Braces, Copy, X, FileText } from 'lucide-vue-next'
+import { Pencil, Braces, Copy, X, FileText, Share2 } from 'lucide-vue-next'
 
 const { t } = useI18n()
 
@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'showVariables'): void
+  (e: 'share', nodeId: string): void
 }>()
 
 const treeStore = useTreeStore()
@@ -118,6 +119,11 @@ function copyWithVariables() {
   emit('showVariables')
 }
 
+// 分享当前节点
+function shareCurrentNode() {
+  emit('share', props.nodeId)
+}
+
 // 关闭编辑器
 function closeEditor() {
   if (saveTimer) {
@@ -167,6 +173,9 @@ onMounted(() => {
         </button>
         <button class="icon-btn" :title="t('common.copy')" @click="copyContent">
           <Copy :size="16" />
+        </button>
+        <button class="icon-btn" :title="t('share.action')" @click="shareCurrentNode">
+          <Share2 :size="16" />
         </button>
         <button 
           v-if="variables.length > 0"
