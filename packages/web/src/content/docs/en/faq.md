@@ -49,6 +49,14 @@ PromptTree uses a "Last Write Wins" strategy — the most recent modification ta
 - Works offline — core data doesn't depend on the network
 - You have full control over your data
 
+### What if the service is temporarily unavailable?
+
+PromptTree is built by an early-stage startup team, and in rare cases cloud services may experience short instability, sync delays, or temporary disconnections. We continuously monitor and fix issues, and we do our best to restore service quickly.
+
+We make best efforts to protect data privacy and security, and to minimize data-loss risk. For critical content, we still recommend keeping an additional local backup copy.
+
+If you notice abnormal behavior or data-related issues, please email **hi@prompttree.app** and we will follow up as soon as possible.
+
 ## Usage
 
 ### How do I use variables?

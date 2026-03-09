@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "pnpm generate:sitemap && vite build",
+    "generate:sitemap": "node ./scripts/generate-sitemap.mjs",
     "preview": "vite preview",
     "lint": "eslint src --ext .vue,.ts",
     "test": "vitest",

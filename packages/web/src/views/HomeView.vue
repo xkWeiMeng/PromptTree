@@ -59,7 +59,10 @@ const pageTitle = computed(() => {
   }
   return t('app.workspace')
 })
-useHead({ title: pageTitle })
+useHead({
+  title: pageTitle,
+  robots: 'noindex, nofollow'
+})
 
 // 是否显示编辑器（只有选中 prompt 类型 + editor 模式时显示）
 const showEditor = computed(() =>

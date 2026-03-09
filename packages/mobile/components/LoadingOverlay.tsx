@@ -1,12 +1,15 @@
 import React from 'react'
 import { View, ActivityIndicator, StyleSheet } from 'react-native'
-import { colors } from '../utils/theme'
+import { useTheme, useThemedStyles, type ThemeColors } from '../utils/theme'
 
 interface LoadingOverlayProps {
   visible: boolean
 }
 
 export default function LoadingOverlay({ visible }: LoadingOverlayProps) {
+  const { colors } = useTheme()
+  const styles = useThemedStyles(createStyles)
+
   if (!visible) return null
 
   return (
@@ -18,10 +21,10 @@ export default function LoadingOverlay({ visible }: LoadingOverlayProps) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: colors.overlay,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 9998,
@@ -30,7 +33,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',

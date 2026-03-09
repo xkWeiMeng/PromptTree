@@ -1,7 +1,8 @@
 import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import type { TreeNode } from '@prompttree/shared'
-import { colors, spacing, fontSize } from '../utils/theme'
+import { useI18n } from '../i18n'
+import { useThemedStyles, spacing, fontSize, type ThemeColors } from '../utils/theme'
 
 // ===================
 // Props
@@ -11,19 +12,22 @@ interface NodeItemProps {
   node: TreeNode
   onPress: (node: TreeNode) => void
   onLongPress?: (node: TreeNode) => void
+  isSelected?: boolean
 }
 
 // ===================
 // 组件
 // ===================
 
-export default function NodeItem({ node, onPress, onLongPress }: NodeItemProps) {
+export default function NodeItem({ node, onPress, onLongPress, isSelected = false }: NodeItemProps) {
+  const { t } = useI18n()
+  const styles = useThemedStyles(createStyles)
   const isFolder = node.type === 'folder'
 
   /** 显示标题：空标题时取内容前20字符 */
   const displayTitle = node.title
     || (node.content ? node.content.slice(0, 20) + (node.content.length > 20 ? '...' : '') : '')
-    || (isFolder ? '未命名文件夹' : '未命名 Prompt')
+    || (isFolder ? t('common.untitledFolder') : t('common.untitledPrompt'))
 
   /** 内容预览（仅 Prompt） */
   const preview = !isFolder && node.content
@@ -34,6 +38,7 @@ export default function NodeItem({ node, onPress, onLongPress }: NodeItemProps) 
     <Pressable
       style={({ pressed }) => [
         styles.container,
+        isSelected && styles.selected,
         pressed && styles.pressed,
       ]}
       onPress={() => onPress(node)}
@@ -74,7 +79,7 @@ export default function NodeItem({ node, onPress, onLongPress }: NodeItemProps) 
 // 样式
 // ===================
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -86,6 +91,9 @@ const styles = StyleSheet.create({
   },
   pressed: {
     backgroundColor: colors.surface,
+  },
+  selected: {
+    backgroundColor: colors.primaryBg,
   },
   iconContainer: {
     width: 36,

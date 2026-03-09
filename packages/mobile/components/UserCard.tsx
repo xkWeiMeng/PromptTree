@@ -1,14 +1,17 @@
 import React from 'react'
 import { View, Text, Image, StyleSheet } from 'react-native'
 import type { User } from '@prompttree/shared'
-import { colors, spacing, fontSize } from '../utils/theme'
+import { useI18n } from '../i18n'
+import { useThemedStyles, spacing, fontSize, type ThemeColors } from '../utils/theme'
 
 interface UserCardProps {
   user: User
 }
 
 export default function UserCard({ user }: UserCardProps) {
-  const displayName = user.displayName || user.email || '未知用户'
+  const { t } = useI18n()
+  const styles = useThemedStyles(createStyles)
+  const displayName = user.displayName || user.email || t('common.untitled')
   const initial = displayName.charAt(0).toUpperCase()
 
   return (
@@ -34,7 +37,7 @@ export default function UserCard({ user }: UserCardProps) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',

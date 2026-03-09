@@ -128,6 +128,39 @@ defineProps<{ name: string }>()
     <path d="M48 20l.7-2 .7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z" fill="#fff" opacity=".45"/>
   </svg>
 
+  <!-- 可分享 -->
+  <svg v-else-if="name === 'share'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="gshare" x1="0" y1="0" x2="56" y2="56">
+        <stop stop-color="#64D2FF"/><stop offset="1" stop-color="#007AFF"/>
+      </linearGradient>
+    </defs>
+    <rect width="56" height="56" rx="14" fill="url(#gshare)"/>
+    <line x1="18" y1="21" x2="36" y2="14" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+    <line x1="18" y1="35" x2="36" y2="42" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+    <circle cx="18" cy="28" r="6.5" fill="#fff" opacity=".92"/>
+    <circle cx="39" cy="13" r="6" fill="#fff" opacity=".78"/>
+    <circle cx="39" cy="43" r="6" fill="#fff" opacity=".78"/>
+    <circle cx="18" cy="28" r="2.2" fill="#007AFF" opacity=".35"/>
+    <circle cx="39" cy="13" r="2" fill="#007AFF" opacity=".28"/>
+    <circle cx="39" cy="43" r="2" fill="#007AFF" opacity=".28"/>
+  </svg>
+
+  <!-- API Key 访问 -->
+  <svg v-else-if="name === 'api'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="gapi" x1="0" y1="0" x2="56" y2="56">
+        <stop stop-color="#8EEFC1"/><stop offset="1" stop-color="#34C759"/>
+      </linearGradient>
+    </defs>
+    <rect width="56" height="56" rx="14" fill="url(#gapi)"/>
+    <path d="M13.5 18.5l-4 4 4 4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>
+    <path d="M42.5 18.5l4 4-4 4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>
+    <circle cx="26" cy="32" r="5.5" fill="#fff" opacity=".9"/>
+    <path d="M31.5 32h10.5v3h-3v3h-3v-2.2h-2.8V33h-1.7z" fill="#fff" opacity=".9"/>
+    <circle cx="26" cy="32" r="2" fill="#34C759" opacity=".35"/>
+  </svg>
+
   <!-- 思维导图 -->
   <svg v-else-if="name === 'mindmap'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>

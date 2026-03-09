@@ -50,13 +50,13 @@ function rowToNode(row: NodeRow): TreeNode {
 
 /** 获取所有节点（含已删除） */
 export function getAllNodes(): TreeNode[] {
-  const rows = db.getAllSync('SELECT * FROM nodes') as NodeRow[]
+  const rows = db.allSync('SELECT * FROM nodes') as NodeRow[]
   return rows.map(rowToNode)
 }
 
 /** 获取所有未删除的节点 */
 export function getActiveNodes(): TreeNode[] {
-  const rows = db.getAllSync(
+  const rows = db.allSync(
     'SELECT * FROM nodes WHERE deletedAt IS NULL'
   ) as NodeRow[]
   return rows.map(rowToNode)
@@ -65,10 +65,10 @@ export function getActiveNodes(): TreeNode[] {
 /** 获取子节点 */
 export function getChildNodes(parentId: string | null): TreeNode[] {
   const rows = parentId === null
-    ? db.getAllSync(
+    ? db.allSync(
         'SELECT * FROM nodes WHERE parentId IS NULL AND deletedAt IS NULL ORDER BY sortOrder'
       ) as NodeRow[]
-    : db.getAllSync(
+    : db.allSync(
         'SELECT * FROM nodes WHERE parentId = ? AND deletedAt IS NULL ORDER BY sortOrder',
         [parentId]
       ) as NodeRow[]
@@ -77,7 +77,7 @@ export function getChildNodes(parentId: string | null): TreeNode[] {
 
 /** 获取收藏节点 */
 export function getFavoriteNodes(): TreeNode[] {
-  const rows = db.getAllSync(
+  const rows = db.allSync(
     'SELECT * FROM nodes WHERE isFavorite = 1 AND deletedAt IS NULL ORDER BY updatedAt DESC'
   ) as NodeRow[]
   return rows.map(rowToNode)
@@ -85,7 +85,7 @@ export function getFavoriteNodes(): TreeNode[] {
 
 /** 根据 ID 获取节点 */
 export function getNodeById(id: string): TreeNode | null {
-  const row = db.getFirstSync(
+  const row = db.getSync(
     'SELECT * FROM nodes WHERE id = ?',
     [id]
   ) as NodeRow | null
@@ -94,7 +94,7 @@ export function getNodeById(id: string): TreeNode | null {
 
 /** 获取待同步（脏）节点 */
 export function getDirtyNodes(): TreeNode[] {
-  const rows = db.getAllSync(
+  const rows = db.allSync(
     'SELECT * FROM nodes WHERE _dirty = 1'
   ) as NodeRow[]
   return rows.map(rowToNode)
@@ -181,7 +181,7 @@ export function clearAllNodes(): void {
 
 /** 读取元数据 */
 export function getMetaValue(key: string): string | null {
-  const row = db.getFirstSync(
+  const row = db.getSync(
     'SELECT value FROM meta WHERE key = ?',
     [key]
   ) as { value: string | null } | null
@@ -199,4 +199,10 @@ export function setMetaValue(key: string, value: string): void {
 /** 删除元数据 */
 export function deleteMetaValue(key: string): void {
   db.runSync('DELETE FROM meta WHERE key = ?', [key])
+}
+
+/** 清空所有本地数据 */
+export function clearAllData(): void {
+  db.runSync('DELETE FROM nodes')
+  db.runSync('DELETE FROM meta')
 }

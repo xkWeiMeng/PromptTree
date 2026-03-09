@@ -229,3 +229,231 @@ export function validatePasswordLoginPayload(data: unknown): ValidationResult<{ 
 
   return { success: true, data: { email: body.email, password: body.password } }
 }
+
+export interface CreateApiKeyRequest {
+  name: string
+  expiresAt: number | null
+}
+
+export interface CreatePromptRequest {
+  title: string
+  content: string
+  parentId: string | null
+  isFavorite: boolean
+  sortOrder: number
+  collapsed: boolean
+}
+
+export interface UpdatePromptRequest {
+  title?: string
+  content?: string
+  parentId?: string | null
+  isFavorite?: boolean
+  sortOrder?: number
+  collapsed?: boolean
+}
+
+export interface CreateFolderRequest {
+  title: string
+  parentId: string | null
+  sortOrder: number
+  collapsed: boolean
+}
+
+/**
+ * 验证创建 API Key 请求
+ */
+export function validateCreateApiKeyPayload(data: unknown): ValidationResult<CreateApiKeyRequest> {
+  if (!data || typeof data !== 'object') {
+    return { success: false, error: 'Request body must be an object' }
+  }
+
+  const body = data as Record<string, unknown>
+  const rawName = body.name
+  const name = typeof rawName === 'string' ? rawName.trim() : 'Default Key'
+
+  if (name.length === 0 || name.length > 64) {
+    return { success: false, error: 'name must be between 1 and 64 characters' }
+  }
+
+  let expiresAt: number | null = null
+  if (body.expiresAt !== undefined && body.expiresAt !== null) {
+    if (typeof body.expiresAt !== 'number' || !Number.isFinite(body.expiresAt)) {
+      return { success: false, error: 'expiresAt must be a number or null' }
+    }
+    if (body.expiresAt <= Date.now()) {
+      return { success: false, error: 'expiresAt must be greater than current time' }
+    }
+    expiresAt = body.expiresAt
+  }
+
+  return {
+    success: true,
+    data: {
+      name,
+      expiresAt
+    }
+  }
+}
+
+/**
+ * 验证创建 Prompt 请求
+ */
+export function validateCreatePromptPayload(data: unknown): ValidationResult<CreatePromptRequest> {
+  if (!data || typeof data !== 'object') {
+    return { success: false, error: 'Request body must be an object' }
+  }
+
+  const body = data as Record<string, unknown>
+
+  if (typeof body.title !== 'string') {
+    return { success: false, error: 'title is required and must be a string' }
+  }
+
+  const title = body.title.trim()
+  if (title.length === 0 || title.length > 200) {
+    return { success: false, error: 'title must be between 1 and 200 characters' }
+  }
+
+  if (body.content !== undefined && typeof body.content !== 'string') {
+    return { success: false, error: 'content must be a string' }
+  }
+
+  if (body.parentId !== undefined && body.parentId !== null) {
+    if (typeof body.parentId !== 'string' || !validateUUID(body.parentId)) {
+      return { success: false, error: 'parentId must be a valid UUID or null' }
+    }
+  }
+
+  if (body.isFavorite !== undefined && typeof body.isFavorite !== 'boolean') {
+    return { success: false, error: 'isFavorite must be a boolean' }
+  }
+
+  if (body.sortOrder !== undefined && (typeof body.sortOrder !== 'number' || !Number.isFinite(body.sortOrder))) {
+    return { success: false, error: 'sortOrder must be a number' }
+  }
+
+  if (body.collapsed !== undefined && typeof body.collapsed !== 'boolean') {
+    return { success: false, error: 'collapsed must be a boolean' }
+  }
+
+  return {
+    success: true,
+    data: {
+      title,
+      content: typeof body.content === 'string' ? body.content : '',
+      parentId: body.parentId === undefined ? null : body.parentId as string | null,
+      isFavorite: typeof body.isFavorite === 'boolean' ? body.isFavorite : false,
+      sortOrder: typeof body.sortOrder === 'number' ? body.sortOrder : 0,
+      collapsed: typeof body.collapsed === 'boolean' ? body.collapsed : false
+    }
+  }
+}
+
+/**
+ * 验证更新 Prompt 请求
+ */
+export function validateUpdatePromptPayload(data: unknown): ValidationResult<UpdatePromptRequest> {
+  if (!data || typeof data !== 'object') {
+    return { success: false, error: 'Request body must be an object' }
+  }
+
+  const body = data as Record<string, unknown>
+  const payload: UpdatePromptRequest = {}
+
+  if (body.title !== undefined) {
+    if (typeof body.title !== 'string') {
+      return { success: false, error: 'title must be a string' }
+    }
+    const title = body.title.trim()
+    if (title.length === 0 || title.length > 200) {
+      return { success: false, error: 'title must be between 1 and 200 characters' }
+    }
+    payload.title = title
+  }
+
+  if (body.content !== undefined) {
+    if (typeof body.content !== 'string') {
+      return { success: false, error: 'content must be a string' }
+    }
+    payload.content = body.content
+  }
+
+  if (body.parentId !== undefined) {
+    if (body.parentId !== null && (typeof body.parentId !== 'string' || !validateUUID(body.parentId))) {
+      return { success: false, error: 'parentId must be a valid UUID or null' }
+    }
+    payload.parentId = body.parentId as string | null
+  }
+
+  if (body.isFavorite !== undefined) {
+    if (typeof body.isFavorite !== 'boolean') {
+      return { success: false, error: 'isFavorite must be a boolean' }
+    }
+    payload.isFavorite = body.isFavorite
+  }
+
+  if (body.sortOrder !== undefined) {
+    if (typeof body.sortOrder !== 'number' || !Number.isFinite(body.sortOrder)) {
+      return { success: false, error: 'sortOrder must be a number' }
+    }
+    payload.sortOrder = body.sortOrder
+  }
+
+  if (body.collapsed !== undefined) {
+    if (typeof body.collapsed !== 'boolean') {
+      return { success: false, error: 'collapsed must be a boolean' }
+    }
+    payload.collapsed = body.collapsed
+  }
+
+  if (Object.keys(payload).length === 0) {
+    return { success: false, error: 'At least one field is required' }
+  }
+
+  return { success: true, data: payload }
+}
+
+/**
+ * 验证创建文件夹请求
+ */
+export function validateCreateFolderPayload(data: unknown): ValidationResult<CreateFolderRequest> {
+  if (!data || typeof data !== 'object') {
+    return { success: false, error: 'Request body must be an object' }
+  }
+
+  const body = data as Record<string, unknown>
+
+  if (typeof body.title !== 'string') {
+    return { success: false, error: 'title is required and must be a string' }
+  }
+
+  const title = body.title.trim()
+  if (title.length === 0 || title.length > 200) {
+    return { success: false, error: 'title must be between 1 and 200 characters' }
+  }
+
+  if (body.parentId !== undefined && body.parentId !== null) {
+    if (typeof body.parentId !== 'string' || !validateUUID(body.parentId)) {
+      return { success: false, error: 'parentId must be a valid UUID or null' }
+    }
+  }
+
+  if (body.sortOrder !== undefined && (typeof body.sortOrder !== 'number' || !Number.isFinite(body.sortOrder))) {
+    return { success: false, error: 'sortOrder must be a number' }
+  }
+
+  if (body.collapsed !== undefined && typeof body.collapsed !== 'boolean') {
+    return { success: false, error: 'collapsed must be a boolean' }
+  }
+
+  return {
+    success: true,
+    data: {
+      title,
+      parentId: body.parentId === undefined ? null : body.parentId as string | null,
+      sortOrder: typeof body.sortOrder === 'number' ? body.sortOrder : 0,
+      collapsed: typeof body.collapsed === 'boolean' ? body.collapsed : false
+    }
+  }
+}

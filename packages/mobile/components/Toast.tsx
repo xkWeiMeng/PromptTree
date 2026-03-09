@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { Text, Animated, StyleSheet, Platform } from 'react-native'
-import { colors, spacing, fontSize } from '../utils/theme'
+import { useTheme, useThemedStyles, spacing, fontSize, type ThemeColors } from '../utils/theme'
 
 export type ToastType = 'success' | 'error' | 'info'
 
@@ -19,6 +19,8 @@ export default function Toast({
   duration = 2000,
   onHide,
 }: ToastProps) {
+  const { colors } = useTheme()
+  const styles = useThemedStyles(createStyles)
   const opacity = useRef(new Animated.Value(0)).current
   const translateY = useRef(new Animated.Value(20)).current
 
@@ -78,7 +80,7 @@ export default function Toast({
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     position: 'absolute',
     bottom: Platform.OS === 'ios' ? 100 : 80,

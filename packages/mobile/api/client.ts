@@ -1,16 +1,12 @@
 import { createApiClient } from '@prompttree/shared'
 import { useAuthStore } from '../stores/auth'
+import { getApiBaseUrl as resolveApiBaseUrl } from './config'
 
 // ===================
 // 配置
 // ===================
 
-// 开发环境使用局域网 IP（Expo Go 无法访问 localhost）
-// 生产环境使用线上域名
-// @ts-ignore __DEV__ 由 React Native 运行时提供
-const API_BASE_URL = typeof __DEV__ !== 'undefined' && __DEV__
-  ? 'http://192.168.1.100:3000' // TODO: 替换为实际局域网 IP
-  : 'https://prompttree.yourdomain.com'
+const API_BASE_URL = resolveApiBaseUrl()
 
 // ===================
 // API 客户端实例

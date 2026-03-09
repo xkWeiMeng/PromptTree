@@ -46,7 +46,7 @@ export const HTML_LANG_MAP: Record<SupportedLocale, string> = {
 // =================== 不加 locale 前缀的路由 ===================
 
 /** 这些路径不需要加语言前缀 */
-const NON_LOCALE_PATHS = ['/app', '/login']
+const NON_LOCALE_PATHS = ['/app', '/login', '/share']
 
 export function isNonLocalePath(path: string): boolean {
   return NON_LOCALE_PATHS.some(p => path === p || path.startsWith(p + '/'))

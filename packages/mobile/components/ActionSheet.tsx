@@ -1,7 +1,8 @@
 import React from 'react'
 import { View, Text, Pressable, Modal, StyleSheet } from 'react-native'
 import type { TreeNode } from '@prompttree/shared'
-import { colors, spacing, fontSize } from '../utils/theme'
+import { useI18n } from '../i18n'
+import { useThemedStyles, spacing, fontSize, type ThemeColors } from '../utils/theme'
 
 // ===================
 // Props
@@ -48,6 +49,9 @@ export default function ActionSheet({
   onCopy,
   onDelete,
 }: ActionSheetProps) {
+  const { t } = useI18n()
+  const styles = useThemedStyles(createStyles)
+
   if (!node) return null
 
   const isFolder = node.type === 'folder'
@@ -55,43 +59,43 @@ export default function ActionSheet({
   const actions: ActionItem[] = [
     {
       icon: '📁',
-      label: '新建子文件夹',
+      label: t('tree.newSubFolder'),
       onPress: () => { onNewFolder?.(); onClose() },
       show: isFolder && !!onNewFolder,
     },
     {
       icon: '📄',
-      label: '新建 Prompt',
+      label: t('tree.newPrompt'),
       onPress: () => { onNewPrompt?.(); onClose() },
       show: isFolder && !!onNewPrompt,
     },
     {
       icon: '✏️',
-      label: '重命名',
+      label: t('tree.rename'),
       onPress: () => { onRename?.(); onClose() },
       show: !!onRename,
     },
     {
       icon: '📦',
-      label: '移动到...',
+      label: t('tree.moveTo'),
       onPress: () => { onMoveTo?.(); onClose() },
       show: !!onMoveTo,
     },
     {
       icon: node.isFavorite ? '💔' : '⭐',
-      label: node.isFavorite ? '取消收藏' : '收藏',
+      label: node.isFavorite ? t('tree.unfavorite') : t('tree.addFavorite'),
       onPress: () => { onToggleFavorite?.(); onClose() },
       show: !!onToggleFavorite,
     },
     {
       icon: '📋',
-      label: '复制内容',
+      label: t('tree.copyContent'),
       onPress: () => { onCopy?.(); onClose() },
       show: !isFolder && !!onCopy,
     },
     {
       icon: '🗑️',
-      label: '删除',
+      label: t('common.delete'),
       onPress: () => { onDelete?.(); onClose() },
       danger: true,
       show: !!onDelete,
@@ -111,11 +115,11 @@ export default function ActionSheet({
         <View style={styles.sheet}>
           {/* 标题 */}
           <View style={styles.header}>
-            <Text style={styles.headerIcon}>{isFolder ? '📁' : '📄'}</Text>
-            <Text style={styles.headerTitle} numberOfLines={1}>
-              {node.title || '未命名'}
-            </Text>
-          </View>
+              <Text style={styles.headerIcon}>{isFolder ? '📁' : '📄'}</Text>
+              <Text style={styles.headerTitle} numberOfLines={1}>
+                {node.title || t('common.untitled')}
+              </Text>
+            </View>
 
           {/* 分隔线 */}
           <View style={styles.divider} />
@@ -149,7 +153,7 @@ export default function ActionSheet({
             ]}
             onPress={onClose}
           >
-            <Text style={styles.cancelText}>取消</Text>
+            <Text style={styles.cancelText}>{t('common.cancel')}</Text>
           </Pressable>
         </View>
       </Pressable>
@@ -161,10 +165,10 @@ export default function ActionSheet({
 // 样式
 // ===================
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: colors.overlay,
     justifyContent: 'flex-end',
   },
   sheet: {

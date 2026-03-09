@@ -47,6 +47,21 @@ CREATE TABLE IF NOT EXISTS nodes (
     FOREIGN KEY (parent_id) REFERENCES nodes(id)
 );
 
+-- API Key 表
+CREATE TABLE IF NOT EXISTS api_keys (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    key_prefix TEXT NOT NULL,
+    key_hash TEXT NOT NULL UNIQUE,
+    is_active INTEGER DEFAULT 1,
+    last_used_at INTEGER,
+    expires_at INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 -- 魔法链接表
 CREATE TABLE IF NOT EXISTS magic_links (
     token TEXT PRIMARY KEY,
@@ -85,6 +100,8 @@ CREATE TABLE IF NOT EXISTS share_reads (
 CREATE INDEX IF NOT EXISTS idx_nodes_user ON nodes(user_id);
 CREATE INDEX IF NOT EXISTS idx_nodes_parent ON nodes(user_id, parent_id);
 CREATE INDEX IF NOT EXISTS idx_nodes_updated ON nodes(user_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_api_keys_user_active ON api_keys(user_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_api_keys_prefix ON api_keys(key_prefix);
 CREATE INDEX IF NOT EXISTS idx_magic_links_email ON magic_links(email);
 CREATE INDEX IF NOT EXISTS idx_shares_user_node_active ON shares(user_id, node_id, is_active);
 CREATE INDEX IF NOT EXISTS idx_shares_token_active ON shares(token, is_active);

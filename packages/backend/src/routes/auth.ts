@@ -1,16 +1,47 @@
 import { Hono } from 'hono'
 import * as jose from 'jose'
 import { signJWT, getJWTExpiresAt } from '../utils/jwt'
-import { validateGoogleAuthPayload, validateMagicLinkPayload, validateRegisterPayload, validatePasswordLoginPayload } from '../utils/validation'
+import { validateGoogleAuthPayload, validateMagicLinkPayload, validateRegisterPayload, validatePasswordLoginPayload, validateCreateApiKeyPayload } from '../utils/validation'
 import { hashPassword, verifyPassword } from '../utils/password'
 import { sendVerificationEmail } from '../utils/email'
 import * as usersRepo from '../db/users'
 import * as magicLinksRepo from '../db/magic-links'
+import * as apiKeysRepo from '../db/api-keys'
+import { jwtOnlyMiddleware } from '../middleware/auth'
 
 const auth = new Hono()
 
+auth.use('/api-keys', jwtOnlyMiddleware)
+auth.use('/api-keys/*', jwtOnlyMiddleware)
+
 function getBackendBaseUrl(): string {
   return process.env.BASE_URL || 'http://localhost:3000'
+}
+
+function parseMobileFlag(value: unknown): boolean {
+  return value === true || value === '1' || value === 1
+}
+
+function createVerifyUrl(
+  path: 'verify' | 'verify-email',
+  token: string,
+  mobile: boolean
+): string {
+  const mobileQuery = mobile ? '&mobile=1' : ''
+  return `${getBackendBaseUrl()}/api/auth/${path}?token=${encodeURIComponent(token)}${mobileQuery}`
+}
+
+function toApiKeyResponse(key: apiKeysRepo.ApiKeyMeta) {
+  return {
+    id: key.id,
+    name: key.name,
+    keyPrefix: key.key_prefix,
+    isActive: key.is_active === 1,
+    lastUsedAt: key.last_used_at,
+    expiresAt: key.expires_at,
+    createdAt: key.created_at,
+    updatedAt: key.updated_at
+  }
 }
 
 // ===================
@@ -92,7 +123,8 @@ auth.get('/github', async (c) => {
   const redirectUri = `${process.env.BASE_URL}/api/auth/github/callback`
   // 将 popup 标记编码到 state 中，回调时据此决定响应方式
   const popup = c.req.query('popup') === '1'
-  const stateData = JSON.stringify({ nonce: Math.random().toString(36).substring(2), popup })
+  const mobile = c.req.query('mobile') === '1'
+  const stateData = JSON.stringify({ nonce: Math.random().toString(36).substring(2), popup, mobile })
   const state = Buffer.from(stateData).toString('base64url')
   
   const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email&state=${state}`
@@ -101,15 +133,18 @@ auth.get('/github', async (c) => {
 
 auth.get('/github/callback', async (c) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
+  const mobileScheme = process.env.MOBILE_DEEP_LINK_SCHEME || 'prompttree'
   const code = c.req.query('code')
   const stateParam = c.req.query('state')
   
-  // 解析 state 中的 popup 标记
+  // 解析 state 中的 popup/mobile 标记
   let isPopup = false
+  let isMobile = false
   try {
     if (stateParam) {
       const stateData = JSON.parse(Buffer.from(stateParam, 'base64url').toString())
       isPopup = stateData.popup === true
+      isMobile = stateData.mobile === true
     }
   } catch { /* ignore parse errors */ }
 
@@ -125,7 +160,13 @@ auth.get('/github/callback', async (c) => {
       </script><p>登录处理中，窗口将自动关闭...</p></body></html>`)
     }
     if (params.token) {
+      if (isMobile) {
+        return c.redirect(`${mobileScheme}://auth/callback?token=${encodeURIComponent(params.token)}`)
+      }
       return c.redirect(`${frontendUrl}/login?token=${params.token}`)
+    }
+    if (isMobile) {
+      return c.redirect(`${mobileScheme}://auth/callback?error=${encodeURIComponent(params.error || 'unknown')}`)
     }
     return c.redirect(`${frontendUrl}/login?error=${params.error}`)
   }
@@ -222,6 +263,7 @@ auth.get('/github/callback', async (c) => {
 auth.post('/register', async (c) => {
   const body = await c.req.json()
   const validation = validateRegisterPayload(body)
+  const isMobile = parseMobileFlag((body as { mobile?: unknown })?.mobile)
 
   if (!validation.success) {
     return c.json({ success: false, error: validation.error }, 400)
@@ -248,7 +290,7 @@ auth.post('/register', async (c) => {
         const recent = magicLinksRepo.findRecentByEmail(email, 60_000)
         if (!recent) {
           const magicLink = magicLinksRepo.create(email)
-          const verifyUrl = `${getBackendBaseUrl()}/api/auth/verify-email?token=${magicLink.token}`
+          const verifyUrl = createVerifyUrl('verify-email', magicLink.token, isMobile)
           await sendVerificationEmail(email, verifyUrl)
         }
       }
@@ -266,7 +308,7 @@ auth.post('/register', async (c) => {
 
     // 创建验证链接并发送邮件
     const magicLink = magicLinksRepo.create(email)
-    const verifyUrl = `${getBackendBaseUrl()}/api/auth/verify-email?token=${magicLink.token}`
+    const verifyUrl = createVerifyUrl('verify-email', magicLink.token, isMobile)
     await sendVerificationEmail(email, verifyUrl)
 
     return c.json({
@@ -337,17 +379,34 @@ auth.post('/login', async (c) => {
 
 auth.get('/verify-email', async (c) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
+  const mobileScheme = process.env.MOBILE_DEEP_LINK_SCHEME || 'prompttree'
+  const isMobile = c.req.query('mobile') === '1'
   const token = c.req.query('token')
 
+  const respond = (params: { token?: string; error?: string }) => {
+    if (params.token) {
+      if (isMobile) {
+        return c.redirect(`${mobileScheme}://auth/callback?token=${encodeURIComponent(params.token)}`)
+      }
+      return c.redirect(`${frontendUrl}/app?token=${params.token}&verified=1`)
+    }
+
+    if (isMobile) {
+      return c.redirect(`${mobileScheme}://auth/callback?error=${encodeURIComponent(params.error || 'unknown')}`)
+    }
+
+    return c.redirect(`${frontendUrl}/app?error=${params.error || 'unknown'}`)
+  }
+
   if (!token) {
-    return c.redirect(`${frontendUrl}/app?error=no_token`)
+    return respond({ error: 'no_token' })
   }
 
   // 先查找 token 是否存在（不检查 used/过期）
   const rawLink = magicLinksRepo.findByToken(token)
 
   if (!rawLink) {
-    return c.redirect(`${frontendUrl}/app?error=invalid_or_expired_token`)
+    return respond({ error: 'invalid_or_expired_token' })
   }
 
   // 已使用的 token：检查用户是否已验证，是则直接登录
@@ -355,14 +414,14 @@ auth.get('/verify-email', async (c) => {
     const user = usersRepo.findByEmail(rawLink.email)
     if (user && user.email_verified) {
       const accessToken = await signJWT({ userId: user.id, email: user.email || undefined })
-      return c.redirect(`${frontendUrl}/app?token=${accessToken}&verified=1`)
+      return respond({ token: accessToken })
     }
-    return c.redirect(`${frontendUrl}/app?error=link_already_used`)
+    return respond({ error: 'link_already_used' })
   }
 
   // 已过期
   if (rawLink.expires_at < Date.now()) {
-    return c.redirect(`${frontendUrl}/app?error=invalid_or_expired_token`)
+    return respond({ error: 'invalid_or_expired_token' })
   }
 
   // 有效 token：标记已使用 + 验证邮箱
@@ -373,10 +432,10 @@ auth.get('/verify-email', async (c) => {
     usersRepo.setEmailVerified(user.id)
 
     const accessToken = await signJWT({ userId: user.id, email: user.email || undefined })
-    return c.redirect(`${frontendUrl}/app?token=${accessToken}&verified=1`)
+    return respond({ token: accessToken })
   }
 
-  return c.redirect(`${frontendUrl}/app?error=user_not_found`)
+  return respond({ error: 'user_not_found' })
 })
 
 // ===================
@@ -385,7 +444,8 @@ auth.get('/verify-email', async (c) => {
 
 auth.post('/resend-verification', async (c) => {
   const body = await c.req.json()
-  const { email } = body as { email?: string }
+  const { email, mobile } = body as { email?: string; mobile?: unknown }
+  const isMobile = parseMobileFlag(mobile)
 
   if (!email || typeof email !== 'string') {
     return c.json({ success: false, error: 'email is required' }, 400)
@@ -408,7 +468,7 @@ auth.post('/resend-verification', async (c) => {
   }
 
   const magicLink = magicLinksRepo.create(email)
-  const verifyUrl = `${getBackendBaseUrl()}/api/auth/verify-email?token=${magicLink.token}`
+  const verifyUrl = createVerifyUrl('verify-email', magicLink.token, isMobile)
   await sendVerificationEmail(email, verifyUrl)
 
   if (process.env.NODE_ENV !== 'production') {
@@ -429,6 +489,7 @@ auth.post('/resend-verification', async (c) => {
 auth.post('/magic-link', async (c) => {
   const body = await c.req.json()
   const validation = validateMagicLinkPayload(body)
+  const isMobile = parseMobileFlag((body as { mobile?: unknown })?.mobile)
   
   if (!validation.success) {
     return c.json({ success: false, error: validation.error }, 400)
@@ -441,7 +502,7 @@ auth.post('/magic-link', async (c) => {
   
   // TODO: 发送邮件
   // 开发阶段：直接返回 token 用于测试
-  const verifyUrl = `${getBackendBaseUrl()}/api/auth/verify?token=${magicLink.token}`
+  const verifyUrl = createVerifyUrl('verify', magicLink.token, isMobile)
   
   // 生产环境应该发送邮件而不是返回 token
   if (process.env.NODE_ENV === 'production') {
@@ -466,17 +527,34 @@ auth.post('/magic-link', async (c) => {
 })
 
 auth.get('/verify', async (c) => {
+  const mobileScheme = process.env.MOBILE_DEEP_LINK_SCHEME || 'prompttree'
+  const isMobile = c.req.query('mobile') === '1'
   const token = c.req.query('token')
+
+  const respond = (params: { token?: string; error?: string }) => {
+    if (params.token) {
+      if (isMobile) {
+        return c.redirect(`${mobileScheme}://auth/callback?token=${encodeURIComponent(params.token)}`)
+      }
+      return c.redirect(`/?token=${params.token}`)
+    }
+
+    if (isMobile) {
+      return c.redirect(`${mobileScheme}://auth/callback?error=${encodeURIComponent(params.error || 'unknown')}`)
+    }
+
+    return c.redirect(`/?error=${params.error || 'unknown'}`)
+  }
   
   if (!token) {
-    return c.redirect('/?error=no_token')
+    return respond({ error: 'no_token' })
   }
   
   // 验证魔法链接
   const magicLink = magicLinksRepo.verify(token)
   
   if (!magicLink) {
-    return c.redirect('/?error=invalid_or_expired_token')
+    return respond({ error: 'invalid_or_expired_token' })
   }
   
   // 标记为已使用
@@ -489,7 +567,7 @@ auth.get('/verify', async (c) => {
   const accessToken = await signJWT({ userId: user.id, email: user.email || undefined })
   
   // 重定向到前端
-  return c.redirect(`/?token=${accessToken}`)
+  return respond({ token: accessToken })
 })
 
 // ===================
@@ -574,6 +652,62 @@ auth.patch('/me', async (c) => {
       createdAt: updated.created_at
     }
   })
+})
+
+// ===================
+// API Key 管理
+// ===================
+
+auth.get('/api-keys', async (c) => {
+  const userId = c.get('userId') as string
+
+  if (!userId) {
+    return c.json({ success: false, error: 'Unauthorized' }, 401)
+  }
+
+  const keys = apiKeysRepo.listByUserId(userId).map(toApiKeyResponse)
+  return c.json({ success: true, keys })
+})
+
+auth.post('/api-keys', async (c) => {
+  const userId = c.get('userId') as string
+
+  if (!userId) {
+    return c.json({ success: false, error: 'Unauthorized' }, 401)
+  }
+
+  const body = await c.req.json().catch(() => ({}))
+  const validation = validateCreateApiKeyPayload(body)
+
+  if (!validation.success) {
+    return c.json({ success: false, error: validation.error }, 400)
+  }
+
+  const { name, expiresAt } = validation.data!
+  const { key, rawKey } = apiKeysRepo.create(userId, { name, expiresAt })
+
+  return c.json({
+    success: true,
+    key: toApiKeyResponse(key),
+    apiKey: rawKey
+  })
+})
+
+auth.delete('/api-keys/:id', async (c) => {
+  const userId = c.get('userId') as string
+
+  if (!userId) {
+    return c.json({ success: false, error: 'Unauthorized' }, 401)
+  }
+
+  const keyId = c.req.param('id')
+  const revoked = apiKeysRepo.revoke(userId, keyId)
+
+  if (!revoked) {
+    return c.json({ success: false, error: 'API key not found' }, 404)
+  }
+
+  return c.json({ success: true })
 })
 
 export default auth

@@ -8,6 +8,16 @@ order: 1
 
 PromptTree is a tree-structured AI Prompt management tool that helps you organize and reuse prompts using folders and files.
 
+## Service Stability & Data Security Notice
+
+PromptTree is currently built and maintained by an early-stage startup team, and service reliability is still being continuously improved. Due to network fluctuations, infrastructure maintenance, or release changes, cloud services may occasionally experience short downtime, sync delays, or temporary disconnections.
+
+We actively monitor and fix incidents, and we will do our best to keep the service available and recover quickly when issues occur. We also make best efforts to protect your privacy and data security, and data transmission is protected with HTTPS encryption.
+
+We work hard to minimize the risk of data loss, but for critical content, we still recommend keeping a local backup copy for extra safety.
+
+If you encounter usage issues, sync abnormalities, or data-related questions, please contact us at: **hi@prompttree.app**.
+
 ## Get Started
 
 ### 1. Open the Workspace

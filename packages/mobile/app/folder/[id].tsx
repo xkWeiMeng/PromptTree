@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { View, Text, Pressable, Alert, StyleSheet, TextInput } from 'react-native'
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router'
+import { useLocalSearchParams, useRouter, Stack, useFocusEffect } from 'expo-router'
 import type { TreeNode } from '@prompttree/shared'
 import { getBreadcrumb } from '@prompttree/shared'
 import { useTreeStore } from '../../stores/tree'
@@ -10,11 +10,15 @@ import ActionSheet from '../../components/ActionSheet'
 import FolderPicker from '../../components/FolderPicker'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import { copyPromptDirect, getPromptVariables } from '../../utils/clipboard'
-import { colors, spacing, fontSize } from '../../utils/theme'
+import { useI18n } from '../../i18n'
+import { useTheme, useThemedStyles, spacing, fontSize, type ThemeColors } from '../../utils/theme'
 
 export default function FolderScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
+  const { t } = useI18n()
+  const { colors } = useTheme()
+  const styles = useThemedStyles(createStyles)
 
   // ===================
   // Store
@@ -24,13 +28,17 @@ export default function FolderScreen() {
   const deleteNode = useTreeStore(s => s.deleteNode)
   const toggleFavorite = useTreeStore(s => s.toggleFavorite)
   const moveNode = useTreeStore(s => s.moveNode)
+  const currentFolderId = useTreeStore(s => s.currentFolderId)
   const getNode = useTreeStore(s => s.getNode)
+  const setViewMode = useTreeStore(s => s.setViewMode)
+  const openFolder = useTreeStore(s => s.openFolder)
+  const openPrompt = useTreeStore(s => s.openPrompt)
 
   // ===================
   // 当前文件夹
   // ===================
-  const [currentFolderId, setCurrentFolderId] = useState<string>(id!)
-  const currentFolder = getNode(currentFolderId)
+  const activeFolderId = currentFolderId ?? id ?? null
+  const currentFolder = activeFolderId ? getNode(activeFolderId) : undefined
 
   // ===================
   // 本地状态
@@ -47,32 +55,42 @@ export default function FolderScreen() {
 
   // 路由参数变化时更新
   useEffect(() => {
-    if (id) setCurrentFolderId(id)
-  }, [id])
+    if (id) {
+      openFolder(id)
+    }
+  }, [id, openFolder])
+
+  useFocusEffect(
+    useCallback(() => {
+      setViewMode('welcome')
+    }, [setViewMode])
+  )
 
   // ===================
   // 面包屑
   // ===================
-  const breadcrumbPath = getBreadcrumb(nodes, currentFolderId)
+  const breadcrumbPath = activeFolderId ? getBreadcrumb(nodes, activeFolderId) : []
 
   // ===================
   // 导航
   // ===================
   const handleNavigateFolder = useCallback((folderId: string) => {
-    setCurrentFolderId(folderId)
-  }, [])
+    openFolder(folderId)
+  }, [openFolder])
 
   const handleSelectPrompt = useCallback((promptId: string) => {
+    openPrompt(promptId)
     router.push(`/prompt/${promptId}`)
-  }, [router])
+  }, [openPrompt, router])
 
   const handleBreadcrumbNavigate = useCallback((nodeId: string | null) => {
     if (nodeId === null) {
-      router.back()
+      openFolder(null)
+      router.replace('/(tabs)')
     } else {
-      setCurrentFolderId(nodeId)
+      openFolder(nodeId)
     }
-  }, [router])
+  }, [openFolder, router])
 
   // ===================
   // 操作
@@ -84,16 +102,17 @@ export default function FolderScreen() {
 
   const handleCopy = useCallback(async (node: TreeNode) => {
     if (!node.content) {
-      Alert.alert('提示', '内容为空')
+      Alert.alert(t('workspace.contentEmptyTitle'), t('workspace.contentEmptyMessage'))
       return
     }
     const vars = getPromptVariables(node.content)
     if (vars.length > 0) {
+      openPrompt(node.id)
       router.push(`/prompt/${node.id}`)
     } else {
-      await copyPromptDirect(node.content)
+      await copyPromptDirect(node.content, t)
     }
-  }, [router])
+  }, [openPrompt, router, t])
 
   const handleDelete = useCallback((node: TreeNode) => {
     setDeleteTargetId(node.id)
@@ -103,26 +122,28 @@ export default function FolderScreen() {
   const confirmDelete = useCallback(() => {
     if (deleteTargetId) {
       deleteNode(deleteTargetId)
-      if (deleteTargetId === currentFolderId) {
-        router.back()
+      if (deleteTargetId === activeFolderId) {
+        openFolder(null)
+        router.replace('/(tabs)')
       }
     }
     setShowDeleteConfirm(false)
     setDeleteTargetId('')
-  }, [deleteTargetId, currentFolderId, deleteNode, router])
+  }, [activeFolderId, deleteTargetId, deleteNode, openFolder, router])
 
   const handleNewFolder = useCallback(() => {
-    const newId = createNode(currentFolderId, 'folder')
+    const newId = createNode(activeFolderId, 'folder')
     setRenameNodeId(newId)
     setRenameText('')
     setShowNewMenu(false)
-  }, [currentFolderId, createNode])
+  }, [activeFolderId, createNode])
 
   const handleNewPrompt = useCallback(() => {
-    const newId = createNode(currentFolderId, 'prompt')
+    const newId = createNode(activeFolderId, 'prompt')
     setShowNewMenu(false)
+    openPrompt(newId)
     router.push(`/prompt/${newId}`)
-  }, [currentFolderId, createNode, router])
+  }, [activeFolderId, createNode, openPrompt, router])
 
   const handleRename = useCallback(() => {
     if (actionSheetNode) {
@@ -177,9 +198,10 @@ export default function FolderScreen() {
   const handleActionNewPrompt = useCallback(() => {
     if (actionSheetNode && actionSheetNode.type === 'folder') {
       const newId = createNode(actionSheetNode.id, 'prompt')
+      openPrompt(newId)
       router.push(`/prompt/${newId}`)
     }
-  }, [actionSheetNode, createNode, router])
+  }, [actionSheetNode, createNode, openPrompt, router])
 
   // ===================
   // 渲染
@@ -188,8 +210,8 @@ export default function FolderScreen() {
     <>
       <Stack.Screen
         options={{
-          title: currentFolder?.title || '文件夹',
-          headerBackTitle: '返回',
+          title: currentFolder?.title || t('common.untitledFolder'),
+          headerBackTitle: t('common.back'),
         }}
       />
       <View style={styles.container}>
@@ -206,7 +228,8 @@ export default function FolderScreen() {
               style={styles.renameInput}
               value={renameText}
               onChangeText={setRenameText}
-              placeholder="输入名称..."
+              placeholder={t('workspace.renamePlaceholder')}
+              placeholderTextColor={colors.textSecondary}
               autoFocus
               onSubmitEditing={handleRenameSubmit}
               onBlur={handleRenameSubmit}
@@ -216,7 +239,7 @@ export default function FolderScreen() {
 
         {/* 列表 */}
         <TreeList
-          folderId={currentFolderId}
+          folderId={activeFolderId}
           onNavigateFolder={handleNavigateFolder}
           onSelectPrompt={handleSelectPrompt}
           onLongPress={handleLongPress}
@@ -229,10 +252,10 @@ export default function FolderScreen() {
           {showNewMenu && (
             <View style={styles.fabMenu}>
               <Pressable style={styles.fabMenuItem} onPress={handleNewFolder}>
-                <Text style={styles.fabMenuText}>📁 新建文件夹</Text>
+                <Text style={styles.fabMenuText}>📁 {t('tree.newFolder')}</Text>
               </Pressable>
               <Pressable style={styles.fabMenuItem} onPress={handleNewPrompt}>
-                <Text style={styles.fabMenuText}>📄 新建 Prompt</Text>
+                <Text style={styles.fabMenuText}>📄 {t('tree.newPrompt')}</Text>
               </Pressable>
             </View>
           )}
@@ -269,9 +292,9 @@ export default function FolderScreen() {
         {/* 删除确认 */}
         <ConfirmDialog
           visible={showDeleteConfirm}
-          title="确认删除"
-          message="删除后将同时删除所有子节点，此操作不可撤销。"
-          confirmText="删除"
+          title={t('workspace.deleteTitle')}
+          message={t('workspace.deleteMessage')}
+          confirmText={t('common.delete')}
           danger
           onConfirm={confirmDelete}
           onCancel={() => setShowDeleteConfirm(false)}
@@ -281,7 +304,7 @@ export default function FolderScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Folder, FileText, Copy, Users, Loader2 } from 'lucide-vue-next'
 import { getPublicShare, type ShareContent } from '@/api/share'
-import { useToast } from '@/composables'
+import { useHead, useToast } from '@/composables'
 import { getOrCreateShareVisitorId } from '@/utils/share'
 
 const route = useRoute()
@@ -15,6 +15,12 @@ const isLoading = ref(true)
 const errorMessage = ref('')
 const content = ref<ShareContent | null>(null)
 const readerCount = ref(0)
+const pageTitle = computed(() => content.value?.root.title || t('share.pageTitle'))
+
+useHead({
+  title: pageTitle,
+  robots: 'noindex, nofollow'
+})
 
 const isFolderShare = computed(() => content.value?.type === 'folder')
 const isPromptShare = computed(() => content.value?.type === 'prompt')

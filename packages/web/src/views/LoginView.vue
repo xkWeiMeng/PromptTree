@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useHead } from '@/composables'
 import BrandLogo from '@/components/common/BrandLogo.vue'
 
 const { t } = useI18n()
@@ -12,6 +13,11 @@ const authStore = useAuthStore()
 
 const status = ref<'loading' | 'error'>('loading')
 const errorMessage = ref('')
+
+useHead({
+  title: t('login.title'),
+  robots: 'noindex, nofollow'
+})
 
 onMounted(async () => {
   // 已登录则直接跳转工作台

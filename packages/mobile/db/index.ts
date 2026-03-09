@@ -1,4 +1,4 @@
-import * as SQLite from 'expo-sqlite'
+import * as SQLite from 'expo-sqlite/next'
 
 // ===================
 // 数据库实例
@@ -53,4 +53,7 @@ export const META_KEYS = {
   LAST_SYNC_TIME: 'lastSyncTime',
   ACCESS_TOKEN: 'accessToken',
   USER: 'user',
+  OFFLINE_MODE: 'offlineMode',
+  LOCALE: 'locale',
+  THEME_MODE: 'themeMode',
 } as const

@@ -5,9 +5,8 @@ import { useHead } from '@/composables'
 import SiteLayout from '@/components/site/SiteLayout.vue'
 import {
   FolderTree, Variable, WifiOff, Smartphone,
-  Puzzle, BrainCircuit, Moon, Search,
-  Star, GripVertical, Copy, Keyboard,
-  ArrowRight, ListTree, Network
+  Puzzle, BrainCircuit, Moon, Keyboard,
+  ArrowRight, ListTree, Share2, KeyRound
 } from 'lucide-vue-next'
 
 const { t } = useI18n()
@@ -57,6 +56,22 @@ const features = computed(() => [
     title: t('features.extensionTitle'),
     desc: t('features.extensionDesc'),
     highlights: [t('features.extensionH1'), t('features.extensionH2'), t('features.extensionH3')]
+  },
+  {
+    tag: t('features.tagCollaboration'),
+    icon: Share2,
+    color: 'blue',
+    title: t('features.shareTitle'),
+    desc: t('features.shareDesc'),
+    highlights: [t('features.shareH1'), t('features.shareH2'), t('features.shareH3')]
+  },
+  {
+    tag: t('features.tagIntegration'),
+    icon: KeyRound,
+    color: 'purple',
+    title: t('features.apiAccessTitle'),
+    desc: t('features.apiAccessDesc'),
+    highlights: [t('features.apiAccessH1'), t('features.apiAccessH2'), t('features.apiAccessH3')]
   },
   {
     tag: t('features.tagVisualization'),

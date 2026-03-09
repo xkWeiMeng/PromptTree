@@ -5,7 +5,8 @@ import { useTreeStore } from '../stores/tree'
 import NodeItem from './NodeItem'
 import SwipeableRow from './SwipeableRow'
 import EmptyState from './EmptyState'
-import { colors } from '../utils/theme'
+import { useI18n } from '../i18n'
+import { useTheme, useThemedStyles, type ThemeColors } from '../utils/theme'
 
 // ===================
 // Props
@@ -44,7 +45,11 @@ export default function TreeList({
   refreshing = false,
   onRefresh,
 }: TreeListProps) {
+  const { t } = useI18n()
+  const { colors } = useTheme()
+  const styles = useThemedStyles(createStyles)
   const getChildren = useTreeStore(s => s.getChildren)
+  const selectedNodeId = useTreeStore(s => s.selectedNodeId)
   const children = getChildren(folderId)
 
   const handlePress = useCallback((node: TreeNode) => {
@@ -67,10 +72,11 @@ export default function TreeList({
           node={item}
           onPress={handlePress}
           onLongPress={onLongPress}
+          isSelected={selectedNodeId === item.id}
         />
       </SwipeableRow>
     )
-  }, [handlePress, onLongPress, onCopy, onDelete])
+  }, [handlePress, onLongPress, onCopy, onDelete, selectedNodeId])
 
   const keyExtractor = useCallback((item: TreeNode) => item.id, [])
 
@@ -78,8 +84,8 @@ export default function TreeList({
     return (
       <EmptyState
         icon="📂"
-        title="还没有内容"
-        subtitle="点击右上角 + 创建文件夹或 Prompt"
+        title={t('workspace.emptyTitle')}
+        subtitle={t('workspace.emptySubtitle')}
       />
     )
   }
@@ -107,9 +113,9 @@ export default function TreeList({
 // 样式
 // ===================
 
-const styles = StyleSheet.create({
+const createStyles = (themeColors: ThemeColors) => StyleSheet.create({
   list: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: themeColors.background,
   },
 })

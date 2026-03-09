@@ -2,16 +2,25 @@ import { create } from 'zustand'
 import type { TreeNode, TreeNodeWithChildren } from '@prompttree/shared'
 import { buildTree, getDescendantIds, createDefaultNode, getBreadcrumb } from '@prompttree/shared'
 import * as dbOps from '../db/operations'
+import { scheduleDebouncedSync } from './sync'
+
+function generateNodeId(): string {
+  return (globalThis as any).crypto?.randomUUID?.()
+    ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
 
 // ===================
 // 类型定义
 // ===================
+
+export type ViewMode = 'welcome' | 'editor' | 'outline' | 'mindmap'
 
 interface TreeState {
   // State
   nodes: TreeNode[]
   selectedNodeId: string | null
   currentFolderId: string | null  // 当前浏览的文件夹 (null = 根目录)
+  viewMode: ViewMode
   isLoading: boolean
 }
 
@@ -29,6 +38,11 @@ interface TreeActions {
   // 导航
   setSelectedNode: (id: string | null) => void
   setCurrentFolder: (id: string | null) => void
+  setViewMode: (mode: ViewMode) => void
+  openNode: (id: string | null) => void
+  openFolder: (id: string | null) => void
+  openPrompt: (id: string) => void
+  closeEditor: () => void
 
   // 查询
   getChildren: (parentId: string | null) => TreeNode[]
@@ -49,6 +63,7 @@ export const useTreeStore = create<TreeState & TreeActions>((set, get) => ({
   nodes: [],
   selectedNodeId: null,
   currentFolderId: null,
+  viewMode: 'welcome',
   isLoading: false,
 
   // ===================
@@ -75,7 +90,7 @@ export const useTreeStore = create<TreeState & TreeActions>((set, get) => ({
     const maxSort = siblings.reduce((max, n) => Math.max(max, n.sortOrder), -1)
 
     const nodeData = createDefaultNode(parentId, type, maxSort + 1)
-    const id = crypto.randomUUID()
+    const id = generateNodeId()
     const newNode: TreeNode = { ...nodeData, id }
 
     // 写入 SQLite
@@ -83,6 +98,7 @@ export const useTreeStore = create<TreeState & TreeActions>((set, get) => ({
 
     // 更新内存状态
     set(state => ({ nodes: [...state.nodes, newNode] }))
+    scheduleDebouncedSync()
 
     return id
   },
@@ -107,15 +123,18 @@ export const useTreeStore = create<TreeState & TreeActions>((set, get) => ({
     set(state => ({
       nodes: state.nodes.map(n => (n.id === id ? updatedNode : n)),
     }))
+    scheduleDebouncedSync()
   },
 
   /** 删除节点（软删除，含子孙） */
   deleteNode: (id) => {
-    const { nodes, selectedNodeId } = get()
+    const { nodes, selectedNodeId, currentFolderId, viewMode } = get()
 
     // 找到所有子孙 ID
     const descendantIds = getDescendantIds(nodes, id)
     const idsToDelete = [id, ...descendantIds]
+    const shouldClearSelection = idsToDelete.includes(selectedNodeId ?? '')
+    const shouldResetFolder = idsToDelete.includes(currentFolderId ?? '')
 
     // SQLite 软删除
     dbOps.softDeleteNode(id)
@@ -123,8 +142,11 @@ export const useTreeStore = create<TreeState & TreeActions>((set, get) => ({
     // 更新内存状态：过滤掉被删除的节点
     set(state => ({
       nodes: state.nodes.filter(n => !idsToDelete.includes(n.id)),
-      selectedNodeId: idsToDelete.includes(selectedNodeId ?? '') ? null : selectedNodeId,
+      selectedNodeId: shouldClearSelection ? null : selectedNodeId,
+      currentFolderId: shouldResetFolder ? null : currentFolderId,
+      viewMode: shouldClearSelection && viewMode === 'editor' ? 'welcome' : viewMode,
     }))
+    scheduleDebouncedSync()
   },
 
   /** 移动节点到新父级 */
@@ -155,6 +177,7 @@ export const useTreeStore = create<TreeState & TreeActions>((set, get) => ({
     set(state => ({
       nodes: state.nodes.map(n => (n.id === id ? updatedNode : n)),
     }))
+    scheduleDebouncedSync()
   },
 
   /** 切换收藏状态 */
@@ -175,6 +198,7 @@ export const useTreeStore = create<TreeState & TreeActions>((set, get) => ({
     set(state => ({
       nodes: state.nodes.map(n => (n.id === id ? updatedNode : n)),
     }))
+    scheduleDebouncedSync()
   },
 
   /** 设置选中节点 */
@@ -182,6 +206,68 @@ export const useTreeStore = create<TreeState & TreeActions>((set, get) => ({
 
   /** 设置当前浏览文件夹 */
   setCurrentFolder: (id) => set({ currentFolderId: id }),
+
+  /** 设置视图模式 */
+  setViewMode: (mode) => set({ viewMode: mode }),
+
+  /** 按节点类型打开：文件夹 -> welcome，Prompt -> editor */
+  openNode: (id) => {
+    if (id === null) {
+      get().openFolder(null)
+      return
+    }
+
+    const target = get().nodes.find(n => n.id === id)
+    if (!target) return
+
+    if (target.type === 'folder') {
+      get().openFolder(target.id)
+      return
+    }
+
+    get().openPrompt(target.id)
+  },
+
+  /** 打开文件夹并回到欢迎视图 */
+  openFolder: (id) => {
+    if (id === null) {
+      set({
+        currentFolderId: null,
+        selectedNodeId: null,
+        viewMode: 'welcome',
+      })
+      return
+    }
+
+    const folderNode = get().nodes.find(n => n.id === id && n.type === 'folder')
+    if (!folderNode) return
+
+    set({
+      currentFolderId: folderNode.id,
+      selectedNodeId: folderNode.id,
+      viewMode: 'welcome',
+    })
+  },
+
+  /** 打开 Prompt 编辑器 */
+  openPrompt: (id) => {
+    const promptNode = get().nodes.find(n => n.id === id && n.type === 'prompt')
+    if (!promptNode) return
+
+    set({
+      selectedNodeId: id,
+      currentFolderId: promptNode.parentId,
+      viewMode: 'editor',
+    })
+  },
+
+  /** 关闭编辑器并回到工作台 */
+  closeEditor: () => {
+    set({
+      selectedNodeId: null,
+      viewMode: 'welcome',
+    })
+  },
 
   // ===================
   // Getters (查询方法)

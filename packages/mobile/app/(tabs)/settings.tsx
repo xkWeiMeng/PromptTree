@@ -11,12 +11,18 @@ import { useRouter } from 'expo-router'
 import { useAuthStore } from '../../stores/auth'
 import { useSyncStore } from '../../stores/sync'
 import { useTreeStore } from '../../stores/tree'
+import { usePreferencesStore, type ThemeMode } from '../../stores/preferences'
 import * as dbOps from '../../db/operations'
 import UserCard from '../../components/UserCard'
-import { colors, spacing, fontSize } from '../../utils/theme'
+import { useI18n } from '../../i18n'
+import { useTheme, useThemedStyles, spacing, fontSize, type ThemeColors } from '../../utils/theme'
 
 export default function SettingsScreen() {
   const router = useRouter()
+  const { t, locale, setLocale, localeOptions } = useI18n()
+  const { colors, themeMode } = useTheme()
+  const setThemeMode = usePreferencesStore(s => s.setThemeMode)
+  const styles = useThemedStyles(createStyles)
   const user = useAuthStore(s => s.user)
   const isLoggedIn = useAuthStore(s => s.isLoggedIn)
   const logout = useAuthStore(s => s.logout)
@@ -38,24 +44,24 @@ export default function SettingsScreen() {
   // 全量同步
   const handleFullSync = useCallback(() => {
     Alert.alert(
-      '全量同步',
-      '将从服务端拉取所有数据覆盖本地，确定继续？',
+      t('settings.fullSyncTitle'),
+      t('settings.fullSyncMessage'),
       [
-        { text: '取消', style: 'cancel' },
-        { text: '确定', onPress: () => fullSync() },
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.confirm'), onPress: () => fullSync() },
       ]
     )
-  }, [fullSync])
+  }, [fullSync, t])
 
   // 清除缓存
   const handleClearCache = useCallback(() => {
     Alert.alert(
-      '清除本地缓存',
-      '将清除所有本地数据，需要重新同步。确定继续？',
+      t('settings.clearCacheTitle'),
+      t('settings.clearCacheMessage'),
       [
-        { text: '取消', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: '清除',
+          text: t('settings.clearCache'),
           style: 'destructive',
           onPress: () => {
             dbOps.clearAllNodes()
@@ -64,14 +70,14 @@ export default function SettingsScreen() {
         },
       ]
     )
-  }, [loadNodes])
+  }, [loadNodes, t])
 
   // 退出登录
   const handleLogout = useCallback(() => {
-    Alert.alert('退出登录', '确定要退出吗？', [
-      { text: '取消', style: 'cancel' },
+    Alert.alert(t('settings.logoutTitle'), t('settings.logoutMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: '退出',
+        text: t('settings.logout'),
         style: 'destructive',
         onPress: () => {
           logout()
@@ -79,17 +85,55 @@ export default function SettingsScreen() {
         },
       },
     ])
-  }, [logout, router])
+  }, [logout, router, t])
 
   // 跳转登录
   const handleLogin = useCallback(() => {
     router.push('/login')
   }, [router])
 
+  const handleOpenProfile = useCallback(() => {
+    router.push('/profile')
+  }, [router])
+
+  const handleThemeModeChange = useCallback((mode: ThemeMode) => {
+    setThemeMode(mode)
+  }, [setThemeMode])
+
   const formatTime = (ts: number) => {
-    if (!ts) return '从未'
-    return new Date(ts).toLocaleString('zh-CN')
+    if (!ts) return t('settings.never')
+    return new Date(ts).toLocaleString(locale)
   }
+
+  const SettingRow = ({
+    label,
+    value,
+    last,
+  }: {
+    label: string
+    value: string
+    last?: boolean
+  }) => (
+    <View style={[styles.settingRow, last && styles.lastRow]}>
+      <Text style={styles.settingLabel}>{label}</Text>
+      <Text style={styles.settingValue}>{value}</Text>
+    </View>
+  )
+
+  const PreferenceRow = ({
+    label,
+    children,
+    last,
+  }: {
+    label: string
+    children: React.ReactNode
+    last?: boolean
+  }) => (
+    <View style={[styles.settingRow, styles.preferenceRow, last && styles.lastRow]}>
+      <Text style={styles.settingLabel}>{label}</Text>
+      <View style={styles.optionsGroup}>{children}</View>
+    </View>
+  )
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -100,8 +144,8 @@ export default function SettingsScreen() {
         <Pressable style={styles.loginCard} onPress={handleLogin}>
           <Text style={styles.loginIcon}>👤</Text>
           <View style={styles.loginInfo}>
-            <Text style={styles.loginTitle}>登录账号</Text>
-            <Text style={styles.loginSubtitle}>登录后数据云端同步</Text>
+            <Text style={styles.loginTitle}>{t('settings.loginAccount')}</Text>
+            <Text style={styles.loginSubtitle}>{t('settings.loginSyncHint')}</Text>
           </View>
           <Text style={styles.chevron}>›</Text>
         </Pressable>
@@ -109,19 +153,19 @@ export default function SettingsScreen() {
 
       {/* 数据统计 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>数据</Text>
+        <Text style={styles.sectionTitle}>{t('settings.data')}</Text>
         <View style={styles.card}>
-          <SettingRow label="总节点数" value={`${nodes.filter(n => !n.deletedAt).length}`} />
+          <SettingRow label={t('settings.totalNodes')} value={`${nodes.filter(n => !n.deletedAt).length}`} />
           <SettingRow
-            label="文件夹"
+            label={t('settings.folders')}
             value={`${nodes.filter(n => n.type === 'folder' && !n.deletedAt).length}`}
           />
           <SettingRow
-            label="Prompt"
+            label={t('settings.prompts')}
             value={`${nodes.filter(n => n.type === 'prompt' && !n.deletedAt).length}`}
           />
           <SettingRow
-            label="收藏"
+            label={t('settings.favorites')}
             value={`${nodes.filter(n => n.isFavorite && !n.deletedAt).length}`}
             last
           />
@@ -131,33 +175,87 @@ export default function SettingsScreen() {
       {/* 同步 */}
       {isLoggedIn && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>同步</Text>
+          <Text style={styles.sectionTitle}>{t('settings.sync')}</Text>
           <View style={styles.card}>
-            <SettingRow label="同步状态" value={syncStatusLabel(syncStatus)} />
-            <SettingRow label="上次同步" value={formatTime(lastSyncTime)} />
-            <SettingRow label="待同步" value={`${dirtyCount} 项`} last />
+            <SettingRow label={t('settings.syncStatus')} value={syncStatusLabel(syncStatus, t)} />
+            <SettingRow label={t('settings.lastSync')} value={formatTime(lastSyncTime)} />
+            <SettingRow label={t('settings.pendingSync')} value={t('settings.pendingItems', { count: dirtyCount })} last />
           </View>
           <View style={styles.buttonGroup}>
             <Pressable style={styles.actionBtn} onPress={handleSync}>
-              <Text style={styles.actionBtnText}>手动同步</Text>
+              <Text style={styles.actionBtnText}>{t('settings.manualSync')}</Text>
             </Pressable>
             <Pressable style={styles.actionBtnSecondary} onPress={handleFullSync}>
-              <Text style={styles.actionBtnSecondaryText}>全量同步</Text>
+              <Text style={styles.actionBtnSecondaryText}>{t('settings.fullSync')}</Text>
             </Pressable>
           </View>
         </View>
       )}
 
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('settings.preferences')}</Text>
+        <View style={styles.card}>
+          <PreferenceRow label={t('settings.language')}>
+            {localeOptions.map(option => (
+              <Pressable
+                key={option.value}
+                style={[
+                  styles.optionChip,
+                  locale === option.value && styles.optionChipActive
+                ]}
+                onPress={() => setLocale(option.value)}
+              >
+                <Text style={[
+                  styles.optionChipText,
+                  locale === option.value && styles.optionChipTextActive
+                ]}>
+                  {option.label}
+                </Text>
+              </Pressable>
+            ))}
+          </PreferenceRow>
+
+          <PreferenceRow label={t('theme.label')} last>
+            {(['system', 'light', 'dark'] as ThemeMode[]).map(mode => (
+              <Pressable
+                key={mode}
+                style={[
+                  styles.optionChip,
+                  themeMode === mode && styles.optionChipActive
+                ]}
+                onPress={() => handleThemeModeChange(mode)}
+              >
+                <Text style={[
+                  styles.optionChipText,
+                  themeMode === mode && styles.optionChipTextActive
+                ]}>
+                  {t(`theme.${mode}`)}
+                </Text>
+              </Pressable>
+            ))}
+          </PreferenceRow>
+        </View>
+      </View>
+
       {/* 操作 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>操作</Text>
+        <Text style={styles.sectionTitle}>{t('settings.actions')}</Text>
         <View style={styles.card}>
-          <Pressable style={styles.settingRow} onPress={handleClearCache}>
-            <Text style={styles.dangerText}>清除本地缓存</Text>
+          {isLoggedIn && (
+            <Pressable style={styles.settingRow} onPress={handleOpenProfile}>
+              <Text style={styles.settingLabel}>{t('settings.accountApiKey')}</Text>
+              <Text style={styles.settingValue}>›</Text>
+            </Pressable>
+          )}
+          <Pressable
+            style={[styles.settingRow, !isLoggedIn && styles.lastRow]}
+            onPress={handleClearCache}
+          >
+            <Text style={styles.dangerText}>{t('settings.clearCache')}</Text>
           </Pressable>
           {isLoggedIn && (
             <Pressable style={[styles.settingRow, styles.lastRow]} onPress={handleLogout}>
-              <Text style={styles.dangerText}>退出登录</Text>
+              <Text style={styles.dangerText}>{t('settings.logout')}</Text>
             </Pressable>
           )}
         </View>
@@ -165,14 +263,14 @@ export default function SettingsScreen() {
 
       {/* 关于 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>关于</Text>
+        <Text style={styles.sectionTitle}>{t('settings.about')}</Text>
         <View style={styles.card}>
-          <SettingRow label="版本" value="1.0.0" last />
+          <SettingRow label={t('settings.version')} value="1.0.0" last />
         </View>
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>PromptTree - 让混乱归于秩序 🌳</Text>
+        <Text style={styles.footerText}>{t('settings.footerTagline')}</Text>
       </View>
     </ScrollView>
   )
@@ -182,33 +280,19 @@ export default function SettingsScreen() {
 // 辅助组件
 // ===================
 
-function SettingRow({
-  label,
-  value,
-  last,
-}: {
-  label: string
-  value: string
-  last?: boolean
-}) {
-  return (
-    <View style={[styles.settingRow, last && styles.lastRow]}>
-      <Text style={styles.settingLabel}>{label}</Text>
-      <Text style={styles.settingValue}>{value}</Text>
-    </View>
-  )
-}
-
-function syncStatusLabel(status: string): string {
+function syncStatusLabel(
+  status: string,
+  t: (key: string) => string
+): string {
   switch (status) {
     case 'syncing':
-      return '同步中...'
+      return t('sync.syncing')
     case 'success':
-      return '已同步'
+      return t('sync.synced')
     case 'error':
-      return '同步失败'
+      return t('sync.error')
     default:
-      return '空闲'
+      return t('sync.idle')
   }
 }
 
@@ -216,7 +300,7 @@ function syncStatusLabel(status: string): string {
 // 样式
 // ===================
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surface,
@@ -283,6 +367,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.borderLight,
+  },
+  preferenceRow: {
+    alignItems: 'flex-start',
+    flexDirection: 'column',
+    gap: spacing.sm,
+  },
+  optionsGroup: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    width: '100%',
+  },
+  optionChip: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 999,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    backgroundColor: colors.surface,
+  },
+  optionChipActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryBg,
+  },
+  optionChipText: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  optionChipTextActive: {
+    color: colors.primary,
   },
   lastRow: {
     borderBottomWidth: 0,

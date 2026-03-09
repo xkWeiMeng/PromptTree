@@ -60,14 +60,22 @@ export function getGitHubOAuthUrl(baseUrl: string): string {
  * 从 Deep Link URL 中提取 token
  * prompttree://auth/callback?token=xxx 或 prompttree://?token=xxx
  */
-export function extractTokenFromUrl(url: string): string | null {
+function extractQueryParamFromUrl(url: string, key: string): string | null {
   try {
-    // 处理 scheme URL
     const urlObj = new URL(url)
-    return urlObj.searchParams.get('token')
-  } catch {
-    // 处理 fragment 方式: ...?token=xxx
-    const match = url.match(/[?&]token=([^&]+)/)
-    return match ? match[1] : null
+    const value = urlObj.searchParams.get(key)
+    return value ? decodeURIComponent(value) : null
+  } catch (error) {
+    console.error('解析回调 URL 失败，尝试回退正则解析:', error)
+    const match = url.match(new RegExp(`[?&]${key}=([^&]+)`))
+    return match ? decodeURIComponent(match[1]) : null
   }
+}
+
+export function extractTokenFromUrl(url: string): string | null {
+  return extractQueryParamFromUrl(url, 'token')
+}
+
+export function extractErrorFromUrl(url: string): string | null {
+  return extractQueryParamFromUrl(url, 'error')
 }

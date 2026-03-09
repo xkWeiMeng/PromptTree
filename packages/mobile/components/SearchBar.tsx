@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react'
 import { View, TextInput, Pressable, Text, StyleSheet } from 'react-native'
-import { colors, spacing, fontSize } from '../utils/theme'
+import { useI18n } from '../i18n'
+import { useTheme, useThemedStyles, spacing, fontSize, type ThemeColors } from '../utils/theme'
 
 interface SearchBarProps {
   onSearch: (query: string) => void
@@ -8,6 +9,9 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({ onSearch, placeholder }: SearchBarProps) {
+  const { t } = useI18n()
+  const { colors } = useTheme()
+  const styles = useThemedStyles(createStyles)
   const [query, setQuery] = useState('')
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -34,7 +38,7 @@ export default function SearchBar({ onSearch, placeholder }: SearchBarProps) {
         style={styles.input}
         value={query}
         onChangeText={handleChange}
-        placeholder={placeholder || '搜索 Prompt...'}
+        placeholder={placeholder || t('workspace.searchTitle')}
         placeholderTextColor={colors.textSecondary}
         returnKeyType="search"
         clearButtonMode="while-editing"
@@ -50,7 +54,7 @@ export default function SearchBar({ onSearch, placeholder }: SearchBarProps) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',

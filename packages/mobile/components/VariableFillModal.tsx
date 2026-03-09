@@ -11,7 +11,8 @@ import {
   Platform,
 } from 'react-native'
 import { extractVariables, fillVariables } from '@prompttree/shared'
-import { colors, spacing, fontSize } from '../utils/theme'
+import { useI18n } from '../i18n'
+import { useTheme, useThemedStyles, spacing, fontSize, type ThemeColors } from '../utils/theme'
 import { copyToClipboard } from '../utils/clipboard'
 
 interface VariableFillModalProps {
@@ -21,6 +22,9 @@ interface VariableFillModalProps {
 }
 
 export default function VariableFillModal({ visible, content, onClose }: VariableFillModalProps) {
+  const { t } = useI18n()
+  const { colors } = useTheme()
+  const styles = useThemedStyles(createStyles)
   const variables = useMemo(() => extractVariables(content), [content])
   const [values, setValues] = useState<Record<string, string>>({})
   const [showPreview, setShowPreview] = useState(false)
@@ -70,12 +74,12 @@ export default function VariableFillModal({ visible, content, onClose }: Variabl
         {/* 顶栏 */}
         <View style={styles.header}>
           <Pressable onPress={handleClose}>
-            <Text style={styles.cancelText}>取消</Text>
+            <Text style={styles.cancelText}>{t('common.cancel')}</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>填充变量</Text>
+          <Text style={styles.headerTitle}>{t('variableFill.title')}</Text>
           <Pressable onPress={handleCopy} disabled={!allFilled}>
             <Text style={[styles.doneText, !allFilled && styles.disabledText]}>
-              复制
+              {t('variableFill.copy')}
             </Text>
           </Pressable>
         </View>
@@ -87,7 +91,7 @@ export default function VariableFillModal({ visible, content, onClose }: Variabl
         >
           {/* 变量输入 */}
           <Text style={styles.sectionTitle}>
-            {variables.length} 个变量需要填充
+            {t('variableFill.countHint', { count: variables.length })}
           </Text>
           {variables.map(name => (
             <View key={name} style={styles.fieldGroup}>
@@ -96,7 +100,7 @@ export default function VariableFillModal({ visible, content, onClose }: Variabl
                 style={styles.fieldInput}
                 value={values[name] || ''}
                 onChangeText={val => handleValueChange(name, val)}
-                placeholder={`输入 ${name} 的值...`}
+                placeholder={t('variableFill.inputPlaceholder', { name })}
                 placeholderTextColor={colors.textSecondary}
                 multiline
               />
@@ -109,7 +113,7 @@ export default function VariableFillModal({ visible, content, onClose }: Variabl
             onPress={() => setShowPreview(!showPreview)}
           >
             <Text style={styles.previewToggleText}>
-              {showPreview ? '▼ 隐藏预览' : '▶ 查看预览'}
+              {showPreview ? t('variableFill.hidePreview') : t('variableFill.showPreview')}
             </Text>
           </Pressable>
 
@@ -125,7 +129,7 @@ export default function VariableFillModal({ visible, content, onClose }: Variabl
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

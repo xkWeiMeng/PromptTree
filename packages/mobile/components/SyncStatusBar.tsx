@@ -8,9 +8,13 @@ import {
 } from 'react-native'
 import { useSyncStore } from '../stores/sync'
 import { useAuthStore } from '../stores/auth'
-import { colors, spacing, fontSize } from '../utils/theme'
+import { useI18n } from '../i18n'
+import { useTheme, useThemedStyles, spacing, fontSize, type ThemeColors } from '../utils/theme'
 
 export default function SyncStatusBar() {
+  const { t } = useI18n()
+  const { colors } = useTheme()
+  const styles = useThemedStyles(createStyles)
   const isLoggedIn = useAuthStore(s => s.isLoggedIn)
   const syncStatus = useSyncStore(s => s.syncStatus)
   const lastSyncTime = useSyncStore(s => s.lastSyncTime)
@@ -26,17 +30,17 @@ export default function SyncStatusBar() {
         return (
           <View style={styles.row}>
             <ActivityIndicator size="small" color={colors.primary} />
-            <Text style={styles.statusText}>同步中...</Text>
+            <Text style={styles.statusText}>{t('sync.syncing')}</Text>
           </View>
         )
       case 'success': {
         const timeStr = lastSyncTime
-          ? formatRelativeTime(lastSyncTime)
-          : '刚刚'
+          ? formatRelativeTime(lastSyncTime, t)
+          : t('sync.justNow')
         return (
           <View style={styles.row}>
             <Text style={styles.successIcon}>✓</Text>
-            <Text style={styles.statusText}>{timeStr}同步</Text>
+            <Text style={styles.statusText}>{t('sync.syncedAgo', { time: timeStr })}</Text>
           </View>
         )
       }
@@ -45,9 +49,9 @@ export default function SyncStatusBar() {
           <Pressable style={styles.row} onPress={triggerSync}>
             <Text style={styles.errorIcon}>!</Text>
             <Text style={styles.errorText}>
-              同步失败{errorMessage ? `：${errorMessage}` : ''}
+              {t('sync.error')}{errorMessage ? `: ${errorMessage}` : ''}
             </Text>
-            <Text style={styles.retryText}>重试</Text>
+            <Text style={styles.retryText}>{t('sync.retry')}</Text>
           </Pressable>
         )
       default:
@@ -61,19 +65,22 @@ export default function SyncStatusBar() {
   return <View style={styles.container}>{content}</View>
 }
 
-function formatRelativeTime(timestamp: number): string {
+function formatRelativeTime(
+  timestamp: number,
+  t: (key: string, params?: Record<string, string | number>) => string
+): string {
   const diff = Date.now() - timestamp
   const seconds = Math.floor(diff / 1000)
-  if (seconds < 60) return '刚刚'
+  if (seconds < 60) return t('sync.justNow')
   const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}分钟前`
+  if (minutes < 60) return t('sync.minutesAgo', { n: minutes })
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}小时前`
+  if (hours < 24) return t('sync.hoursAgo', { n: hours })
   const days = Math.floor(hours / 24)
-  return `${days}天前`
+  return t('sync.daysAgo', { n: days })
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xs,
@@ -104,7 +111,7 @@ const styles = StyleSheet.create({
     height: 16,
     lineHeight: 16,
     textAlign: 'center',
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.dangerBg,
     borderRadius: 8,
     overflow: 'hidden',
   },

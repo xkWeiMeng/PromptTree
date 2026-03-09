@@ -1,7 +1,8 @@
 import React from 'react'
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native'
 import type { TreeNode } from '@prompttree/shared'
-import { colors, spacing, fontSize } from '../utils/theme'
+import { useI18n } from '../i18n'
+import { useThemedStyles, spacing, fontSize, type ThemeColors } from '../utils/theme'
 
 // ===================
 // Props
@@ -19,6 +20,9 @@ interface BreadcrumbProps {
 // ===================
 
 export default function Breadcrumb({ path, onNavigate }: BreadcrumbProps) {
+  const { t } = useI18n()
+  const styles = useThemedStyles(createStyles)
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -32,7 +36,7 @@ export default function Breadcrumb({ path, onNavigate }: BreadcrumbProps) {
           hitSlop={8}
         >
           <Text style={[styles.item, path.length === 0 && styles.itemActive]}>
-            🏠 根目录
+            🏠 {t('workspace.rootFolder')}
           </Text>
         </Pressable>
 
@@ -53,7 +57,7 @@ export default function Breadcrumb({ path, onNavigate }: BreadcrumbProps) {
                   style={[styles.item, isLast && styles.itemActive]}
                   numberOfLines={1}
                 >
-                  {node.title || '未命名'}
+                  {node.title || t('common.untitled')}
                 </Text>
               </Pressable>
             </React.Fragment>
@@ -68,7 +72,7 @@ export default function Breadcrumb({ path, onNavigate }: BreadcrumbProps) {
 // 样式
 // ===================
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     backgroundColor: colors.surface,
     borderBottomWidth: StyleSheet.hairlineWidth,

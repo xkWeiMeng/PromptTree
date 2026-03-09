@@ -3,7 +3,8 @@ import { View, Text, Pressable, Modal, FlatList, StyleSheet } from 'react-native
 import type { TreeNode } from '@prompttree/shared'
 import { isAncestor } from '@prompttree/shared'
 import { useTreeStore } from '../stores/tree'
-import { colors, spacing, fontSize } from '../utils/theme'
+import { useI18n } from '../i18n'
+import { useThemedStyles, spacing, fontSize, type ThemeColors } from '../utils/theme'
 
 // ===================
 // Props
@@ -27,6 +28,8 @@ export default function FolderPicker({
   onSelect,
   onClose,
 }: FolderPickerProps) {
+  const { t } = useI18n()
+  const styles = useThemedStyles(createStyles)
   const nodes = useTreeStore(s => s.nodes)
   const getChildren = useTreeStore(s => s.getChildren)
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
@@ -77,8 +80,8 @@ export default function FolderPicker({
   }
 
   const currentTitle = breadcrumb.length > 0
-    ? breadcrumb[breadcrumb.length - 1].title || '未命名'
-    : '根目录'
+    ? breadcrumb[breadcrumb.length - 1].title || t('common.untitled')
+    : t('workspace.rootFolder')
 
   return (
     <Modal
@@ -92,11 +95,11 @@ export default function FolderPicker({
           {/* 头部 */}
           <View style={styles.header}>
             <Pressable onPress={handleClose}>
-              <Text style={styles.cancelText}>取消</Text>
+              <Text style={styles.cancelText}>{t('common.cancel')}</Text>
             </Pressable>
-            <Text style={styles.headerTitle}>移动到</Text>
+            <Text style={styles.headerTitle}>{t('folderPicker.title')}</Text>
             <Pressable onPress={handleSelect}>
-              <Text style={styles.confirmText}>确定</Text>
+              <Text style={styles.confirmText}>{t('common.confirm')}</Text>
             </Pressable>
           </View>
 
@@ -104,7 +107,7 @@ export default function FolderPicker({
           <View style={styles.pathRow}>
             {breadcrumb.length > 0 && (
               <Pressable onPress={navigateBack} hitSlop={8}>
-                <Text style={styles.backButton}>‹ 返回</Text>
+                <Text style={styles.backButton}>{t('folderPicker.back')}</Text>
               </Pressable>
             )}
             <Text style={styles.pathText}>📁 {currentTitle}</Text>
@@ -117,7 +120,7 @@ export default function FolderPicker({
             style={styles.list}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>没有子文件夹</Text>
+                <Text style={styles.emptyText}>{t('folderPicker.noSubfolders')}</Text>
               </View>
             }
             renderItem={({ item }) => (
@@ -130,7 +133,7 @@ export default function FolderPicker({
               >
                 <Text style={styles.folderIcon}>📁</Text>
                 <Text style={styles.folderName} numberOfLines={1}>
-                  {item.title || '未命名文件夹'}
+                  {item.title || t('common.untitledFolder')}
                 </Text>
                 <Text style={styles.chevron}>›</Text>
               </Pressable>
@@ -146,10 +149,10 @@ export default function FolderPicker({
 // 样式
 // ===================
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: colors.overlay,
     justifyContent: 'flex-end',
   },
   container: {

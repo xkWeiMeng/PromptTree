@@ -10,17 +10,23 @@ import {
   Platform,
   Alert,
 } from 'react-native'
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router'
+import { useLocalSearchParams, useRouter, Stack, useFocusEffect } from 'expo-router'
 import { extractVariables } from '@prompttree/shared'
 import { useTreeStore } from '../../stores/tree'
+import { useAuthStore } from '../../stores/auth'
+import { createShare, deleteShare, getMyShare } from '../../api/share'
 import VariableFillModal from '../../components/VariableFillModal'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import { copyToClipboard } from '../../utils/clipboard'
-import { colors, spacing, fontSize } from '../../utils/theme'
+import { useI18n } from '../../i18n'
+import { useTheme, useThemedStyles, spacing, fontSize, type ThemeColors } from '../../utils/theme'
 
 export default function PromptDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
+  const { t, locale } = useI18n()
+  const { colors } = useTheme()
+  const styles = useThemedStyles(createStyles)
 
   // ===================
   // Store
@@ -29,8 +35,24 @@ export default function PromptDetailScreen() {
   const updateNode = useTreeStore(s => s.updateNode)
   const deleteNode = useTreeStore(s => s.deleteNode)
   const toggleFavorite = useTreeStore(s => s.toggleFavorite)
+  const openPrompt = useTreeStore(s => s.openPrompt)
+  const closeEditor = useTreeStore(s => s.closeEditor)
+  const isLoggedIn = useAuthStore(s => s.isLoggedIn)
+  const isOfflineMode = useAuthStore(s => s.isOfflineMode)
 
   const node = getNode(id!)
+
+  useFocusEffect(
+    useCallback(() => {
+      if (id) openPrompt(id)
+      return () => {
+        const state = useTreeStore.getState()
+        if (id && state.selectedNodeId === id && state.viewMode === 'editor') {
+          closeEditor()
+        }
+      }
+    }, [closeEditor, id, openPrompt])
+  )
 
   // ===================
   // 本地编辑状态
@@ -39,6 +61,7 @@ export default function PromptDetailScreen() {
   const [content, setContent] = useState(node?.content || '')
   const [showVariableModal, setShowVariableModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
 
   // 防抖保存
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -100,7 +123,7 @@ export default function PromptDetailScreen() {
   // ===================
   const handleCopy = useCallback(() => {
     if (!content.trim()) {
-      Alert.alert('提示', '内容为空')
+      Alert.alert(t('workspace.contentEmptyTitle'), t('workspace.contentEmptyMessage'))
       return
     }
     const vars = extractVariables(content)
@@ -109,7 +132,7 @@ export default function PromptDetailScreen() {
     } else {
       copyToClipboard(content)
     }
-  }, [content])
+  }, [content, t])
 
   const handleToggleFavorite = useCallback(() => {
     if (id) toggleFavorite(id)
@@ -118,6 +141,64 @@ export default function PromptDetailScreen() {
   const handleDelete = useCallback(() => {
     setShowDeleteConfirm(true)
   }, [])
+
+  const handleShare = useCallback(async () => {
+    if (!id || isSharing) return
+
+    if (!isLoggedIn || isOfflineMode) {
+      Alert.alert(t('workspace.noSyncAccessTitle'), t('workspace.noSyncAccessMessage'))
+      return
+    }
+
+    setIsSharing(true)
+    try {
+      const existing = await getMyShare(id)
+
+      if (existing.share) {
+        Alert.alert(t('share.title'), existing.share.link, [
+          {
+            text: t('share.copyLink'),
+            onPress: () => {
+              void copyToClipboard(existing.share!.link)
+            }
+          },
+          {
+            text: t('share.stopSharing'),
+            style: 'destructive',
+            onPress: () => {
+              void (async () => {
+                try {
+                  await deleteShare(existing.share!.id)
+                  Alert.alert(t('share.stopped'))
+                } catch (error) {
+                  console.error('取消分享失败:', error)
+                  Alert.alert(t('share.stopFailedTitle'), t('share.stopFailedMessage'))
+                }
+              })()
+            }
+          },
+          { text: t('common.close'), style: 'cancel' }
+        ])
+        return
+      }
+
+      const created = await createShare(id)
+      Alert.alert(t('share.createdTitle'), created.share.link, [
+        {
+          text: t('share.copyLink'),
+          onPress: () => {
+            void copyToClipboard(created.share.link)
+          }
+        },
+        { text: t('common.close'), style: 'cancel' }
+      ])
+    } catch (error) {
+      console.error('分享失败:', error)
+      Alert.alert(t('share.failedTitle'), t('share.failedMessage'))
+    } finally {
+      setIsSharing(false)
+    }
+  }, [id, isLoggedIn, isOfflineMode, isSharing, t])
 
   const confirmDelete = useCallback(() => {
     if (id) {
@@ -133,9 +214,9 @@ export default function PromptDetailScreen() {
   if (!node) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>Prompt 不存在或已被删除</Text>
+        <Text style={styles.emptyText}>{t('prompt.notFound')}</Text>
         <Pressable onPress={() => router.back()}>
-          <Text style={styles.backLink}>返回</Text>
+          <Text style={styles.backLink}>{t('common.back')}</Text>
         </Pressable>
       </View>
     )
@@ -144,17 +225,18 @@ export default function PromptDetailScreen() {
   // ===================
   // 计算属性
   // ===================
-  const hasVars = content ? extractVariables(content).length > 0 : false
+  const variables = content ? extractVariables(content) : []
+  const hasVars = variables.length > 0
   const wordCount = content.length
-  const createdDate = new Date(node.createdAt).toLocaleString('zh-CN')
-  const updatedDate = new Date(node.updatedAt).toLocaleString('zh-CN')
+  const createdDate = new Date(node.createdAt).toLocaleString(locale)
+  const updatedDate = new Date(node.updatedAt).toLocaleString(locale)
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: title || '未命名 Prompt',
-          headerBackTitle: '返回',
+          title: title || t('common.untitledPrompt'),
+          headerBackTitle: t('common.back'),
           headerRight: () => (
             <View style={styles.headerActions}>
               <Pressable onPress={handleToggleFavorite} style={styles.headerBtn}>
@@ -165,6 +247,11 @@ export default function PromptDetailScreen() {
               <Pressable onPress={handleCopy} style={styles.headerBtn}>
                 <Text style={styles.headerBtnText}>📋</Text>
               </Pressable>
+              {isLoggedIn && !isOfflineMode && (
+                <Pressable onPress={handleShare} style={styles.headerBtn}>
+                  <Text style={styles.headerBtnText}>{isSharing ? '…' : '🔗'}</Text>
+                </Pressable>
+              )}
               <Pressable onPress={handleDelete} style={styles.headerBtn}>
                 <Text style={styles.headerBtnText}>🗑️</Text>
               </Pressable>
@@ -187,7 +274,7 @@ export default function PromptDetailScreen() {
             style={styles.titleInput}
             value={title}
             onChangeText={handleTitleChange}
-            placeholder="Prompt 标题"
+            placeholder={t('prompt.titlePlaceholder')}
             placeholderTextColor={colors.textSecondary}
             returnKeyType="next"
           />
@@ -200,7 +287,7 @@ export default function PromptDetailScreen() {
             style={styles.contentInput}
             value={content}
             onChangeText={handleContentChange}
-            placeholder="在这里编写 Prompt 内容...\n\n使用 {{变量名}} 创建可填充变量"
+            placeholder={t('prompt.contentPlaceholder')}
             placeholderTextColor={colors.textSecondary}
             multiline
             textAlignVertical="top"
@@ -211,17 +298,17 @@ export default function PromptDetailScreen() {
           {hasVars && (
             <View style={styles.variableHint}>
               <Text style={styles.variableHintText}>
-                🔤 检测到 {extractVariables(content).length} 个变量：
-                {extractVariables(content).map(v => ` {{${v}}}`).join(',')}
+                {t('prompt.variablesDetected', { count: variables.length })}
+                {variables.map(v => ` {{${v}}}`).join(',')}
               </Text>
             </View>
           )}
 
           {/* 元信息 */}
           <View style={styles.metaSection}>
-            <Text style={styles.metaText}>字数：{wordCount}</Text>
-            <Text style={styles.metaText}>创建：{createdDate}</Text>
-            <Text style={styles.metaText}>更新：{updatedDate}</Text>
+            <Text style={styles.metaText}>{t('prompt.charCount', { count: wordCount })}</Text>
+            <Text style={styles.metaText}>{t('prompt.createdAt', { time: createdDate })}</Text>
+            <Text style={styles.metaText}>{t('prompt.updatedAt', { time: updatedDate })}</Text>
           </View>
         </ScrollView>
 
@@ -229,7 +316,7 @@ export default function PromptDetailScreen() {
         <View style={styles.bottomBar}>
           <Pressable style={styles.bottomBtn} onPress={handleCopy}>
             <Text style={styles.bottomBtnText}>
-              {hasVars ? '🔤 填充变量并复制' : '📋 复制内容'}
+              {hasVars ? t('prompt.copyWithVariables') : t('prompt.copyContent')}
             </Text>
           </Pressable>
         </View>
@@ -245,9 +332,9 @@ export default function PromptDetailScreen() {
       {/* 删除确认 */}
       <ConfirmDialog
         visible={showDeleteConfirm}
-        title="确认删除"
-        message="此 Prompt 将被删除，此操作不可撤销。"
-        confirmText="删除"
+        title={t('prompt.deleteTitle')}
+        message={t('prompt.deleteMessage')}
+        confirmText={t('common.delete')}
         danger
         onConfirm={confirmDelete}
         onCancel={() => setShowDeleteConfirm(false)}
@@ -256,7 +343,7 @@ export default function PromptDetailScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

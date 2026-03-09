@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, Pressable, Modal, StyleSheet } from 'react-native'
-import { colors, spacing, fontSize } from '../utils/theme'
+import { useI18n } from '../i18n'
+import { useThemedStyles, spacing, fontSize, type ThemeColors } from '../utils/theme'
 
 // ===================
 // Props
@@ -25,12 +26,18 @@ export default function ConfirmDialog({
   visible,
   title,
   message,
-  confirmText = '确定',
-  cancelText = '取消',
+  confirmText,
+  cancelText,
   danger = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useI18n()
+  const styles = useThemedStyles(createStyles)
+
+  const resolvedConfirmText = confirmText ?? t('common.confirm')
+  const resolvedCancelText = cancelText ?? t('common.cancel')
+
   return (
     <Modal
       visible={visible}
@@ -52,7 +59,7 @@ export default function ConfirmDialog({
               ]}
               onPress={onCancel}
             >
-              <Text style={styles.cancelText}>{cancelText}</Text>
+              <Text style={styles.cancelText}>{resolvedCancelText}</Text>
             </Pressable>
 
             <Pressable
@@ -63,7 +70,7 @@ export default function ConfirmDialog({
               ]}
               onPress={onConfirm}
             >
-              <Text style={styles.confirmText}>{confirmText}</Text>
+              <Text style={styles.confirmText}>{resolvedConfirmText}</Text>
             </Pressable>
           </View>
         </View>
@@ -76,10 +83,10 @@ export default function ConfirmDialog({
 // 样式
 // ===================
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,

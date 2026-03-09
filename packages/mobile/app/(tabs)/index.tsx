@@ -1,35 +1,46 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { View, Text, Pressable, Alert, StyleSheet, TextInput } from 'react-native'
-import { useRouter } from 'expo-router'
+import { useRouter, useFocusEffect } from 'expo-router'
 import type { TreeNode } from '@prompttree/shared'
 import { getBreadcrumb } from '@prompttree/shared'
-import { initDatabase } from '../../db/index'
-import { useTreeStore } from '../../stores/tree'
+import { useTreeStore, type ViewMode } from '../../stores/tree'
 import TreeList from '../../components/TreeList'
 import Breadcrumb from '../../components/Breadcrumb'
 import ActionSheet from '../../components/ActionSheet'
 import FolderPicker from '../../components/FolderPicker'
 import ConfirmDialog from '../../components/ConfirmDialog'
+import WorkspaceModeSwitcher from '../../components/WorkspaceModeSwitcher'
 import { copyPromptDirect, getPromptVariables } from '../../utils/clipboard'
-import { colors, spacing, fontSize } from '../../utils/theme'
+import { useI18n } from '../../i18n'
+import { useTheme, useThemedStyles, spacing, fontSize, type ThemeColors } from '../../utils/theme'
 
 export default function HomeScreen() {
   const router = useRouter()
+  const { t } = useI18n()
+  const { colors } = useTheme()
+  const styles = useThemedStyles(createStyles)
 
   // ===================
   // Store
   // ===================
   const loadNodes = useTreeStore(s => s.loadNodes)
   const nodes = useTreeStore(s => s.nodes)
+  const selectedNodeId = useTreeStore(s => s.selectedNodeId)
+  const currentFolderId = useTreeStore(s => s.currentFolderId)
+  const viewMode = useTreeStore(s => s.viewMode)
   const createNode = useTreeStore(s => s.createNode)
   const deleteNode = useTreeStore(s => s.deleteNode)
   const toggleFavorite = useTreeStore(s => s.toggleFavorite)
   const moveNode = useTreeStore(s => s.moveNode)
+  const setViewMode = useTreeStore(s => s.setViewMode)
+  const openFolder = useTreeStore(s => s.openFolder)
+  const openPrompt = useTreeStore(s => s.openPrompt)
+
+  const selectedPrompt = nodes.find(node => node.id === selectedNodeId && node.type === 'prompt') ?? null
 
   // ===================
   // 本地状态
   // ===================
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
   const [actionSheetNode, setActionSheetNode] = useState<TreeNode | null>(null)
   const [showActionSheet, setShowActionSheet] = useState(false)
   const [showFolderPicker, setShowFolderPicker] = useState(false)
@@ -44,9 +55,14 @@ export default function HomeScreen() {
   // 初始化
   // ===================
   useEffect(() => {
-    initDatabase()
     loadNodes()
-  }, [])
+  }, [loadNodes])
+
+  useFocusEffect(
+    useCallback(() => {
+      setViewMode('welcome')
+    }, [setViewMode])
+  )
 
   // ===================
   // 面包屑
@@ -59,16 +75,41 @@ export default function HomeScreen() {
   // 导航
   // ===================
   const handleNavigateFolder = useCallback((id: string) => {
-    setCurrentFolderId(id)
-  }, [])
+    openFolder(id)
+  }, [openFolder])
 
   const handleSelectPrompt = useCallback((id: string) => {
+    openPrompt(id)
     router.push(`/prompt/${id}`)
-  }, [router])
+  }, [openPrompt, router])
 
   const handleBreadcrumbNavigate = useCallback((nodeId: string | null) => {
-    setCurrentFolderId(nodeId)
-  }, [])
+    openFolder(nodeId)
+  }, [openFolder])
+
+  const handleOpenSearch = useCallback(() => {
+    router.push('/search')
+  }, [router])
+
+  const handleSwitchMode = useCallback((mode: ViewMode) => {
+    if (mode === 'welcome') {
+      setViewMode('welcome')
+      return
+    }
+
+    if (mode === 'editor') {
+      if (!selectedPrompt) {
+        Alert.alert(t('workspace.selectPromptToEditTitle'), t('workspace.selectPromptToEditMessage'))
+        return
+      }
+      openPrompt(selectedPrompt.id)
+      router.push(`/prompt/${selectedPrompt.id}`)
+      return
+    }
+
+    setViewMode(mode)
+    router.push(mode === 'outline' ? '/outline' : '/mindmap')
+  }, [openPrompt, router, selectedPrompt, setViewMode, t])
 
   // ===================
   // 操作
@@ -80,16 +121,17 @@ export default function HomeScreen() {
 
   const handleCopy = useCallback(async (node: TreeNode) => {
     if (!node.content) {
-      Alert.alert('提示', '内容为空')
+      Alert.alert(t('workspace.contentEmptyTitle'), t('workspace.contentEmptyMessage'))
       return
     }
     const vars = getPromptVariables(node.content)
     if (vars.length > 0) {
+      openPrompt(node.id)
       router.push(`/prompt/${node.id}`)
     } else {
-      await copyPromptDirect(node.content)
+      await copyPromptDirect(node.content, t)
     }
-  }, [router])
+  }, [openPrompt, router, t])
 
   const handleDelete = useCallback((node: TreeNode) => {
     setDeleteTargetId(node.id)
@@ -100,12 +142,12 @@ export default function HomeScreen() {
     if (deleteTargetId) {
       deleteNode(deleteTargetId)
       if (deleteTargetId === currentFolderId) {
-        setCurrentFolderId(null)
+        openFolder(null)
       }
     }
     setShowDeleteConfirm(false)
     setDeleteTargetId('')
-  }, [deleteTargetId, currentFolderId, deleteNode])
+  }, [deleteTargetId, currentFolderId, deleteNode, openFolder])
 
   const handleNewFolder = useCallback(() => {
     const id = createNode(currentFolderId, 'folder')
@@ -117,8 +159,9 @@ export default function HomeScreen() {
   const handleNewPrompt = useCallback(() => {
     const id = createNode(currentFolderId, 'prompt')
     setShowNewMenu(false)
+    openPrompt(id)
     router.push(`/prompt/${id}`)
-  }, [currentFolderId, createNode, router])
+  }, [currentFolderId, createNode, openPrompt, router])
 
   const handleRename = useCallback(() => {
     if (actionSheetNode) {
@@ -179,9 +222,10 @@ export default function HomeScreen() {
   const handleActionNewPrompt = useCallback(() => {
     if (actionSheetNode && actionSheetNode.type === 'folder') {
       const id = createNode(actionSheetNode.id, 'prompt')
+      openPrompt(id)
       router.push(`/prompt/${id}`)
     }
-  }, [actionSheetNode, createNode, router])
+  }, [actionSheetNode, createNode, openPrompt, router])
 
   // ===================
   // 渲染
@@ -194,6 +238,38 @@ export default function HomeScreen() {
         onNavigate={handleBreadcrumbNavigate}
       />
 
+      <WorkspaceModeSwitcher
+        mode={viewMode}
+        hasSelectedPrompt={!!selectedPrompt}
+        onSwitchMode={handleSwitchMode}
+      />
+
+      <View style={styles.workspaceActions}>
+        <Pressable style={styles.searchButton} onPress={handleOpenSearch}>
+          <Text style={styles.searchButtonText}>{t('workspace.searchWorkspace')}</Text>
+        </Pressable>
+        <View style={styles.modeEntryRow}>
+          <Pressable style={styles.modeEntryBtn} onPress={() => handleSwitchMode('outline')}>
+            <Text style={styles.modeEntryTitle}>{t('workspace.outlineTitle')}</Text>
+            <Text style={styles.modeEntryDesc}>{t('workspace.outlineDesc')}</Text>
+          </Pressable>
+          <Pressable style={styles.modeEntryBtn} onPress={() => handleSwitchMode('mindmap')}>
+            <Text style={styles.modeEntryTitle}>{t('workspace.mindmapTitle')}</Text>
+            <Text style={styles.modeEntryDesc}>{t('workspace.mindmapDesc')}</Text>
+          </Pressable>
+        </View>
+        {selectedPrompt ? (
+          <Pressable style={styles.resumeButton} onPress={() => handleSwitchMode('editor')}>
+            <Text style={styles.resumeLabel}>{t('workspace.resumeEditing')}</Text>
+            <Text style={styles.resumeTitle} numberOfLines={1}>
+              {selectedPrompt.title || t('common.untitledPrompt')}
+            </Text>
+          </Pressable>
+        ) : (
+          <Text style={styles.workspaceHint}>{t('workspace.selectPromptHint')}</Text>
+        )}
+      </View>
+
       {/* 重命名输入框 */}
       {renameNodeId && (
         <View style={styles.renameBar}>
@@ -201,7 +277,8 @@ export default function HomeScreen() {
             style={styles.renameInput}
             value={renameText}
             onChangeText={setRenameText}
-            placeholder="输入名称..."
+            placeholder={t('workspace.renamePlaceholder')}
+            placeholderTextColor={colors.textSecondary}
             autoFocus
             onSubmitEditing={handleRenameSubmit}
             onBlur={handleRenameSubmit}
@@ -224,10 +301,10 @@ export default function HomeScreen() {
         {showNewMenu && (
           <View style={styles.fabMenu}>
             <Pressable style={styles.fabMenuItem} onPress={handleNewFolder}>
-              <Text style={styles.fabMenuText}>📁 新建文件夹</Text>
+              <Text style={styles.fabMenuText}>📁 {t('tree.newFolder')}</Text>
             </Pressable>
             <Pressable style={styles.fabMenuItem} onPress={handleNewPrompt}>
-              <Text style={styles.fabMenuText}>📄 新建 Prompt</Text>
+              <Text style={styles.fabMenuText}>📄 {t('tree.newPrompt')}</Text>
             </Pressable>
           </View>
         )}
@@ -267,9 +344,9 @@ export default function HomeScreen() {
       {/* 删除确认 */}
       <ConfirmDialog
         visible={showDeleteConfirm}
-        title="确认删除"
-        message="删除后将同时删除所有子节点，此操作不可撤销。"
-        confirmText="删除"
+        title={t('workspace.deleteTitle')}
+        message={t('workspace.deleteMessage')}
+        confirmText={t('common.delete')}
         danger
         onConfirm={confirmDelete}
         onCancel={() => setShowDeleteConfirm(false)}
@@ -282,10 +359,78 @@ export default function HomeScreen() {
 // 样式
 // ===================
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  workspaceActions: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.borderLight,
+  },
+  searchButton: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.background,
+  },
+  searchButtonText: {
+    fontSize: fontSize.sm,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  modeEntryRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  modeEntryBtn: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.surface,
+  },
+  modeEntryTitle: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  modeEntryDesc: {
+    marginTop: spacing.xs,
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+    lineHeight: 16,
+  },
+  resumeButton: {
+    marginTop: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 10,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.primaryBg,
+  },
+  resumeLabel: {
+    fontSize: fontSize.xs,
+    color: colors.primary,
+    marginBottom: spacing.xs,
+  },
+  resumeTitle: {
+    fontSize: fontSize.sm,
+    color: colors.text,
+    fontWeight: '600',
+  },
+  workspaceHint: {
+    marginTop: spacing.sm,
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
   },
   renameBar: {
     paddingHorizontal: spacing.lg,

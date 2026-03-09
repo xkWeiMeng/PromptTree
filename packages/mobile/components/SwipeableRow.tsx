@@ -1,7 +1,8 @@
 import React, { useRef } from 'react'
-import { View, Text, StyleSheet, Animated, I18nManager } from 'react-native'
+import { Text, StyleSheet, Animated } from 'react-native'
 import { Swipeable, RectButton } from 'react-native-gesture-handler'
-import { colors, spacing } from '../utils/theme'
+import { useI18n } from '../i18n'
+import { useThemedStyles, type ThemeColors } from '../utils/theme'
 
 // ===================
 // Props
@@ -24,6 +25,8 @@ export default function SwipeableRow({
   onSwipeLeft,
   onSwipeRight,
 }: SwipeableRowProps) {
+  const { t } = useI18n()
+  const styles = useThemedStyles(createStyles)
   const swipeableRef = useRef<Swipeable>(null)
 
   /** 右侧操作（左滑显示） - 删除 */
@@ -47,7 +50,7 @@ export default function SwipeableRow({
             swipeableRef.current?.close()
           }}
         >
-          <Text style={styles.actionText}>🗑️ 删除</Text>
+          <Text style={styles.actionText}>🗑️ {t('common.delete')}</Text>
         </RectButton>
       </Animated.View>
     )
@@ -74,7 +77,7 @@ export default function SwipeableRow({
             swipeableRef.current?.close()
           }}
         >
-          <Text style={styles.actionText}>📋 复制</Text>
+          <Text style={styles.actionText}>📋 {t('common.copy')}</Text>
         </RectButton>
       </Animated.View>
     )
@@ -98,7 +101,7 @@ export default function SwipeableRow({
 // 样式
 // ===================
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   rightAction: {
     backgroundColor: colors.danger,
     justifyContent: 'center',

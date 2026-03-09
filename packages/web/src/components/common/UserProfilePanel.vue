@@ -2,9 +2,11 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { Camera, Check, X, LogOut, User as UserIcon } from 'lucide-vue-next'
+import { Camera, Check, X, LogOut, User as UserIcon, KeyRound, Copy, Trash2 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
+import { useClipboard } from '@/composables/useClipboard'
+import * as apiKeysApi from '@/api/api-keys'
 
 const props = withDefaults(defineProps<{
   anchor: HTMLElement | null
@@ -21,6 +23,7 @@ const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 const toast = useToast()
+const { copy } = useClipboard()
 
 const panelRef = ref<HTMLElement | null>(null)
 
@@ -32,6 +35,13 @@ const isSaving = ref(false)
 
 const isEditingAvatar = ref(false)
 const editAvatarUrl = ref('')
+
+const apiKeys = ref<apiKeysApi.ApiKeyInfo[]>([])
+const isApiKeysLoading = ref(false)
+const isCreatingApiKey = ref(false)
+const revokingKeyId = ref<string | null>(null)
+const apiKeyName = ref('')
+const createdApiKey = ref<string | null>(null)
 
 const user = computed(() => authStore.user)
 
@@ -132,6 +142,79 @@ function onAvatarKeydown(e: KeyboardEvent) {
   }
 }
 
+function formatTime(timestamp: number | null): string {
+  if (!timestamp) {
+    return t('apiKeys.neverUsed')
+  }
+
+  return new Date(timestamp).toLocaleString()
+}
+
+async function loadApiKeys() {
+  if (!user.value) return
+
+  isApiKeysLoading.value = true
+  try {
+    const response = await apiKeysApi.listApiKeys()
+    if (response.success) {
+      apiKeys.value = response.keys
+    }
+  } catch (err) {
+    console.error('Failed to load api keys:', err)
+    toast.error(t('apiKeys.loadFailed'))
+  } finally {
+    isApiKeysLoading.value = false
+  }
+}
+
+async function handleCreateApiKey() {
+  if (isCreatingApiKey.value) return
+
+  isCreatingApiKey.value = true
+  try {
+    const response = await apiKeysApi.createApiKey({
+      name: apiKeyName.value.trim() || undefined
+    })
+
+    createdApiKey.value = response.apiKey
+    apiKeyName.value = ''
+    apiKeys.value = [response.key, ...apiKeys.value.filter((item) => item.id !== response.key.id)]
+    toast.success(t('apiKeys.created'))
+  } catch (err) {
+    console.error('Failed to create api key:', err)
+    toast.error(t('apiKeys.createFailed'))
+  } finally {
+    isCreatingApiKey.value = false
+  }
+}
+
+async function handleCopyNewApiKey() {
+  if (!createdApiKey.value) return
+  await copy(createdApiKey.value)
+}
+
+async function handleRevokeApiKey(id: string) {
+  if (revokingKeyId.value) return
+
+  const target = apiKeys.value.find((item) => item.id === id)
+  if (!target) return
+
+  const confirmed = window.confirm(t('apiKeys.revokeConfirm', { name: target.name }))
+  if (!confirmed) return
+
+  revokingKeyId.value = id
+  try {
+    await apiKeysApi.revokeApiKey(id)
+    apiKeys.value = apiKeys.value.filter((item) => item.id !== id)
+    toast.success(t('apiKeys.revoked'))
+  } catch (err) {
+    console.error('Failed to revoke api key:', err)
+    toast.error(t('apiKeys.revokeFailed'))
+  } finally {
+    revokingKeyId.value = null
+  }
+}
+
 // 退出登录
 async function handleLogout() {
   emit('close')
@@ -158,6 +241,9 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
+  if (user.value) {
+    loadApiKeys()
+  }
   document.addEventListener('mousedown', onClickOutside)
   document.addEventListener('keydown', onKeydown)
 })
@@ -232,6 +318,63 @@ onUnmounted(() => {
     <div class="profile-field">
       <label class="profile-label">{{ t('profile.email') }}</label>
       <div class="profile-value">{{ user?.email || '-' }}</div>
+    </div>
+
+    <!-- API Key 管理 -->
+    <div class="profile-field">
+      <label class="profile-label profile-label--section">
+        <KeyRound :size="14" />
+        <span>{{ t('apiKeys.title') }}</span>
+      </label>
+      <div class="profile-hint">{{ t('apiKeys.hint') }}</div>
+
+      <div class="api-key-create-row">
+        <input
+          v-model="apiKeyName"
+          class="profile-input"
+          :placeholder="t('apiKeys.namePlaceholder')"
+          maxlength="64"
+          @keydown.enter="handleCreateApiKey"
+        />
+        <button
+          class="api-key-create-btn"
+          :disabled="isCreatingApiKey"
+          @click="handleCreateApiKey"
+        >
+          {{ t('apiKeys.create') }}
+        </button>
+      </div>
+
+      <div v-if="createdApiKey" class="api-key-new">
+        <div class="api-key-new-label">{{ t('apiKeys.copyNow') }}</div>
+        <code class="api-key-new-value">{{ createdApiKey }}</code>
+        <button class="profile-icon-btn" @click="handleCopyNewApiKey" :title="t('apiKeys.copy')">
+          <Copy :size="14" />
+        </button>
+      </div>
+
+      <div v-if="isApiKeysLoading" class="api-key-empty">{{ t('common.loading') }}</div>
+      <div v-else-if="apiKeys.length === 0" class="api-key-empty">{{ t('apiKeys.empty') }}</div>
+      <div v-else class="api-key-list">
+        <div v-for="item in apiKeys" :key="item.id" class="api-key-item">
+          <div class="api-key-item-main">
+            <div class="api-key-item-title">{{ item.name }}</div>
+            <div class="api-key-item-meta">
+              <span>{{ item.keyPrefix }}</span>
+              <span>·</span>
+              <span>{{ formatTime(item.lastUsedAt) }}</span>
+            </div>
+          </div>
+          <button
+            class="profile-icon-btn api-key-revoke-btn"
+            :disabled="revokingKeyId === item.id"
+            :title="t('apiKeys.revoke')"
+            @click="handleRevokeApiKey(item.id)"
+          >
+            <Trash2 :size="14" />
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- 分隔线 -->
@@ -329,6 +472,17 @@ onUnmounted(() => {
   font-weight: var(--font-weight-medium);
 }
 
+.profile-label--section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.profile-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
 .profile-value {
   font-size: var(--font-size-sm);
   color: var(--text-primary);
@@ -370,6 +524,106 @@ onUnmounted(() => {
 .profile-input:focus {
   border-color: var(--color-accent);
   box-shadow: 0 0 0 2px var(--color-accent-subtle);
+}
+
+.api-key-create-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.api-key-create-btn {
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--text-on-accent);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: background var(--duration-fast) ease;
+  white-space: nowrap;
+}
+
+.api-key-create-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+.api-key-create-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.api-key-new {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+}
+
+.api-key-new-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.api-key-new-value {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-primary);
+  background: transparent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.api-key-empty {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.api-key-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-height: 140px;
+  overflow: auto;
+}
+
+.api-key-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+}
+
+.api-key-item-main {
+  min-width: 0;
+}
+
+.api-key-item-title {
+  font-size: var(--font-size-xs);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.api-key-item-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: 2px;
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.api-key-revoke-btn {
+  color: var(--color-danger);
 }
 
 .profile-edit-actions {
