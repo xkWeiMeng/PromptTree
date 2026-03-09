@@ -330,12 +330,20 @@
   </url>
   <url>
     <loc>https://prompttree.app/zh-CN/blog</loc>
-    <lastmod>2026-02-12</lastmod>
+    <lastmod>2026-03-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://prompttree.app/en/blog" />
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://prompttree.app/zh-CN/blog" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://prompttree.app/en/blog" />
+  </url>
+  <url>
+    <loc>https://prompttree.app/zh-CN/blog/api-key-prompt-management</loc>
+    <lastmod>2026-03-09</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://prompttree.app/zh-CN/blog/api-key-prompt-management" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://prompttree.app/zh-CN/blog/api-key-prompt-management" />
   </url>
   <url>
     <loc>https://prompttree.app/en/blog/offline-first-design</loc>
@@ -372,6 +380,22 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://prompttree.app/en/blog/prompt-management-pain-points" />
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://prompttree.app/zh-CN/blog/prompt-management-pain-points" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://prompttree.app/en/blog/prompt-management-pain-points" />
+  </url>
+  <url>
+    <loc>https://prompttree.app/zh-CN/blog/prompt-sharing-use-cases</loc>
+    <lastmod>2026-03-09</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://prompttree.app/zh-CN/blog/prompt-sharing-use-cases" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://prompttree.app/zh-CN/blog/prompt-sharing-use-cases" />
+  </url>
+  <url>
+    <loc>https://prompttree.app/zh-CN/blog/skills-api-key-automation</loc>
+    <lastmod>2026-03-09</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://prompttree.app/zh-CN/blog/skills-api-key-automation" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://prompttree.app/zh-CN/blog/skills-api-key-automation" />
   </url>
   <url>
     <loc>https://prompttree.app/en/blog/variable-filling</loc>
