@@ -24,6 +24,7 @@ const features = computed(() => [
   { illustration: 'mindmap', color: 'indigo', title: t('landing.feature6Title'), desc: t('landing.feature6Desc') },
   { illustration: 'share', color: 'blue', title: t('landing.feature7Title'), desc: t('landing.feature7Desc') },
   { illustration: 'api', color: 'purple', title: t('landing.feature8Title'), desc: t('landing.feature8Desc') },
+  { illustration: 'skills', color: 'teal', title: t('landing.feature9Title'), desc: t('landing.feature9Desc') },
 ])
 
 const platforms = computed(() => [

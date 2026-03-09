@@ -161,6 +161,27 @@ defineProps<{ name: string }>()
     <circle cx="26" cy="32" r="2" fill="#34C759" opacity=".35"/>
   </svg>
 
+  <!-- Agent Skills -->
+  <svg v-else-if="name === 'skills'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="gskills" x1="0" y1="0" x2="56" y2="56">
+        <stop stop-color="#64D2FF"/><stop offset="1" stop-color="#5AC8FA"/>
+      </linearGradient>
+    </defs>
+    <rect width="56" height="56" rx="14" fill="url(#gskills)"/>
+    <rect x="8" y="10" width="18" height="18" rx="4" fill="#fff" opacity=".2"/>
+    <rect x="30" y="10" width="18" height="18" rx="4" fill="#fff" opacity=".2"/>
+    <rect x="19" y="30" width="18" height="16" rx="4" fill="#fff" opacity=".25"/>
+    <line x1="26" y1="19" x2="30" y2="19" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+    <line x1="28" y1="28" x2="28" y2="30" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+    <circle cx="17" cy="19" r="4" fill="#fff" opacity=".9"/>
+    <circle cx="39" cy="19" r="4" fill="#fff" opacity=".9"/>
+    <circle cx="28" cy="38" r="4.5" fill="#fff" opacity=".95"/>
+    <circle cx="17" cy="19" r="1.5" fill="#5AC8FA" opacity=".4"/>
+    <circle cx="39" cy="19" r="1.5" fill="#5AC8FA" opacity=".4"/>
+    <path d="M28 32l1.1 1.3 1.7-.3.3 1.7 1.3 1.1-1.3 1.1-.3 1.7-1.7-.3L28 40l-1.1-1.3-1.7.3-.3-1.7-1.3-1.1 1.3-1.1.3-1.7 1.7.3L28 32z" fill="#5AC8FA" opacity=".35"/>
+  </svg>
+
   <!-- 思维导图 -->
   <svg v-else-if="name === 'mindmap'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>

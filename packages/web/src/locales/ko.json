@@ -62,10 +62,12 @@
     "feature5Desc": "ChatGPT, Claude, Gemini 등 AI 페이지에서 프롬프트를 직접 선택하고 원클릭으로 입력란에 삽입합니다.",
     "feature6Title": "마인드맵 뷰",
     "feature6Desc": "인터랙티브 마인드맵으로 프롬프트 라이브러리를 탐색하세요. 지식 구조를 한눈에 파악할 수 있습니다.",
-    "feature7Title": "공유 링크",
-    "feature7Desc": "단일 프롬프트나 폴더 전체에 공개 링크를 생성하세요. 링크가 있는 사람은 로그인 없이 조회·복사할 수 있습니다.",
-    "feature8Title": "API 키 접근",
-    "feature8Desc": "API 키를 발급해 스크립트, 자동화 워크플로, 내부 도구에서 PromptTree 데이터에 안전하게 접근하세요.",
+    "feature7Title": "온라인 공유 지원",
+    "feature7Desc": "단일 프롬프트나 폴더 전체에 온라인 공유 링크를 생성하세요. 링크가 있는 사람은 로그인 없이 조회·복사할 수 있습니다.",
+    "feature8Title": "API 키 호출 지원",
+    "feature8Desc": "API 키를 발급해 스크립트, 자동화 워크플로, 내부 도구에서 PromptTree 데이터를 안전하게 호출하세요.",
+    "feature9Title": "Agent Skills 지원",
+    "feature9Desc": "공식 Agent Skills를 함께 사용해 Prompt 운영과 재사용을 표준화하고 자동화 워크플로를 쉽게 구축하세요.",
     "platformsTitle": "언제 어디서나, 모든 플랫폼",
     "platformsDesc": "어떤 플랫폼에서 작업하든 PromptTree가 함께합니다.",
     "platformWebTitle": "Web App",
@@ -85,7 +87,7 @@
     "ctaTitle": "프롬프트를 정리할 준비가 되셨나요?",
     "ctaDesc": "무료 사용, 신용카드 불필요. 오프라인 모드 지원, 가입 없이 체험 가능.",
     "ctaBtn": "지금 무료로 시작하기",
-    "metaDesc": "PromptTree — 트리 구조의 프롬프트 관리 도구. 변수 채우기, 공유 링크, API 키 접근, 오프라인 우선, 멀티 디바이스 동기화를 지원합니다."
+    "metaDesc": "PromptTree — 트리 구조의 프롬프트 관리 도구. 변수 채우기, 온라인 공유, API 키 호출, Agent Skills, 오프라인 우선, 멀티 디바이스 동기화를 지원합니다."
   },
   "features": {
     "pageTitle": "기능 소개",

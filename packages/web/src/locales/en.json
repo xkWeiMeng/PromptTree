@@ -62,10 +62,12 @@
     "feature5Desc": "Select prompts directly on ChatGPT, Claude, Gemini and other AI pages. Insert into the input box with one click.",
     "feature6Title": "Mind Map View",
     "feature6Desc": "Browse your prompt library as an interactive mind map. Get a bird's-eye view of your knowledge structure.",
-    "feature7Title": "Share Links",
-    "feature7Desc": "Generate a public link for a prompt or folder. Anyone with the link can view and copy without logging in.",
-    "feature8Title": "API Key Access",
-    "feature8Desc": "Create API keys to access PromptTree data from scripts, automations, and internal tools.",
+    "feature7Title": "Online Sharing",
+    "feature7Desc": "Generate online share links for a prompt or folder. Anyone with the link can view and copy without logging in.",
+    "feature8Title": "API Key Calls",
+    "feature8Desc": "Create API keys so scripts, automations, and internal tools can call PromptTree data securely.",
+    "feature9Title": "Agent Skills Support",
+    "feature9Desc": "Combine official Agent Skills with your prompt workflows to standardize reusable capabilities across teams.",
     "platformsTitle": "Anywhere, Every Platform",
     "platformsDesc": "No matter where you work, PromptTree is right there with you.",
     "platformWebTitle": "Web App",
@@ -85,7 +87,7 @@
     "ctaTitle": "Ready to Get Your Prompts Organized?",
     "ctaDesc": "Free to use, no credit card required. Supports offline mode — no sign-up needed to try.",
     "ctaBtn": "Start Free Now",
-    "metaDesc": "PromptTree — A tree-structured prompt management tool with variable filling, public sharing, API key access, offline-first design, and multi-device sync."
+    "metaDesc": "PromptTree — A tree-structured prompt manager with variable filling, online sharing, API key calls, Agent Skills support, offline-first design, and multi-device sync."
   },
   "features": {
     "pageTitle": "Features",

@@ -62,10 +62,12 @@
     "feature5Desc": "在 ChatGPT、Claude、Gemini 等 AI 页面直接选取 Prompt，一键填入输入框。",
     "feature6Title": "思维导图视图",
     "feature6Desc": "以可视化思维导图方式浏览你的 Prompt 库，全局把握知识结构。",
-    "feature7Title": "公开分享链接",
-    "feature7Desc": "可为单条 Prompt 或整个文件夹生成公开链接，拿到链接的人无需登录即可查看并复制。",
-    "feature8Title": "API Key 访问",
-    "feature8Desc": "可生成 API Key 供脚本、自动化流程或内部工具安全访问 PromptTree 数据。",
+    "feature7Title": "支持在线分享",
+    "feature7Desc": "可为单条 Prompt 或整个文件夹生成在线分享链接，拿到链接的人无需登录即可查看并复制。",
+    "feature8Title": "支持 API Key 调用",
+    "feature8Desc": "可生成 API Key 供脚本、自动化流程或内部工具安全调用 PromptTree 数据。",
+    "feature9Title": "支持 Agent Skills",
+    "feature9Desc": "可结合官方 Agent Skills 管理与沉淀 Prompt，让团队能力复用和自动化流程落地更简单。",
     "platformsTitle": "随时随地，多端覆盖",
     "platformsDesc": "无论你在哪个平台工作，PromptTree 都在你身边。",
     "platformWebTitle": "Web App",
@@ -85,7 +87,7 @@
     "ctaTitle": "准备好让 Prompt 井然有序了吗？",
     "ctaDesc": "免费使用，无需信用卡。支持离线模式，无需注册即可体验。",
     "ctaBtn": "立即免费使用",
-    "metaDesc": "PromptTree — 树形结构 Prompt 管理工具，支持变量填充、公开分享链接、API Key 访问、离线优先与多端同步。"
+    "metaDesc": "PromptTree — 树形结构 Prompt 管理工具，支持变量填充、在线分享、API Key 调用、Agent Skills、离线优先与多端同步。"
   },
   "features": {
     "pageTitle": "功能介绍",

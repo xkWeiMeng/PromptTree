@@ -62,10 +62,12 @@
     "feature5Desc": "ChatGPT、Claude、GeminiなどのAIページで直接プロンプトを選択し、ワンクリックで入力欄に挿入。",
     "feature6Title": "マインドマップビュー",
     "feature6Desc": "インタラクティブなマインドマップでプロンプトライブラリを閲覧。知識構造を俯瞰的に把握。",
-    "feature7Title": "共有リンク",
-    "feature7Desc": "単一のPromptやフォルダ全体に公開リンクを生成。リンクを持つ人はログイン不要で閲覧・コピーできます。",
-    "feature8Title": "APIキーアクセス",
-    "feature8Desc": "APIキーを発行して、スクリプト・自動化フロー・社内ツールからPromptTreeデータに安全にアクセス。",
+    "feature7Title": "オンライン共有対応",
+    "feature7Desc": "単一のPromptやフォルダ全体にオンライン共有リンクを生成。リンクを持つ人はログイン不要で閲覧・コピーできます。",
+    "feature8Title": "APIキー呼び出し対応",
+    "feature8Desc": "APIキーを発行し、スクリプト・自動化フロー・社内ツールからPromptTreeデータを安全に呼び出せます。",
+    "feature9Title": "Agent Skills 対応",
+    "feature9Desc": "公式 Agent Skills を組み合わせ、Prompt の運用・再利用・自動化ワークフローをチームで標準化できます。",
     "platformsTitle": "いつでもどこでも、マルチプラットフォーム",
     "platformsDesc": "どのプラットフォームで作業していても、PromptTreeはそばにいます。",
     "platformWebTitle": "Web App",
@@ -85,7 +87,7 @@
     "ctaTitle": "プロンプトを整理する準備はできましたか？",
     "ctaDesc": "無料で使用、クレジットカード不要。オフラインモード対応、登録不要で体験可能。",
     "ctaBtn": "今すぐ無料で始める",
-    "metaDesc": "PromptTree — ツリー構造のプロンプト管理ツール。変数埋め込み、共有リンク、APIキーアクセス、オフラインファースト、マルチデバイス同期に対応。"
+    "metaDesc": "PromptTree — ツリー構造のプロンプト管理ツール。変数埋め込み、オンライン共有、APIキー呼び出し、Agent Skills、オフラインファースト、マルチデバイス同期に対応。"
   },
   "features": {
     "pageTitle": "機能紹介",
