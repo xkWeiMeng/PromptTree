@@ -99,10 +99,10 @@
 
 /* Modal scale + fade */
 .modal-enter-active {
-  transition: all var(--duration-enter) var(--ease-spring);
+  transition: opacity var(--duration-enter) var(--ease-spring), transform var(--duration-enter) var(--ease-spring);
 }
 .modal-leave-active {
-  transition: all var(--duration-leave) var(--ease-out);
+  transition: opacity var(--duration-leave) var(--ease-out), transform var(--duration-leave) var(--ease-out);
 }
 .modal-enter-from {
   opacity: 0;
@@ -118,10 +118,10 @@
    =========================================================================== */
 
 .popover-enter-active {
-  transition: all var(--duration-fast) var(--ease-out);
+  transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
 }
 .popover-leave-active {
-  transition: all var(--duration-instant) ease;
+  transition: opacity var(--duration-instant) ease, transform var(--duration-instant) ease;
 }
 .popover-enter-from {
   opacity: 0;
@@ -134,10 +134,10 @@
 
 /* Context menu (faster, subtler) */
 .menu-enter-active {
-  transition: all var(--duration-fast) var(--ease-out);
+  transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
 }
 .menu-leave-active {
-  transition: all 100ms ease;
+  transition: opacity 100ms ease, transform 100ms ease;
 }
 .menu-enter-from {
   opacity: 0;
@@ -153,10 +153,10 @@
    =========================================================================== */
 
 .toast-enter-active {
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: opacity var(--duration-normal) var(--ease-out), transform var(--duration-normal) var(--ease-out);
 }
 .toast-leave-active {
-  transition: all var(--duration-leave) var(--ease-out);
+  transition: opacity var(--duration-leave) var(--ease-out), transform var(--duration-leave) var(--ease-out);
 }
 .toast-enter-from {
   opacity: 0;
@@ -175,10 +175,10 @@
    =========================================================================== */
 
 .slide-down-enter-active {
-  transition: all var(--duration-enter) var(--ease-out);
+  transition: opacity var(--duration-enter) var(--ease-out), transform var(--duration-enter) var(--ease-out);
 }
 .slide-down-leave-active {
-  transition: all var(--duration-leave) ease;
+  transition: opacity var(--duration-leave) ease, transform var(--duration-leave) ease;
 }
 .slide-down-enter-from {
   opacity: 0;
@@ -222,4 +222,18 @@
 
 .animate-scale-in {
   animation: scale-in var(--duration-enter) var(--ease-spring);
+}
+
+/* ===========================================================================
+   Accessibility — Reduced Motion
+   =========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
