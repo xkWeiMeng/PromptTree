@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import DOMPurify from 'dompurify'
 
 const props = defineProps<{
   content: string
@@ -89,7 +90,12 @@ function escapeHtml(str: string): string {
     .replace(/"/g, '&quot;')
 }
 
-const rendered = computed(() => renderMarkdown(props.content))
+const rendered = computed(() =>
+  DOMPurify.sanitize(renderMarkdown(props.content), {
+    ADD_ATTR: ['target', 'rel', 'loading'],
+    ADD_TAGS: ['img'],
+  })
+)
 </script>
 
 <template>
