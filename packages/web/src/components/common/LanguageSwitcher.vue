@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { Globe } from 'lucide-vue-next'
 import {
   SUPPORTED_LOCALES,
@@ -19,6 +19,8 @@ const router = useRouter()
 const route = useRoute()
 const open = ref(false)
 const switcherRef = ref<HTMLElement | null>(null)
+const menuRef = ref<HTMLElement | null>(null)
+const focusedIndex = ref(-1)
 
 async function switchLocale(newLocale: SupportedLocale) {
   if (newLocale === locale.value) {
@@ -41,6 +43,41 @@ async function switchLocale(newLocale: SupportedLocale) {
 
 function toggleMenu() {
   open.value = !open.value
+  if (open.value) {
+    focusedIndex.value = SUPPORTED_LOCALES.indexOf(locale.value as SupportedLocale)
+    if (focusedIndex.value === -1) focusedIndex.value = 0
+    nextTick(() => focusMenuItem(focusedIndex.value))
+  }
+}
+
+function focusMenuItem(index: number) {
+  const items = menuRef.value?.querySelectorAll<HTMLElement>('[role="menuitem"]')
+  items?.[index]?.focus()
+}
+
+function onMenuKeydown(e: KeyboardEvent) {
+  const len = SUPPORTED_LOCALES.length
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+    e.preventDefault()
+    focusedIndex.value = (focusedIndex.value + 1) % len
+    focusMenuItem(focusedIndex.value)
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault()
+    focusedIndex.value = (focusedIndex.value - 1 + len) % len
+    focusMenuItem(focusedIndex.value)
+  } else if (e.key === 'Escape') {
+    e.preventDefault()
+    open.value = false
+    switcherRef.value?.querySelector('button')?.focus()
+  } else if (e.key === 'Home') {
+    e.preventDefault()
+    focusedIndex.value = 0
+    focusMenuItem(0)
+  } else if (e.key === 'End') {
+    e.preventDefault()
+    focusedIndex.value = len - 1
+    focusMenuItem(focusedIndex.value)
+  }
 }
 
 function onClickOutside(e: MouseEvent) {
@@ -63,6 +100,9 @@ onBeforeUnmount(() => {
     <button
       class="lang-switcher__trigger"
       :title="$t('languageSwitcher.label')"
+      :aria-label="$t('languageSwitcher.label')"
+      aria-haspopup="true"
+      :aria-expanded="open"
       @click="toggleMenu"
     >
       <Globe :size="16" />
@@ -70,12 +110,21 @@ onBeforeUnmount(() => {
     </button>
 
     <Transition name="dropdown">
-      <div v-if="open" class="lang-switcher__menu">
+      <div
+        v-if="open"
+        ref="menuRef"
+        class="lang-switcher__menu"
+        role="menu"
+        :aria-label="$t('languageSwitcher.label')"
+        @keydown="onMenuKeydown"
+      >
         <button
           v-for="loc in SUPPORTED_LOCALES"
           :key="loc"
+          role="menuitem"
           class="lang-switcher__item"
           :class="{ 'lang-switcher__item--active': locale === loc }"
+          :aria-current="locale === loc ? 'true' : undefined"
           @click="switchLocale(loc)"
         >
           {{ LOCALE_LABELS[loc] }}

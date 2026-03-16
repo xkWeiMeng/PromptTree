@@ -42,8 +42,8 @@ useHead({ title: pageTitle, description: pageDesc })
       <!-- 文章头 -->
       <div class="blog-post__header">
         <div class="site-container">
-          <RouterLink :to="localePath('/blog')" class="blog-post__back">
-            <ArrowLeft :size="16" />
+          <RouterLink :to="localePath('/blog')" class="blog-post__back" :aria-label="t('blog.backToBlog')">
+            <ArrowLeft :size="20" />
             {{ t('blog.backToBlog') }}
           </RouterLink>
           <h1 class="blog-post__title">{{ post.meta.title }}</h1>
@@ -58,7 +58,7 @@ useHead({ title: pageTitle, description: pageDesc })
       </div>
 
       <!-- 文章内容 -->
-      <div class="site-container site-container--narrow" style="padding-bottom: var(--space-16);">
+      <div class="site-container site-container--narrow blog-post__body">
         <MarkdownRenderer :content="post.content" />
 
         <!-- 相关文章 -->
@@ -80,15 +80,19 @@ useHead({ title: pageTitle, description: pageDesc })
     </template>
 
     <template v-else>
-      <div style="text-align: center; padding: calc(var(--site-header-height) + var(--space-20)) 0 var(--space-20); color: var(--text-tertiary);">
+      <div class="blog-post__not-found">
         <p>{{ t('blog.notFound') }}</p>
-        <RouterLink :to="localePath('/blog')" style="margin-top: var(--space-4); display: inline-block;">{{ t('blog.backToList') }}</RouterLink>
+        <RouterLink :to="localePath('/blog')" class="blog-post__not-found-link" :aria-label="t('blog.backToList')">{{ t('blog.backToList') }}</RouterLink>
       </div>
     </template>
   </SiteLayout>
 </template>
 
 <style scoped>
+.blog-post__body {
+  padding-bottom: var(--space-16);
+}
+
 .blog-post__back {
   display: inline-flex;
   align-items: center;
@@ -104,11 +108,33 @@ useHead({ title: pageTitle, description: pageDesc })
   text-decoration: none;
 }
 
+.blog-post__back:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Typography */
+.blog-post__title {
+  text-wrap: balance;
+}
+
 .blog-post__tags {
   display: flex;
   justify-content: center;
   gap: var(--space-2);
   margin-top: var(--space-4);
+}
+
+.blog-post__not-found {
+  text-align: center;
+  padding: calc(var(--site-header-height) + var(--space-20)) 0 var(--space-20);
+  color: var(--text-tertiary);
+}
+
+.blog-post__not-found-link {
+  margin-top: var(--space-4);
+  display: inline-block;
 }
 
 .related-posts {
@@ -146,6 +172,11 @@ useHead({ title: pageTitle, description: pageDesc })
   text-decoration: none;
 }
 
+.related-posts__item:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .related-posts__item-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -155,5 +186,26 @@ useHead({ title: pageTitle, description: pageDesc })
 .related-posts__item-date {
   font-size: var(--font-size-xs);
   color: var(--text-tertiary);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .blog-post__body {
+    padding-bottom: var(--space-10);
+  }
+
+  .blog-post__not-found {
+    padding: calc(var(--site-header-height) + var(--space-12)) 0 var(--space-12);
+  }
+
+  .related-posts {
+    margin-top: var(--space-10);
+  }
+
+  .related-posts__item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
 }
 </style>

@@ -283,3 +283,11 @@ img, svg {
     background: var(--glass-bg-thick);
   }
 }
+
+/* =================== Mobile Adaptations =================== */
+@media (max-width: 768px) {
+  .icon-btn {
+    min-width: var(--touch-target-min, 44px);
+    min-height: var(--touch-target-min, 44px);
+  }
+}

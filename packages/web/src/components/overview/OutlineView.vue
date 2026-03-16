@@ -118,6 +118,7 @@ function collapseAllOutline() {
           type="text"
           :placeholder="t('outline.searchPlaceholder')"
           class="search-input"
+          aria-label="Search outline"
         />
         <button
           v-if="searchQuery"
@@ -248,6 +249,11 @@ function collapseAllOutline() {
   font-size: var(--font-size-sm);
   color: var(--text-primary);
   outline: none;
+}
+
+.search-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .search-input::placeholder {

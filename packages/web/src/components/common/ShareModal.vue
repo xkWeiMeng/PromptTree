@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Copy, Share2, Users, Trash2, Loader2, LogIn } from 'lucide-vue-next'
 import { createShare, deleteShare, getMyShare, type ShareInfo, type ShareStats } from '@/api/share'
@@ -23,6 +23,7 @@ const loginModal = useLoginModal()
 const authStore = useAuthStore()
 const treeStore = useTreeStore()
 
+const modalRef = ref<HTMLElement | null>(null)
 const loading = ref(false)
 const operating = ref(false)
 const shareInfo = ref<ShareInfo | null>(null)
@@ -68,6 +69,16 @@ function handleBackdropClick(event: MouseEvent) {
   if ((event.target as HTMLElement).classList.contains('share-backdrop')) {
     closeModal()
   }
+}
+
+// 焦点陷阱
+function trapFocus(e: KeyboardEvent) {
+  const focusable = modalRef.value?.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+  if (!focusable?.length) return
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
 }
 
 async function loadShareState() {
@@ -155,6 +166,15 @@ watch(
   },
   { immediate: true }
 )
+
+// 打开时聚焦第一个可交互元素
+watch(() => props.visible, async (visible) => {
+  if (visible) {
+    await nextTick()
+    const first = modalRef.value?.querySelector<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    first?.focus()
+  }
+})
 </script>
 
 <template>
@@ -162,7 +182,16 @@ watch(
     <Transition name="backdrop">
       <div v-if="visible" class="share-backdrop" @click="handleBackdropClick">
         <Transition name="modal" appear>
-          <div v-if="visible" class="share-dialog">
+          <div
+            v-if="visible"
+            ref="modalRef"
+            class="share-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Share"
+            @keydown.tab="trapFocus"
+            @keydown.escape="closeModal"
+          >
             <div class="share-header">
               <h3>{{ t('share.title') }}</h3>
               <p class="sub-title">{{ currentNode?.title || t('common.untitled') }}</p>
@@ -189,8 +218,8 @@ watch(
               <div v-else-if="shareInfo" class="share-body">
                 <label class="label">{{ t('share.linkLabel') }}</label>
                 <div class="link-row">
-                  <input :value="shareInfo.link" readonly class="link-input" />
-                  <button class="icon-btn" @click="handleCopyLink" :title="t('share.copyLink')">
+                  <input :value="shareInfo.link" readonly class="link-input" :aria-label="t('share.linkLabel')" />
+                  <button class="icon-btn" @click="handleCopyLink" :title="t('share.copyLink')" :aria-label="t('share.copyLink')">
                     <Copy :size="14" />
                   </button>
                 </div>
@@ -244,6 +273,7 @@ watch(
   align-items: center;
   justify-content: center;
   z-index: var(--z-modal);
+  overscroll-behavior: contain;
 }
 
 .share-dialog {
@@ -425,5 +455,15 @@ watch(
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .share-dialog {
+    width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+    margin: 0;
+  }
 }
 </style>

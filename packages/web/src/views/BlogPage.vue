@@ -34,7 +34,7 @@ function formatDate(dateStr: string): string {
       </div>
     </section>
 
-    <div class="site-container" style="padding-bottom: var(--space-20);">
+    <div class="site-container blog-page__body">
       <div class="blog-grid">
         <RouterLink
           v-for="post in posts"
@@ -51,9 +51,41 @@ function formatDate(dateStr: string): string {
         </RouterLink>
       </div>
 
-      <div v-if="!posts.length" style="text-align: center; padding: var(--space-20) 0; color: var(--text-tertiary);">
+      <div v-if="!posts.length" class="blog-page__empty">
         <p>{{ t('blog.noPosts') }}</p>
       </div>
     </div>
   </SiteLayout>
 </template>
+
+<style scoped>
+.blog-page__body {
+  padding-bottom: var(--space-20);
+}
+
+.blog-page__empty {
+  text-align: center;
+  padding: var(--space-20) 0;
+  color: var(--text-tertiary);
+}
+
+/* Typography */
+.page-header__title {
+  text-wrap: balance;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .blog-page__body {
+    padding-bottom: var(--space-12);
+  }
+
+  .page-header__title {
+    font-size: var(--font-size-h3);
+  }
+
+  .blog-page__empty {
+    padding: var(--space-12) 0;
+  }
+}
+</style>

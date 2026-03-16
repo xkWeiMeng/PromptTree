@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Sun, Moon, Monitor } from 'lucide-vue-next'
 import { useTheme } from '@/composables/useTheme'
@@ -16,6 +16,8 @@ const { themeMode, setTheme } = useTheme()
 
 const open = ref(false)
 const toggleRef = ref<HTMLElement | null>(null)
+const menuRef = ref<HTMLElement | null>(null)
+const focusedIndex = ref(-1)
 
 const options: { mode: ThemeMode; icon: typeof Sun; labelKey: string }[] = [
   { mode: 'system', icon: Monitor, labelKey: 'theme.system' },
@@ -30,6 +32,40 @@ function select(mode: ThemeMode) {
 
 function toggleMenu() {
   open.value = !open.value
+  if (open.value) {
+    focusedIndex.value = options.findIndex(o => o.mode === themeMode.value)
+    if (focusedIndex.value === -1) focusedIndex.value = 0
+    nextTick(() => focusMenuItem(focusedIndex.value))
+  }
+}
+
+function focusMenuItem(index: number) {
+  const items = menuRef.value?.querySelectorAll<HTMLElement>('[role="menuitem"]')
+  items?.[index]?.focus()
+}
+
+function onMenuKeydown(e: KeyboardEvent) {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+    e.preventDefault()
+    focusedIndex.value = (focusedIndex.value + 1) % options.length
+    focusMenuItem(focusedIndex.value)
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault()
+    focusedIndex.value = (focusedIndex.value - 1 + options.length) % options.length
+    focusMenuItem(focusedIndex.value)
+  } else if (e.key === 'Escape') {
+    e.preventDefault()
+    open.value = false
+    toggleRef.value?.querySelector('button')?.focus()
+  } else if (e.key === 'Home') {
+    e.preventDefault()
+    focusedIndex.value = 0
+    focusMenuItem(0)
+  } else if (e.key === 'End') {
+    e.preventDefault()
+    focusedIndex.value = options.length - 1
+    focusMenuItem(focusedIndex.value)
+  }
 }
 
 function onClickOutside(e: MouseEvent) {
@@ -52,6 +88,9 @@ onBeforeUnmount(() => {
     <button
       class="theme-toggle__trigger"
       :title="t('theme.label')"
+      :aria-label="t('theme.label')"
+      aria-haspopup="true"
+      :aria-expanded="open"
       @click="toggleMenu"
     >
       <Transition name="theme-icon" mode="out-in">
@@ -62,10 +101,19 @@ onBeforeUnmount(() => {
     </button>
 
     <Transition :name="placement === 'top' ? 'dropdown-up' : 'dropdown'">
-      <div v-if="open" class="theme-toggle__menu" :class="`theme-toggle__menu--${placement}`">
+      <div
+        v-if="open"
+        ref="menuRef"
+        class="theme-toggle__menu"
+        :class="`theme-toggle__menu--${placement}`"
+        role="menu"
+        :aria-label="t('theme.label')"
+        @keydown="onMenuKeydown"
+      >
         <button
           v-for="opt in options"
           :key="opt.mode"
+          role="menuitem"
           class="theme-toggle__item"
           :class="{ 'theme-toggle__item--active': themeMode === opt.mode }"
           @click="select(opt.mode)"

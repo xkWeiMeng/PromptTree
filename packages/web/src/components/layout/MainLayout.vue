@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useSyncStore } from '@/stores/sync'
 import { useLoginModal } from '@/composables/useLoginModal'
 import {
   RefreshCw, AlertTriangle, User,
-  WifiOff, CheckCircle
+  WifiOff, CheckCircle, Menu
 } from 'lucide-vue-next'
 import BrandLogo from '@/components/common/BrandLogo.vue'
 import ThemeToggle from '@/components/common/ThemeToggle.vue'
@@ -22,6 +22,28 @@ const sidebarWidth = ref(280)
 const isResizing = ref(false)
 const minWidth = 200
 const maxWidth = 500
+
+// 移动端菜单
+const isMobileMenuOpen = ref(false)
+const isMobile = ref(false)
+
+function checkMobile() {
+  isMobile.value = window.matchMedia('(max-width: 768px)').matches
+  if (!isMobile.value) isMobileMenuOpen.value = false
+}
+
+function toggleMobileMenu() {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
+}
+
+function closeMobileMenu() {
+  isMobileMenuOpen.value = false
+}
+
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
 
 // 用户信息
 const user = computed(() => authStore.user)
@@ -86,16 +108,42 @@ function closeProfilePanel() {
 onUnmounted(() => {
   document.removeEventListener('mousemove', handleResize)
   document.removeEventListener('mouseup', stopResize)
+  window.removeEventListener('resize', checkMobile)
 })
 </script>
 
 <template>
   <div class="main-layout" :class="{ resizing: isResizing }">
+    <!-- Skip to main content -->
+    <a href="#main-content" class="skip-link">Skip to content</a>
+
+    <!-- Mobile menu button -->
+    <button
+      v-if="isMobile"
+      class="mobile-menu-btn"
+      :aria-label="t('layout.menu', 'Menu')"
+      :aria-expanded="isMobileMenuOpen"
+      @click="toggleMobileMenu"
+    >
+      <Menu :size="20" />
+    </button>
+
+    <!-- Mobile overlay -->
+    <div
+      v-if="isMobile && isMobileMenuOpen"
+      class="sidebar-overlay"
+      @click="closeMobileMenu"
+    ></div>
+
     <!-- 侧边栏 -->
-    <aside class="sidebar" :style="{ width: sidebarWidth + 'px' }">
+    <aside
+      class="sidebar"
+      :class="{ 'sidebar--open': isMobileMenuOpen }"
+      :style="isMobile ? undefined : { width: sidebarWidth + 'px' }"
+    >
       <!-- 侧边栏头部 -->
       <div class="sidebar-header">
-        <RouterLink to="/" class="logo">
+        <RouterLink to="/" class="logo" aria-label="PromptTree">
           <BrandLogo :size="22" />
           <span>PromptTree</span>
         </RouterLink>
@@ -121,7 +169,18 @@ onUnmounted(() => {
       <!-- 侧边栏底部 -->
       <div class="sidebar-footer">
         <!-- 登录用户信息 -->
-        <div class="user-avatar-btn" v-if="user" ref="profileAnchorRef" @click="toggleProfilePanel">
+        <div
+          class="user-avatar-btn"
+          v-if="user"
+          ref="profileAnchorRef"
+          role="button"
+          tabindex="0"
+          aria-haspopup="true"
+          :aria-expanded="showProfilePanel"
+          @click="toggleProfilePanel"
+          @keydown.enter="toggleProfilePanel"
+          @keydown.space.prevent="toggleProfilePanel"
+        >
           <img v-if="user.avatarUrl" :src="user.avatarUrl" class="avatar avatar-img" alt="" />
           <span v-else class="avatar"><User :size="14" /></span>
         </div>
@@ -158,16 +217,48 @@ onUnmounted(() => {
     <div class="resize-handle" @mousedown="startResize"></div>
     
     <!-- 主内容区 -->
-    <main class="main-content">
+    <main id="main-content" class="main-content">
       <slot name="content"></slot>
     </main>
   </div>
 </template>
 
 <style scoped>
+/* ===================
+   Skip Link (a11y)
+   =================== */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 200;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-accent);
+  color: var(--text-on-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+.skip-link:focus {
+  position: fixed;
+  left: var(--space-4);
+  top: var(--space-4);
+  width: auto;
+  height: auto;
+}
+
+/* ===================
+   Layout
+   =================== */
 .main-layout {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background: var(--bg-primary);
 }
@@ -175,6 +266,20 @@ onUnmounted(() => {
 .main-layout.resizing {
   user-select: none;
   cursor: col-resize;
+}
+
+/* ===================
+   Mobile Menu Button
+   =================== */
+.mobile-menu-btn {
+  display: none;
+}
+
+/* ===================
+   Mobile Overlay
+   =================== */
+.sidebar-overlay {
+  display: none;
 }
 
 /* ===================
@@ -198,6 +303,7 @@ onUnmounted(() => {
 
 .sidebar-header {
   padding: var(--space-3) var(--space-4);
+  padding-top: calc(var(--safe-area-top, env(safe-area-inset-top, 0px)) + var(--space-3));
   border-bottom: 0.5px solid var(--border-secondary);
 }
 
@@ -265,6 +371,11 @@ onUnmounted(() => {
   padding: 2px;
   transition: background var(--duration-fast) ease;
   flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-avatar-btn:hover {
@@ -326,6 +437,11 @@ onUnmounted(() => {
   background: var(--color-accent-hover);
 }
 
+.btn-login:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .offline-badge {
   display: inline-flex;
   align-items: center;
@@ -371,5 +487,66 @@ onUnmounted(() => {
   flex: 1;
   overflow: hidden;
   background: var(--bg-primary);
+}
+
+/* ===================
+   Mobile — ≤768px
+   =================== */
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: var(--space-2);
+    left: var(--space-2);
+    z-index: 101;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-secondary);
+    border: 0.5px solid var(--border-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .mobile-menu-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 80vw;
+    max-width: 320px;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform var(--duration-normal) ease;
+  }
+
+  .sidebar.sidebar--open {
+    transform: translateX(0);
+  }
+
+  .resize-handle {
+    display: none;
+  }
+
+  .main-content {
+    width: 100%;
+    flex: 1;
+  }
 }
 </style>

@@ -66,10 +66,10 @@ onMounted(async () => {
         <BrandLogo :size="48" />
       </div>
       <template v-if="status === 'loading'">
-        <p class="status-text">{{ t('login.processing') }}</p>
+        <p class="status-text" role="status" aria-live="polite">{{ t('login.processing') }}</p>
       </template>
       <template v-else-if="status === 'error'">
-        <p class="error-text">{{ errorMessage }}</p>
+        <p class="error-text" role="alert">{{ errorMessage }}</p>
         <p class="hint-text">{{ t('login.redirecting') }}</p>
       </template>
     </div>
@@ -83,6 +83,11 @@ onMounted(async () => {
   justify-content: center;
   min-height: 100vh;
   background: var(--bg-secondary);
+  padding:
+    env(safe-area-inset-top, 0)
+    env(safe-area-inset-right, 0)
+    env(safe-area-inset-bottom, 0)
+    env(safe-area-inset-left, 0);
 }
 
 .login-callback-card {
@@ -111,5 +116,17 @@ onMounted(async () => {
 .hint-text {
   color: var(--text-tertiary);
   font-size: var(--font-size-sm);
+}
+
+@media (max-width: 640px) {
+  .login-callback-card {
+    padding: var(--space-5);
+    max-width: 100%;
+  }
+
+  .status-text,
+  .error-text {
+    font-size: var(--font-size-sm);
+  }
 }
 </style>

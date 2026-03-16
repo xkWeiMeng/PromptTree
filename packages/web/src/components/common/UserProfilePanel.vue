@@ -258,15 +258,19 @@ onUnmounted(() => {
   <div ref="panelRef" class="profile-panel" :class="`profile-panel--${props.placement}`">
     <!-- 头像区域 -->
     <div class="profile-avatar-section">
-      <div class="profile-avatar-wrapper" @click="startEditAvatar">
-        <img v-if="user?.avatarUrl" :src="user.avatarUrl" class="profile-avatar" alt="" />
+      <button
+        class="profile-avatar-wrapper"
+        :aria-label="t('profile.changeAvatar', 'Change avatar')"
+        @click="startEditAvatar"
+      >
+        <img v-if="user?.avatarUrl" :src="user.avatarUrl" class="profile-avatar" :alt="user?.displayName ? `${user.displayName} avatar` : 'User avatar'" />
         <span v-else class="profile-avatar profile-avatar--fallback">
           <UserIcon :size="24" />
         </span>
-        <div class="profile-avatar-overlay">
+        <div class="profile-avatar-overlay" aria-hidden="true">
           <Camera :size="14" />
         </div>
-      </div>
+      </button>
     </div>
 
     <!-- 头像 URL 编辑 -->
@@ -274,6 +278,7 @@ onUnmounted(() => {
       <input
         v-model="editAvatarUrl"
         class="profile-input"
+        :aria-label="t('profile.avatarUrlPlaceholder')"
         :placeholder="t('profile.avatarUrlPlaceholder')"
         @keydown="onAvatarKeydown"
       />
@@ -295,6 +300,7 @@ onUnmounted(() => {
           ref="nameInputRef"
           v-model="editName"
           class="profile-input"
+          :aria-label="t('profile.displayName')"
           :placeholder="t('profile.namePlaceholder')"
           maxlength="50"
           @keydown="onNameKeydown"
@@ -309,7 +315,16 @@ onUnmounted(() => {
           </button>
         </div>
       </div>
-      <div v-else class="profile-value profile-value--editable" @click="startEditName">
+      <div
+        v-else
+        class="profile-value profile-value--editable"
+        role="button"
+        tabindex="0"
+        :aria-label="`${t('profile.displayName')}: ${user?.displayName || t('profile.notSet')}`"
+        @click="startEditName"
+        @keydown.enter="startEditName"
+        @keydown.space.prevent="startEditName"
+      >
         {{ user?.displayName || t('profile.notSet') }}
       </div>
     </div>
@@ -423,6 +438,14 @@ onUnmounted(() => {
   position: relative;
   cursor: pointer;
   border-radius: var(--radius-full);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.profile-avatar-wrapper:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .profile-avatar-wrapper:hover .profile-avatar-overlay {

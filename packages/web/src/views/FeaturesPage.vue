@@ -3,11 +3,8 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@/composables'
 import SiteLayout from '@/components/site/SiteLayout.vue'
-import {
-  FolderTree, Variable, WifiOff, Smartphone,
-  Puzzle, BrainCircuit, Moon, Keyboard,
-  ArrowRight, ListTree, Share2, KeyRound
-} from 'lucide-vue-next'
+import FeatureDetailIllustration from '@/components/site/FeatureDetailIllustration.vue'
+import { ArrowRight } from 'lucide-vue-next'
 
 const { t } = useI18n()
 
@@ -19,7 +16,7 @@ useHead({
 const features = computed(() => [
   {
     tag: t('features.tagCore'),
-    icon: FolderTree,
+    illustration: 'tree',
     color: 'blue',
     title: t('features.treeTitle'),
     desc: t('features.treeDesc'),
@@ -27,7 +24,7 @@ const features = computed(() => [
   },
   {
     tag: t('features.tagKiller'),
-    icon: Variable,
+    illustration: 'variable',
     color: 'purple',
     title: t('features.variableTitle'),
     desc: t('features.variableDesc'),
@@ -35,7 +32,7 @@ const features = computed(() => [
   },
   {
     tag: t('features.tagArchitecture'),
-    icon: WifiOff,
+    illustration: 'offline',
     color: 'orange',
     title: t('features.offlineTitle'),
     desc: t('features.offlineDesc'),
@@ -43,7 +40,7 @@ const features = computed(() => [
   },
   {
     tag: t('features.tagPlatform'),
-    icon: Smartphone,
+    illustration: 'sync',
     color: 'green',
     title: t('features.syncTitle'),
     desc: t('features.syncDesc'),
@@ -51,7 +48,7 @@ const features = computed(() => [
   },
   {
     tag: t('features.tagEfficiency'),
-    icon: Puzzle,
+    illustration: 'extension',
     color: 'teal',
     title: t('features.extensionTitle'),
     desc: t('features.extensionDesc'),
@@ -59,7 +56,7 @@ const features = computed(() => [
   },
   {
     tag: t('features.tagCollaboration'),
-    icon: Share2,
+    illustration: 'share',
     color: 'blue',
     title: t('features.shareTitle'),
     desc: t('features.shareDesc'),
@@ -67,7 +64,7 @@ const features = computed(() => [
   },
   {
     tag: t('features.tagIntegration'),
-    icon: KeyRound,
+    illustration: 'api',
     color: 'purple',
     title: t('features.apiAccessTitle'),
     desc: t('features.apiAccessDesc'),
@@ -75,7 +72,7 @@ const features = computed(() => [
   },
   {
     tag: t('features.tagVisualization'),
-    icon: BrainCircuit,
+    illustration: 'mindmap',
     color: 'indigo',
     title: t('features.mindmapTitle'),
     desc: t('features.mindmapDesc'),
@@ -83,7 +80,7 @@ const features = computed(() => [
   },
   {
     tag: t('features.tagVisualization'),
-    icon: ListTree,
+    illustration: 'outline',
     color: 'blue',
     title: t('features.outlineTitle'),
     desc: t('features.outlineDesc'),
@@ -91,7 +88,7 @@ const features = computed(() => [
   },
   {
     tag: t('features.tagExperience'),
-    icon: Moon,
+    illustration: 'dark',
     color: 'pink',
     title: t('features.darkTitle'),
     desc: t('features.darkDesc'),
@@ -99,7 +96,7 @@ const features = computed(() => [
   },
   {
     tag: t('features.tagShortcut'),
-    icon: Keyboard,
+    illustration: 'keyboard',
     color: 'green',
     title: t('features.keyboardTitle'),
     desc: t('features.keyboardDesc'),
@@ -122,8 +119,8 @@ const features = computed(() => [
 
     <!-- 功能详情列表 -->
     <div class="site-container">
-      <div
-        v-for="(f, i) in features"
+      <section
+        v-for="f in features"
         :key="f.title"
         class="feature-detail"
       >
@@ -133,14 +130,16 @@ const features = computed(() => [
           <p class="feature-detail__desc">{{ f.desc }}</p>
           <ul class="feature-detail__highlights">
             <li v-for="h in f.highlights" :key="h" class="feature-detail__highlight">
-              ✓ {{ h }}
+              <span aria-hidden="true">✓</span> {{ h }}
             </li>
           </ul>
         </div>
         <div class="feature-detail__visual">
-          <component :is="f.icon" :size="64" style="opacity: 0.3" />
+          <div class="feature-detail__illustration" :class="`feature-detail__illustration--${f.color}`">
+            <FeatureDetailIllustration :name="f.illustration" />
+          </div>
         </div>
-      </div>
+      </section>
     </div>
 
     <!-- CTA -->

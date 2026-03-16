@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { ref, watch, nextTick } from 'vue'
 import { useConfirm } from '@/composables/useConfirm'
 import { AlertTriangle, Info, AlertCircle } from 'lucide-vue-next'
 
 const { state, handleConfirm, handleCancel } = useConfirm()
+
+const modalRef = ref<HTMLElement | null>(null)
 
 // 点击背景关闭
 function handleBackdropClick(e: MouseEvent) {
@@ -10,6 +13,25 @@ function handleBackdropClick(e: MouseEvent) {
     handleCancel()
   }
 }
+
+// 焦点陷阱
+function trapFocus(e: KeyboardEvent) {
+  const focusable = modalRef.value?.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+  if (!focusable?.length) return
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+}
+
+// 打开时聚焦第一个可交互元素
+watch(() => state.visible, async (visible) => {
+  if (visible) {
+    await nextTick()
+    const first = modalRef.value?.querySelector<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    first?.focus()
+  }
+})
 </script>
 
 <template>
@@ -21,14 +43,24 @@ function handleBackdropClick(e: MouseEvent) {
         @click="handleBackdropClick"
       >
         <Transition name="modal" appear>
-          <div v-if="state.visible" class="confirm-dialog">
+          <div
+            v-if="state.visible"
+            ref="modalRef"
+            class="confirm-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="confirm-title"
+            aria-describedby="confirm-message"
+            @keydown.tab="trapFocus"
+            @keydown.escape="handleCancel"
+          >
             <div class="confirm-body">
               <div class="confirm-icon" :class="state.options.type">
                 <AlertTriangle v-if="state.options.type === 'danger' || state.options.type === 'warning'" :size="24" />
                 <Info v-else :size="24" />
               </div>
-              <h3 class="confirm-title">{{ state.options.title }}</h3>
-              <p class="confirm-message">{{ state.options.message }}</p>
+              <h3 id="confirm-title" class="confirm-title">{{ state.options.title }}</h3>
+              <p id="confirm-message" class="confirm-message">{{ state.options.message }}</p>
             </div>
             
             <div class="confirm-footer">
@@ -59,6 +91,7 @@ function handleBackdropClick(e: MouseEvent) {
   align-items: center;
   justify-content: center;
   z-index: var(--z-modal);
+  overscroll-behavior: contain;
 }
 
 .confirm-dialog {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useToast } from '@/composables/useToast'
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-vue-next'
-import { markRaw, type Component } from 'vue'
+import { markRaw, onMounted, onBeforeUnmount, type Component } from 'vue'
 
 const { toasts, remove } = useToast()
 
@@ -12,6 +12,28 @@ const iconMap: Record<string, Component> = {
   warning: markRaw(AlertTriangle),
   info: markRaw(Info)
 }
+
+function toastRole(type: string) {
+  return type === 'error' ? 'alert' : 'status'
+}
+
+function toastLive(type: string) {
+  return type === 'error' ? 'assertive' : 'polite'
+}
+
+function onGlobalKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape' && toasts.value.length > 0) {
+    remove(toasts.value[toasts.value.length - 1].id)
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', onGlobalKeydown)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onGlobalKeydown)
+})
 </script>
 
 <template>
@@ -23,6 +45,8 @@ const iconMap: Record<string, Component> = {
           :key="toast.id"
           class="toast"
           :class="toast.type"
+          :role="toastRole(toast.type)"
+          :aria-live="toastLive(toast.type)"
           @click="remove(toast.id)"
         >
           <component :is="iconMap[toast.type]" :size="18" class="toast-icon" />
@@ -34,7 +58,7 @@ const iconMap: Record<string, Component> = {
           >
             {{ toast.action.label }}
           </button>
-          <button class="toast-close" @click.stop="remove(toast.id)">
+          <button class="toast-close" aria-label="Dismiss notification" @click.stop="remove(toast.id)">
             <X :size="12" />
           </button>
         </div>

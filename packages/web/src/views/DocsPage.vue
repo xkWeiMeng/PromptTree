@@ -29,7 +29,7 @@ const docs = computed(() => getAllDocs(locale.value))
       </div>
     </section>
 
-    <div class="site-container" style="padding-bottom: var(--space-20);">
+    <div class="site-container docs-page__body">
       <div class="docs-list">
         <RouterLink
           v-for="doc in docs"
@@ -50,6 +50,15 @@ const docs = computed(() => getAllDocs(locale.value))
 </template>
 
 <style scoped>
+.docs-page__body {
+  padding-bottom: var(--space-20);
+}
+
+/* Typography */
+.page-header__title {
+  text-wrap: balance;
+}
+
 .docs-list {
   display: flex;
   flex-direction: column;
@@ -77,6 +86,11 @@ const docs = computed(() => getAllDocs(locale.value))
   text-decoration: none;
 }
 
+.docs-list__item:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .docs-list__icon {
   color: var(--color-accent);
   flex-shrink: 0;
@@ -102,5 +116,25 @@ const docs = computed(() => getAllDocs(locale.value))
 .docs-list__arrow {
   color: var(--text-tertiary);
   flex-shrink: 0;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .docs-page__body {
+    padding-bottom: var(--space-12);
+  }
+
+  .page-header__title {
+    font-size: var(--font-size-h3);
+  }
+
+  .docs-list__item {
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .docs-list__arrow {
+    display: none;
+  }
 }
 </style>

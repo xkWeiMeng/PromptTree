@@ -135,6 +135,8 @@ function handleDrop(e: DragEvent) {
       class="tree-node"
       :class="{ selected: isSelected, folder: isFolder }"
       :style="{ paddingLeft: indent }"
+      role="treeitem"
+      aria-roledescription="draggable item"
       :draggable="true"
       @click="handleClick"
       @dblclick="handleDblClick"
@@ -148,7 +150,13 @@ function handleDrop(e: DragEvent) {
       <span
         class="toggle"
         :class="{ expanded: isExpanded, hidden: !isFolder }"
+        role="button"
+        tabindex="0"
+        :aria-expanded="isFolder ? isExpanded : undefined"
+        :aria-label="isFolder ? (isExpanded ? 'Collapse folder' : 'Expand folder') : undefined"
         @click="handleToggle"
+        @keydown.enter.prevent="handleToggle"
+        @keydown.space.prevent="handleToggle"
       >
         <svg viewBox="0 0 24 24" width="14" height="14">
           <path fill="currentColor" d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
@@ -280,6 +288,10 @@ function handleDrop(e: DragEvent) {
   background: var(--bg-primary);
   outline: none;
   line-height: 1.6;
+}
+
+.rename-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-accent);
 }
 
 .children {

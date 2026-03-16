@@ -161,20 +161,20 @@ onMounted(() => {
           @blur="finishEditTitle"
           @keydown="handleTitleKeydown"
         />
-        <h1 v-else class="title" @click="startEditTitle">
+        <h1 v-else class="title" role="button" tabindex="0" @click="startEditTitle" @keydown.enter="startEditTitle">
           {{ title || t('common.untitled') }}
           <Pencil :size="14" class="edit-hint" />
         </h1>
       </div>
       
       <div class="actions">
-        <button class="icon-btn" :title="t('editor.insertVariable')" @click="insertVariable()">
+        <button class="icon-btn" :title="t('editor.insertVariable')" :aria-label="t('editor.insertVariable')" @click="insertVariable()">
           <Braces :size="16" />
         </button>
-        <button class="icon-btn" :title="t('common.copy')" @click="copyContent">
+        <button class="icon-btn" :title="t('common.copy')" :aria-label="t('common.copy')" @click="copyContent">
           <Copy :size="16" />
         </button>
-        <button class="icon-btn" :title="t('share.action')" @click="shareCurrentNode">
+        <button class="icon-btn" :title="t('share.action')" :aria-label="t('share.action')" @click="shareCurrentNode">
           <Share2 :size="16" />
         </button>
         <button 
@@ -184,7 +184,7 @@ onMounted(() => {
         >
           {{ t('editor.fillAndCopy') }}
         </button>
-        <button class="icon-btn close" :title="t('editor.closeHint')" @click="closeEditor">
+        <button class="icon-btn close" :title="t('editor.closeHint')" :aria-label="t('editor.closeHint')" @click="closeEditor">
           <X :size="16" />
         </button>
       </div>
@@ -211,7 +211,7 @@ onMounted(() => {
     <!-- 底部状态 -->
     <div class="editor-footer">
       <span class="char-count">{{ content.length }} {{ t('editor.charCount') }}</span>
-      <span v-if="node.updatedAt" class="update-time">
+      <span v-if="node.updatedAt" class="update-time" aria-live="polite">
         {{ t('editor.lastUpdated') }} {{ new Date(node.updatedAt).toLocaleString() }}
       </span>
     </div>
@@ -240,7 +240,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3) var(--space-5);
-  border-bottom: 0.5px solid var(--border-secondary);
+  border-bottom: 1px solid var(--border-secondary);
 }
 
 .title-section {
@@ -282,6 +282,10 @@ onMounted(() => {
   border-bottom: 2px solid var(--color-accent);
 }
 
+.title-input:focus-visible {
+  box-shadow: 0 2px 0 var(--color-accent);
+}
+
 /* ===================
    Actions
    =================== */
@@ -305,7 +309,7 @@ onMounted(() => {
   gap: var(--space-2);
   padding: var(--space-2) var(--space-5);
   background: var(--bg-secondary);
-  border-bottom: 0.5px solid var(--border-secondary);
+  border-bottom: 1px solid var(--border-secondary);
   flex-wrap: wrap;
 }
 
@@ -338,6 +342,7 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   border: none;
+  border-left: 2px solid transparent;
   outline: none;
   resize: none;
   font-size: var(--font-size-md);
@@ -345,6 +350,13 @@ onMounted(() => {
   font-family: inherit;
   color: var(--text-primary);
   background: transparent;
+  transition: border-color var(--duration-fast) ease,
+    background-color var(--duration-fast) ease;
+}
+
+.content-textarea:focus {
+  border-left-color: var(--color-accent);
+  background: var(--accent-bg-hover);
 }
 
 .content-textarea::placeholder {
@@ -358,7 +370,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   padding: var(--space-2) var(--space-5);
-  border-top: 0.5px solid var(--border-secondary);
+  border-top: 1px solid var(--border-secondary);
   font-size: var(--font-size-xs);
   color: var(--text-tertiary);
 }
@@ -383,5 +395,33 @@ onMounted(() => {
 .empty-editor p {
   margin: 0;
   font-size: var(--font-size-md);
+}
+
+/* ===================
+   Mobile
+   =================== */
+@media (max-width: 768px) {
+  .icon-btn {
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+  }
+}
+
+@media (max-width: 640px) {
+  .editor-header {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .editor-content {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .variables-bar {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .editor-footer {
+    padding: var(--space-2) var(--space-3);
+  }
 }
 </style>

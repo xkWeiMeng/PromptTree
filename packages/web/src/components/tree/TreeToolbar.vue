@@ -87,6 +87,7 @@ defineExpose({ focusSearch })
         type="text"
         class="search-input"
         :placeholder="t('tree.searchPlaceholder')"
+        aria-label="Search prompts"
       />
       <Search :size="14" class="search-icon" />
       <button v-if="hasQuery" class="search-clear" @click="clear">
@@ -128,6 +129,11 @@ defineExpose({ focusSearch })
           <div class="no-results">{{ t('tree.noResults') }}</div>
         </div>
       </Transition>
+
+      <!-- Screen reader result count announcement -->
+      <span class="sr-only" aria-live="polite">
+        {{ hasQuery ? (results.length > 0 ? results.length + ' results found' : 'No results found') : '' }}
+      </span>
     </div>
     
     <!-- 操作按钮 -->
@@ -142,15 +148,15 @@ defineExpose({ focusSearch })
           <Plus :size="16" />
         </button>
         <Transition name="popover">
-          <div v-if="showCreateMenu" class="create-menu" @click.stop>
-            <div class="menu-item" @click="handleCreate('folder')">
+          <div v-if="showCreateMenu" class="create-menu" role="menu" @click.stop>
+            <button type="button" class="menu-item" role="menuitem" @click="handleCreate('folder')">
               <Folder :size="15" />
               <span>{{ t('tree.newFolder') }}</span>
-            </div>
-            <div class="menu-item" @click="handleCreate('prompt')">
+            </button>
+            <button type="button" class="menu-item" role="menuitem" @click="handleCreate('prompt')">
               <FileText :size="15" />
               <span>{{ t('tree.newPrompt') }}</span>
-            </div>
+            </button>
           </div>
         </Transition>
       </div>
@@ -392,10 +398,32 @@ defineExpose({ focusSearch })
   border-radius: var(--radius-xs);
   color: var(--text-primary);
   transition: background-color var(--duration-fast) ease;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
 }
 
 .menu-item:hover {
   background: var(--color-accent);
   color: var(--text-on-accent);
+}
+
+.menu-item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>

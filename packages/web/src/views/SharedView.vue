@@ -85,12 +85,12 @@ onMounted(() => {
 <template>
   <main class="shared-page">
     <section class="shared-container">
-      <div v-if="isLoading" class="state loading">
+      <div v-if="isLoading" class="state loading" aria-live="polite">
         <Loader2 :size="18" class="spin" />
         <span>{{ t('share.loading') }}</span>
       </div>
 
-      <div v-else-if="errorMessage" class="state error">
+      <div v-else-if="errorMessage" class="state error" aria-live="polite" role="alert">
         <h2>{{ t('share.loadFailed') }}</h2>
         <p>{{ errorMessage }}</p>
       </div>
@@ -121,7 +121,7 @@ onMounted(() => {
             v-for="node in content.nodes"
             :key="node.id"
             class="folder-node"
-            :style="{ paddingLeft: `${nodeDepthMap[node.id] * 16}px` }"
+            :style="{ '--depth': nodeDepthMap[node.id] }"
           >
             <div class="node-title">
               <component :is="node.type === 'folder' ? Folder : FileText" :size="14" />
@@ -151,7 +151,7 @@ onMounted(() => {
 }
 
 .shared-container {
-  max-width: 860px;
+  max-width: min(860px, 100% - var(--space-6));
   margin: 0 auto;
   background: var(--bg-elevated);
   border: 0.5px solid var(--border-secondary);
@@ -194,6 +194,7 @@ onMounted(() => {
   gap: var(--space-1);
   border-radius: var(--radius-sm);
   padding: var(--space-1) var(--space-2);
+  min-height: var(--touch-target-min, 44px);
   font-size: var(--font-size-sm);
   color: var(--text-primary);
   border: 0.5px solid var(--border-secondary);
@@ -214,6 +215,7 @@ onMounted(() => {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-x: auto;
   font-size: var(--font-size-sm);
   line-height: var(--line-height-relaxed);
   color: var(--text-primary);
@@ -232,7 +234,7 @@ onMounted(() => {
 
 .folder-node {
   border-left: 1px solid var(--border-secondary);
-  padding-left: var(--space-2);
+  padding-left: calc(var(--depth, 0) * var(--node-depth-indent, 16px) + var(--space-2));
 }
 
 .node-title {
@@ -276,5 +278,36 @@ onMounted(() => {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .shared-page {
+    padding: var(--space-4) var(--space-2);
+  }
+
+  .shared-container {
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+  }
+
+  .shared-header h1 {
+    font-size: var(--font-size-lg);
+  }
+
+  .folder-node {
+    --node-depth-indent: 12px;
+  }
+
+  .prompt-content,
+  .node-content {
+    font-size: var(--font-size-xs);
+    padding: var(--space-2);
+  }
 }
 </style>

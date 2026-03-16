@@ -56,7 +56,7 @@ const platforms = computed(() => [
           {{ t('landing.badge') }}
         </div>
         <h1 class="hero__title">
-          {{ t('landing.heroTitle') }}<br>
+          {{ t('landing.heroTitle') }}
           <span class="hero__title-accent">{{ t('landing.heroTitleAccent') }}</span>
         </h1>
         <p class="hero__subtitle">
@@ -82,13 +82,13 @@ const platforms = computed(() => [
           {{ t('landing.featuresDesc') }}
         </p>
         <div class="features-grid">
-          <div v-for="f in features" :key="f.title" class="feature-card">
+          <article v-for="f in features" :key="f.title" class="feature-card">
             <div class="feature-card__illustration" :class="`feature-card__illustration--${f.color}`">
               <FeatureIllustration :name="f.illustration" />
             </div>
             <h3 class="feature-card__title">{{ f.title }}</h3>
             <p class="feature-card__desc">{{ f.desc }}</p>
-          </div>
+          </article>
         </div>
       </div>
     </section>
@@ -101,11 +101,11 @@ const platforms = computed(() => [
           {{ t('landing.platformsDesc') }}
         </p>
         <div class="platform-cards">
-          <div v-for="p in platforms" :key="p.title" class="platform-card">
+          <article v-for="p in platforms" :key="p.title" class="platform-card">
             <component :is="p.icon" class="platform-card__icon" :size="40" />
             <h3 class="platform-card__title">{{ p.title }}</h3>
             <p class="platform-card__desc">{{ p.desc }}</p>
-          </div>
+          </article>
         </div>
       </div>
     </section>
@@ -118,7 +118,7 @@ const platforms = computed(() => [
           {{ t('landing.scenariosDesc') }}
         </p>
         <div class="features-grid">
-          <div class="feature-card">
+          <article class="feature-card">
             <div class="feature-card__illustration feature-card__illustration--blue">
               <FeatureIllustration name="creator" />
             </div>
@@ -126,8 +126,8 @@ const platforms = computed(() => [
             <p class="feature-card__desc">
               {{ t('landing.scenario1Desc') }}
             </p>
-          </div>
-          <div class="feature-card">
+          </article>
+          <article class="feature-card">
             <div class="feature-card__illustration feature-card__illustration--green">
               <FeatureIllustration name="developer" />
             </div>
@@ -135,8 +135,8 @@ const platforms = computed(() => [
             <p class="feature-card__desc">
               {{ t('landing.scenario2Desc') }}
             </p>
-          </div>
-          <div class="feature-card">
+          </article>
+          <article class="feature-card">
             <div class="feature-card__illustration feature-card__illustration--purple">
               <FeatureIllustration name="researcher" />
             </div>
@@ -144,7 +144,7 @@ const platforms = computed(() => [
             <p class="feature-card__desc">
               {{ t('landing.scenario3Desc') }}
             </p>
-          </div>
+          </article>
         </div>
       </div>
     </section>
@@ -164,3 +164,105 @@ const platforms = computed(() => [
     </section>
   </SiteLayout>
 </template>
+
+<style scoped>
+/* ===================
+   Typography — balanced headings & accent line-break replacement
+   =================== */
+.hero__title,
+.features-section__title,
+.cta-section__title {
+  text-wrap: balance;
+}
+
+.hero__title-accent {
+  display: block;
+}
+
+/* ===================
+   Interaction — press feedback & smooth transitions
+   =================== */
+.hero__btn--primary:active,
+.hero__btn--secondary:active {
+  transform: scale(0.98);
+}
+
+.hero__btn--secondary {
+  transition: background-color var(--duration-normal) var(--ease-out),
+              color var(--duration-normal) var(--ease-out),
+              transform var(--duration-normal) var(--ease-out);
+}
+
+/* ===================
+   Mobile Responsiveness (≤ 640px)
+   =================== */
+@media (max-width: 640px) {
+  /* Hero */
+  .hero {
+    padding-top: calc(var(--site-header-height) + var(--space-16));
+    padding-bottom: var(--space-12);
+  }
+
+  .hero__title {
+    font-size: var(--font-size-h2);
+  }
+
+  .hero__subtitle {
+    font-size: var(--font-size-md);
+    margin-bottom: var(--space-6);
+  }
+
+  /* CTA buttons full-width on mobile */
+  .hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero__btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Container padding reduction */
+  .hero .site-container,
+  .features-section .site-container,
+  .platforms-section .site-container,
+  .cta-section .site-container {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  /* Feature cards already 1fr via site.css — ensure card padding reduction */
+  .feature-card {
+    padding: var(--space-6);
+  }
+
+  /* Platform cards single-column */
+  .platform-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .platform-card {
+    padding: var(--space-6);
+  }
+
+  /* CTA section */
+  .cta-section {
+    padding: var(--space-12) 0;
+  }
+
+  .cta-section__title {
+    font-size: var(--font-size-h3);
+  }
+
+  .cta-section__desc {
+    font-size: var(--font-size-md);
+  }
+
+  /* Sections padding reduction */
+  .features-section,
+  .platforms-section {
+    padding: var(--space-12) 0;
+  }
+}
+</style>

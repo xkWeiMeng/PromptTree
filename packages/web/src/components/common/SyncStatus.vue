@@ -50,11 +50,12 @@ function handleSync() {
 </script>
 
 <template>
-  <div 
-    class="sync-status" 
+  <button
+    class="sync-status"
     :class="status"
-    @click="handleSync"
+    :aria-label="`${t('sync.label', 'Sync status')}: ${statusText}`"
     :title="status === 'syncing' ? t('sync.syncingTitle') : t('sync.clickToSync')"
+    @click="handleSync"
   >
     <RefreshCw v-if="status === 'syncing'" :size="13" class="sync-icon animate-spin" />
     <CheckCircle v-else-if="status === 'success'" :size="13" class="sync-icon" />
@@ -64,7 +65,7 @@ function handleSync() {
     <span v-if="pendingCount > 0 && status !== 'syncing'" class="pending-badge">
       {{ pendingCount }}
     </span>
-  </div>
+  </button>
 </template>
 
 <style scoped>
@@ -73,8 +74,10 @@ function handleSync() {
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-1) var(--space-2);
+  border: none;
   border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
+  font-family: inherit;
   cursor: pointer;
   transition: all var(--duration-fast) ease;
   background: var(--bg-tertiary);
@@ -83,6 +86,11 @@ function handleSync() {
 
 .sync-status:hover {
   background: var(--bg-quaternary);
+}
+
+.sync-status:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
 }
 
 .sync-status.syncing {

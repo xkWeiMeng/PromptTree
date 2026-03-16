@@ -30,10 +30,16 @@ useHead({ title: pageTitle, description: pageDesc })
 <template>
   <SiteLayout>
     <div class="docs-layout">
+      <!-- Sidebar toggle for mobile -->
+      <input id="docs-sidebar-toggle" type="checkbox" class="docs-sidebar__checkbox" aria-hidden="true" />
+
       <!-- 侧边栏 -->
       <aside class="docs-sidebar">
-        <div class="docs-sidebar__title">{{ t('docs.sidebarTitle') }}</div>
-        <nav class="docs-sidebar__list">
+        <label for="docs-sidebar-toggle" class="docs-sidebar__toggle-label">
+          {{ t('docs.sidebarTitle') }}
+        </label>
+        <div class="docs-sidebar__title docs-sidebar__title--desktop">{{ t('docs.sidebarTitle') }}</div>
+        <nav class="docs-sidebar__list" role="navigation" :aria-label="t('docs.sidebarTitle')">
           <RouterLink
             v-for="d in allDocs"
             :key="d.meta.slug"
@@ -49,19 +55,29 @@ useHead({ title: pageTitle, description: pageDesc })
       <!-- 内容 -->
       <div class="docs-content">
         <template v-if="doc">
-          <h1 style="font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); margin-bottom: var(--space-6); letter-spacing: var(--letter-spacing-tight);">
+          <h1 class="doc-detail__title">
             {{ doc.meta.title }}
           </h1>
           <MarkdownRenderer :content="doc.content" />
 
           <!-- 前后导航 -->
           <div class="doc-nav">
-            <RouterLink v-if="prevDoc" :to="localePath(`/docs/${prevDoc.meta.slug}`)" class="doc-nav__link doc-nav__link--prev">
+            <RouterLink
+              v-if="prevDoc"
+              :to="localePath(`/docs/${prevDoc.meta.slug}`)"
+              class="doc-nav__link doc-nav__link--prev"
+              :aria-label="`${t('docs.prevDoc')}: ${prevDoc.meta.title}`"
+            >
               <ChevronLeft :size="16" />
               <span>{{ prevDoc.meta.title }}</span>
             </RouterLink>
             <div v-else />
-            <RouterLink v-if="nextDoc" :to="localePath(`/docs/${nextDoc.meta.slug}`)" class="doc-nav__link doc-nav__link--next">
+            <RouterLink
+              v-if="nextDoc"
+              :to="localePath(`/docs/${nextDoc.meta.slug}`)"
+              class="doc-nav__link doc-nav__link--next"
+              :aria-label="`${t('docs.nextDoc')}: ${nextDoc.meta.title}`"
+            >
               <span>{{ nextDoc.meta.title }}</span>
               <ChevronRight :size="16" />
             </RouterLink>
@@ -69,9 +85,9 @@ useHead({ title: pageTitle, description: pageDesc })
         </template>
 
         <template v-else>
-          <div style="text-align: center; padding: var(--space-20) 0; color: var(--text-tertiary);">
+          <div class="doc-detail__not-found">
             <p>{{ t('docs.notFound') }}</p>
-            <RouterLink :to="localePath('/docs')" style="margin-top: var(--space-4); display: inline-block;">{{ t('docs.backToList') }}</RouterLink>
+            <RouterLink :to="localePath('/docs')" class="doc-detail__not-found-link" :aria-label="t('docs.backToList')">{{ t('docs.backToList') }}</RouterLink>
           </div>
         </template>
       </div>
@@ -80,6 +96,45 @@ useHead({ title: pageTitle, description: pageDesc })
 </template>
 
 <style scoped>
+/* Title */
+.doc-detail__title {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-6);
+  letter-spacing: var(--letter-spacing-tight);
+  text-wrap: balance;
+}
+
+/* Not-found state */
+.doc-detail__not-found {
+  text-align: center;
+  padding: var(--space-20) 0;
+  color: var(--text-tertiary);
+}
+
+.doc-detail__not-found-link {
+  margin-top: var(--space-4);
+  display: inline-block;
+}
+
+/* Sidebar collapsible checkbox (hidden) */
+.docs-sidebar__checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Mobile toggle label (hidden on desktop) */
+.docs-sidebar__toggle-label {
+  display: none;
+}
+
+/* Desktop sidebar title (hidden on mobile when toggle visible) */
+.docs-sidebar__title--desktop {
+  display: block;
+}
+
+/* Navigation */
 .doc-nav {
   display: flex;
   justify-content: space-between;
@@ -108,7 +163,71 @@ useHead({ title: pageTitle, description: pageDesc })
   text-decoration: none;
 }
 
+.doc-nav__link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .doc-nav__link--next {
   margin-left: auto;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .doc-detail__title {
+    font-size: var(--font-size-h3);
+  }
+
+  .doc-detail__not-found {
+    padding: var(--space-12) 0;
+  }
+
+  /* Collapsible sidebar via checkbox hack */
+  .docs-sidebar__title--desktop {
+    display: none;
+  }
+
+  .docs-sidebar__toggle-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    cursor: pointer;
+    padding: var(--space-2) 0;
+    user-select: none;
+  }
+
+  .docs-sidebar__toggle-label::after {
+    content: '▸';
+    transition: transform var(--duration-fast) ease;
+  }
+
+  .docs-sidebar__checkbox:checked ~ .docs-sidebar .docs-sidebar__toggle-label::after {
+    transform: rotate(90deg);
+  }
+
+  .docs-sidebar__list {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--duration-normal) ease;
+  }
+
+  .docs-sidebar__checkbox:checked ~ .docs-sidebar .docs-sidebar__list {
+    max-height: 60vh;
+  }
+
+  /* Nav buttons stack vertically */
+  .doc-nav {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .doc-nav__link--next {
+    margin-left: 0;
+  }
 }
 </style>

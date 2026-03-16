@@ -300,12 +300,16 @@ h2 {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
-  border: 0.5px solid var(--border-secondary);
+  padding: var(--space-3) var(--space-5);
+  min-height: var(--touch-target-min);
+  border: 1px solid var(--border-secondary);
   border-radius: var(--radius-xl);
   background: var(--bg-elevated);
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: transform var(--duration-normal) var(--ease-out),
+    background-color var(--duration-normal) var(--ease-out),
+    border-color var(--duration-normal) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out);
   text-align: left;
 }
 
@@ -314,6 +318,17 @@ h2 {
   background: var(--accent-bg-subtle);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+}
+
+.entry-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-ring);
+  border-color: var(--color-accent);
+}
+
+.entry-btn:active {
+  transform: scale(0.98);
+  box-shadow: none;
 }
 
 .entry-icon {
@@ -366,5 +381,30 @@ h2 {
   margin: var(--space-2) 0;
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
+}
+
+/* ===================
+   Mobile
+   =================== */
+@media (max-width: 640px) {
+  .folder-selected,
+  .empty-state {
+    padding: var(--space-4);
+  }
+
+  .view-entries {
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 100%;
+  }
+
+  .entry-btn {
+    width: 100%;
+  }
+
+  .shortcuts {
+    margin-top: var(--space-5);
+    padding: var(--space-3) var(--space-4);
+  }
 }
 </style>

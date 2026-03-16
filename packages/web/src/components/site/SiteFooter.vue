@@ -65,3 +65,44 @@ const { localePath } = useLocalePath()
     </div>
   </footer>
 </template>
+
+<style scoped>
+.site-footer {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (max-width: 640px) {
+  .site-footer__grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .site-footer__brand {
+    align-items: center;
+  }
+
+  .site-footer__brand-desc {
+    text-align: center;
+  }
+
+  .site-footer__links {
+    align-items: center;
+  }
+
+  .site-footer__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--touch-target-min, 44px);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .site-footer__bottom {
+    text-align: center;
+  }
+
+  .site-footer__friends {
+    justify-content: center;
+  }
+}
+</style>

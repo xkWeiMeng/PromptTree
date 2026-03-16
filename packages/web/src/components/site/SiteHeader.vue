@@ -91,7 +91,12 @@ function openLogin() {
         </template>
       </nav>
 
-      <button class="site-header__menu-btn" @click="mobileOpen = !mobileOpen">
+      <button
+        class="site-header__menu-btn"
+        :aria-expanded="mobileOpen"
+        aria-label="Toggle navigation menu"
+        @click="mobileOpen = !mobileOpen"
+      >
         <Menu v-if="!mobileOpen" :size="20" />
         <X v-else :size="20" />
       </button>
@@ -99,7 +104,7 @@ function openLogin() {
   </header>
 
   <!-- 移动端导航 -->
-  <nav class="site-mobile-nav" :class="{ 'site-mobile-nav--open': mobileOpen }">
+  <nav class="site-mobile-nav" :class="{ 'site-mobile-nav--open': mobileOpen }" role="navigation" aria-label="Mobile navigation">
     <RouterLink
       v-for="link in navLinks"
       :key="link.to"
@@ -156,5 +161,12 @@ function openLogin() {
   justify-content: center;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
+}
+
+/* Mobile nav overscroll containment */
+:deep(.site-mobile-nav--open) {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
 }
 </style>

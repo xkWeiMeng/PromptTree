@@ -29,15 +29,18 @@ function switchView(mode: ViewMode) {
 
 <template>
   <div class="view-switcher">
-    <div class="switcher-tabs">
+    <div class="switcher-tabs" role="tablist">
       <button
         v-for="tab in tabs"
         :key="tab.mode"
+        role="tab"
         class="tab-btn"
         :class="{
           active: treeStore.viewMode === tab.mode,
           disabled: tab.mode === 'editor' && !hasSelectedPrompt
         }"
+        :aria-selected="treeStore.viewMode === tab.mode"
+        :aria-disabled="tab.mode === 'editor' && !hasSelectedPrompt ? true : undefined"
         :title="tab.mode === 'editor' && !hasSelectedPrompt ? t('view.editorDisabledHint') : tab.label"
         @click="switchView(tab.mode)"
       >

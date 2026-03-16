@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { X, Copy } from 'lucide-vue-next'
 
@@ -15,6 +15,8 @@ const emit = defineEmits<{
   (e: 'close'): void
   (e: 'copy', filledContent: string): void
 }>()
+
+const modalRef = ref<HTMLElement | null>(null)
 
 // 变量值映射
 const variableValues = ref<Record<string, string>>({})
@@ -65,6 +67,25 @@ function handleBackdropClick(e: MouseEvent) {
     handleClose()
   }
 }
+
+// 焦点陷阱
+function trapFocus(e: KeyboardEvent) {
+  const focusable = modalRef.value?.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+  if (!focusable?.length) return
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+}
+
+// 打开时聚焦第一个可交互元素
+watch(() => props.visible, async (visible) => {
+  if (visible) {
+    await nextTick()
+    const first = modalRef.value?.querySelector<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    first?.focus()
+  }
+})
 </script>
 
 <template>
@@ -72,10 +93,18 @@ function handleBackdropClick(e: MouseEvent) {
     <Transition name="backdrop">
       <div v-if="visible" class="modal-backdrop" @click="handleBackdropClick">
         <Transition name="modal" appear>
-          <div class="modal" v-if="visible">
+          <div
+            v-if="visible"
+            ref="modalRef"
+            class="modal"
+            role="dialog"
+            aria-modal="true"
+            @keydown.tab="trapFocus"
+            @keydown.escape="handleClose"
+          >
             <div class="modal-header">
               <h3>{{ t('variableModal.fillTitle') }}</h3>
-              <button class="icon-btn close" @click="handleClose">
+              <button class="icon-btn close" @click="handleClose" :aria-label="t('common.close')">
                 <X :size="16" />
               </button>
             </div>
@@ -132,6 +161,7 @@ function handleBackdropClick(e: MouseEvent) {
   align-items: center;
   justify-content: center;
   z-index: var(--z-modal);
+  overscroll-behavior: contain;
 }
 
 .modal {
@@ -288,7 +318,20 @@ function handleBackdropClick(e: MouseEvent) {
 }
 
 .btn-copy:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+  }
+
+  .form-item input {
+    padding: var(--space-3) var(--space-4);
+  }
 }
 </style>

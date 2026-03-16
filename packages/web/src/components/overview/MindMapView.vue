@@ -317,9 +317,9 @@ function truncateTitle(title: string, max = 16): string {
       </div>
 
       <div class="toolbar-right">
-        <button class="icon-btn" :title="t('mindmapView.zoomIn')" @click="zoomIn"><ZoomIn :size="16" /></button>
-        <button class="icon-btn" :title="t('mindmapView.zoomOut')" @click="zoomOut"><ZoomOut :size="16" /></button>
-        <button class="icon-btn" :title="t('mindmapView.resetView')" @click="resetZoom"><RotateCcw :size="16" /></button>
+        <button class="icon-btn zoom-btn" :title="t('mindmapView.zoomIn')" aria-label="Zoom in" @click="zoomIn"><ZoomIn :size="16" /></button>
+        <button class="icon-btn zoom-btn" :title="t('mindmapView.zoomOut')" aria-label="Zoom out" @click="zoomOut"><ZoomOut :size="16" /></button>
+        <button class="icon-btn zoom-btn" :title="t('mindmapView.resetView')" aria-label="Reset zoom" @click="resetZoom"><RotateCcw :size="16" /></button>
       </div>
     </div>
 
@@ -329,6 +329,7 @@ function truncateTitle(title: string, max = 16): string {
       class="mindmap-svg"
       :width="svgWidth"
       :height="svgHeight"
+      style="touch-action: none"
     >
       <g :transform="`translate(${transform.x},${transform.y}) scale(${transform.k})`">
         <!-- 连线 -->
@@ -352,7 +353,11 @@ function truncateTitle(title: string, max = 16): string {
             'node-selected': node.data.id === treeStore.selectedNodeId
           }"
           :transform="`translate(${node.y},${node.x})`"
+          tabindex="0"
+          role="button"
+          :aria-label="node.data.title || t('common.untitled')"
           @click.stop="handleNodeClick(node)"
+          @keydown.enter="handleNodeClick(node)"
           @mouseenter="(e: MouseEvent) => handleNodeHover(e, node)"
           @mouseleave="handleNodeLeave"
         >
@@ -605,5 +610,15 @@ function truncateTitle(title: string, max = 16): string {
   color: var(--text-tertiary);
   font-size: 11px;
   font-style: italic;
+}
+
+/* ===================
+   Mobile
+   =================== */
+@media (max-width: 640px) {
+  .zoom-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 </style>

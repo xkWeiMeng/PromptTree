@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { TreeNodeWithChildren } from '@prompttree/shared'
 import { useTreeStore } from '@/stores/tree'
@@ -48,6 +48,47 @@ function showContextMenu(e: MouseEvent, node: TreeNodeWithChildren) {
 // 隐藏右键菜单
 function hideContextMenu() {
   contextMenu.value.visible = false
+}
+
+// Context menu ref for keyboard navigation
+const contextMenuRef = ref<HTMLElement | null>(null)
+
+// Focus first menu item when context menu opens
+watch(() => contextMenu.value.visible, async (visible) => {
+  if (visible) {
+    await nextTick()
+    const firstItem = contextMenuRef.value?.querySelector('[role="menuitem"]') as HTMLElement | null
+    firstItem?.focus()
+  }
+})
+
+// Keyboard navigation for context menu
+function handleMenuKeydown(e: KeyboardEvent) {
+  const menu = contextMenuRef.value
+  if (!menu) return
+
+  const items = Array.from(menu.querySelectorAll('[role="menuitem"]')) as HTMLElement[]
+  if (items.length === 0) return
+
+  const currentIndex = items.indexOf(document.activeElement as HTMLElement)
+
+  switch (e.key) {
+    case 'ArrowDown':
+      e.preventDefault()
+      items[currentIndex < items.length - 1 ? currentIndex + 1 : 0].focus()
+      break
+    case 'ArrowUp':
+      e.preventDefault()
+      items[currentIndex > 0 ? currentIndex - 1 : items.length - 1].focus()
+      break
+    case 'Escape':
+      e.preventDefault()
+      hideContextMenu()
+      break
+    case 'Tab':
+      e.preventDefault()
+      break
+  }
 }
 
 // 创建子节点
@@ -143,57 +184,64 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
       <Transition name="menu">
         <div
           v-if="contextMenu.visible"
+          ref="contextMenuRef"
           class="context-menu"
+          role="menu"
           :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
           @click.stop
+          @keydown="handleMenuKeydown"
         >
           <template v-if="contextMenu.node">
             <!-- 节点右键菜单 -->
-            <div
+            <button
               v-if="contextMenu.node.type === 'folder'"
+              type="button"
               class="menu-item"
+              role="menuitem"
               @click="handleCreateChild('folder')"
             >
               <FolderPlus :size="15" />
               <span>{{ t('tree.newFolder') }}</span>
-            </div>
-            <div
+            </button>
+            <button
               v-if="contextMenu.node.type === 'folder'"
+              type="button"
               class="menu-item"
+              role="menuitem"
               @click="handleCreateChild('prompt')"
             >
               <FilePlus :size="15" />
               <span>{{ t('tree.newPrompt') }}</span>
-            </div>
+            </button>
             <div class="menu-divider" v-if="contextMenu.node.type === 'folder'"></div>
-            <div class="menu-item" @click="handleRename">
+            <button type="button" class="menu-item" role="menuitem" @click="handleRename">
               <Pencil :size="15" />
               <span>{{ t('tree.rename') }}</span>
-            </div>
-            <div class="menu-item" @click="handleToggleFavorite">
+            </button>
+            <button type="button" class="menu-item" role="menuitem" @click="handleToggleFavorite">
               <component :is="contextMenu.node.isFavorite ? StarOff : Star" :size="15" />
               <span>{{ contextMenu.node.isFavorite ? t('tree.unfavorite') : t('tree.addFavorite') }}</span>
-            </div>
-            <div class="menu-item" @click="handleShare">
+            </button>
+            <button type="button" class="menu-item" role="menuitem" @click="handleShare">
               <Share2 :size="15" />
               <span>{{ t('share.action') }}</span>
-            </div>
+            </button>
             <div class="menu-divider"></div>
-            <div class="menu-item danger" @click="handleDelete">
+            <button type="button" class="menu-item danger" role="menuitem" @click="handleDelete">
               <Trash2 :size="15" />
               <span>{{ t('common.delete') }}</span>
-            </div>
+            </button>
           </template>
           <template v-else>
             <!-- 空白处右键菜单 -->
-            <div class="menu-item" @click="handleCreateRoot('folder')">
+            <button type="button" class="menu-item" role="menuitem" @click="handleCreateRoot('folder')">
               <FolderPlus :size="15" />
               <span>{{ t('tree.newFolder') }}</span>
-            </div>
-            <div class="menu-item" @click="handleCreateRoot('prompt')">
+            </button>
+            <button type="button" class="menu-item" role="menuitem" @click="handleCreateRoot('prompt')">
               <FilePlus :size="15" />
               <span>{{ t('tree.newPrompt') }}</span>
-            </div>
+            </button>
           </template>
         </div>
       </Transition>
@@ -264,6 +312,16 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
   border-radius: var(--radius-xs);
   color: var(--text-primary);
   transition: all var(--duration-instant) ease;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+
+.menu-item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent);
 }
 
 .menu-item:hover {

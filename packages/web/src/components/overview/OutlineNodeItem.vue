@@ -71,7 +71,13 @@ function getVarCount(content: string): number {
         v-if="node.type === 'folder'"
         class="expand-arrow"
         :class="{ expanded: isExpanded }"
+        role="button"
+        tabindex="0"
+        :aria-expanded="isExpanded"
+        :aria-label="isExpanded ? t('tree.collapseAll') : t('tree.expandAll')"
         @click="handleToggle"
+        @keydown.enter="handleToggle"
+        @keydown.space.prevent="handleToggle"
       >
         <ChevronRight :size="14" />
       </span>
