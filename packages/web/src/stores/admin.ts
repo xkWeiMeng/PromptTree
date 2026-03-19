@@ -10,9 +10,10 @@ export const useAdminStore = defineStore('admin', () => {
   // ===================
   // State
   // ===================
-  const isAuthenticated = ref(adminApi.hasAdminSecret())
+  const isAuthenticated = ref(adminApi.hasAdminCredentials())
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const serverUrl = ref(adminApi.getSavedServerUrl())
 
   // Dashboard
   const overview = ref<OverviewStats | null>(null)
@@ -38,18 +39,20 @@ export const useAdminStore = defineStore('admin', () => {
   // Actions
   // ===================
 
-  async function login(secret: string): Promise<boolean> {
-    const valid = await adminApi.verifyAdminSecret(secret)
+  async function login(server: string, secret: string): Promise<boolean> {
+    const valid = await adminApi.verifyAdminAccess(server, secret)
     if (valid) {
-      adminApi.setAdminSecret(secret)
+      adminApi.setAdminCredentials(server, secret)
       isAuthenticated.value = true
+      serverUrl.value = server
     }
     return valid
   }
 
   function logout() {
-    adminApi.clearAdminSecret()
+    adminApi.clearAdminCredentials()
     isAuthenticated.value = false
+    serverUrl.value = ''
     overview.value = null
     dailyStats.value = []
     usersData.value = null
@@ -119,6 +122,7 @@ export const useAdminStore = defineStore('admin', () => {
     isAuthenticated,
     isLoading,
     error,
+    serverUrl,
     overview,
     dailyStats,
     usersData,

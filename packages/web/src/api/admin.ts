@@ -1,24 +1,45 @@
-const ADMIN_BASE = '/api/admin'
 const ADMIN_SECRET_KEY = 'prompttree-admin-secret'
+const ADMIN_SERVER_KEY = 'prompttree-admin-server'
+
+// ===================
+// 凭证 & 服务器地址管理
+// ===================
 
 function getAdminSecret(): string {
   return localStorage.getItem(ADMIN_SECRET_KEY) || ''
 }
 
-export function setAdminSecret(secret: string) {
+function getServerUrl(): string {
+  return localStorage.getItem(ADMIN_SERVER_KEY) || ''
+}
+
+export function setAdminCredentials(serverUrl: string, secret: string) {
+  localStorage.setItem(ADMIN_SERVER_KEY, serverUrl.replace(/\/+$/, ''))
   localStorage.setItem(ADMIN_SECRET_KEY, secret)
 }
 
-export function clearAdminSecret() {
+export function clearAdminCredentials() {
   localStorage.removeItem(ADMIN_SECRET_KEY)
+  localStorage.removeItem(ADMIN_SERVER_KEY)
 }
 
-export function hasAdminSecret(): boolean {
-  return !!localStorage.getItem(ADMIN_SECRET_KEY)
+export function hasAdminCredentials(): boolean {
+  return !!localStorage.getItem(ADMIN_SECRET_KEY) && !!localStorage.getItem(ADMIN_SERVER_KEY)
 }
+
+export function getSavedServerUrl(): string {
+  return getServerUrl()
+}
+
+// ===================
+// HTTP 请求封装
+// ===================
 
 async function adminFetch<T>(path: string, params?: Record<string, string>): Promise<T> {
-  const url = new URL(`${ADMIN_BASE}${path}`, window.location.origin)
+  const serverUrl = getServerUrl()
+  if (!serverUrl) throw new Error('未配置服务器地址')
+
+  const url = new URL(`${serverUrl}/api/admin${path}`)
   if (params) {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v))
   }
@@ -133,11 +154,12 @@ export async function getRecentContent(limit = 50): Promise<RecentContent[]> {
 }
 
 /**
- * 验证 admin secret 是否有效（通过调用 overview API）
+ * 验证服务器地址 + admin secret 是否有效
  */
-export async function verifyAdminSecret(secret: string): Promise<boolean> {
+export async function verifyAdminAccess(serverUrl: string, secret: string): Promise<boolean> {
   try {
-    const res = await fetch(`${ADMIN_BASE}/stats/overview`, {
+    const url = `${serverUrl.replace(/\/+$/, '')}/api/admin/stats/overview`
+    const res = await fetch(url, {
       headers: {
         'x-admin-secret': secret,
         'Content-Type': 'application/json',

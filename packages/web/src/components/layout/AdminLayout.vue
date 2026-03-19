@@ -29,7 +29,12 @@ function handleLogout() {
     <aside class="admin-sidebar">
       <div class="admin-sidebar-header">
         <BarChart3 :size="20" />
-        <span>PromptTree Admin</span>
+        <div class="header-text">
+          <span>PromptTree Admin</span>
+          <span v-if="adminStore.serverUrl" class="server-badge" :title="adminStore.serverUrl">
+            {{ adminStore.serverUrl.replace(/^https?:\/\//, '') }}
+          </span>
+        </div>
       </div>
 
       <nav class="admin-nav">
@@ -82,7 +87,7 @@ function handleLogout() {
 
 .admin-sidebar-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-4);
   font-size: var(--font-size-md);
@@ -90,6 +95,22 @@ function handleLogout() {
   color: var(--text-primary);
   border-bottom: 0.5px solid var(--border-secondary);
   letter-spacing: var(--letter-spacing-tight);
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.server-badge {
+  font-size: 10px;
+  font-weight: var(--font-weight-normal, 400);
+  color: var(--text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .admin-nav {

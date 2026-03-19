@@ -2,16 +2,22 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminStore } from '@/stores/admin'
-import { Lock, AlertCircle } from 'lucide-vue-next'
+import { getSavedServerUrl } from '@/api/admin'
+import { Lock, AlertCircle, Server } from 'lucide-vue-next'
 
 const router = useRouter()
 const adminStore = useAdminStore()
 
+const serverUrl = ref(getSavedServerUrl() || 'https://prompttree.tech')
 const secret = ref('')
 const isVerifying = ref(false)
 const errorMsg = ref('')
 
 async function handleLogin() {
+  if (!serverUrl.value.trim()) {
+    errorMsg.value = '请输入服务器地址'
+    return
+  }
   if (!secret.value.trim()) {
     errorMsg.value = '请输入管理密钥'
     return
@@ -21,14 +27,14 @@ async function handleLogin() {
   errorMsg.value = ''
 
   try {
-    const ok = await adminStore.login(secret.value.trim())
+    const ok = await adminStore.login(serverUrl.value.trim(), secret.value.trim())
     if (ok) {
       router.push('/admin/dashboard')
     } else {
       errorMsg.value = '密钥无效或服务器不可达'
     }
   } catch {
-    errorMsg.value = '连接失败，请确认后端已启动'
+    errorMsg.value = '连接失败，请确认服务器地址和网络'
   } finally {
     isVerifying.value = false
   }
@@ -47,9 +53,25 @@ if (adminStore.isAuthenticated) {
         <Lock :size="32" />
       </div>
       <h1 class="admin-login-title">PromptTree Admin</h1>
-      <p class="admin-login-desc">输入管理密钥以访问管理后台</p>
+      <p class="admin-login-desc">连接远程服务器，查看管理数据</p>
 
       <form class="admin-login-form" @submit.prevent="handleLogin">
+        <label class="admin-label">
+          <Server :size="14" />
+          <span>服务器地址</span>
+        </label>
+        <input
+          v-model="serverUrl"
+          type="url"
+          placeholder="https://prompttree.tech"
+          class="admin-input"
+          autocomplete="url"
+        />
+
+        <label class="admin-label">
+          <Lock :size="14" />
+          <span>管理密钥</span>
+        </label>
         <input
           v-model="secret"
           type="password"
@@ -58,12 +80,13 @@ if (adminStore.isAuthenticated) {
           autocomplete="off"
           autofocus
         />
+
         <div v-if="errorMsg" class="admin-error">
           <AlertCircle :size="14" />
           <span>{{ errorMsg }}</span>
         </div>
         <button type="submit" class="admin-btn-primary" :disabled="isVerifying">
-          {{ isVerifying ? '验证中...' : '进入管理后台' }}
+          {{ isVerifying ? '连接中...' : '连接服务器' }}
         </button>
       </form>
     </div>
@@ -119,7 +142,17 @@ if (adminStore.isAuthenticated) {
 .admin-login-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
+}
+
+.admin-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  margin-top: var(--space-2);
 }
 
 .admin-input {
@@ -151,6 +184,7 @@ if (adminStore.isAuthenticated) {
 .admin-btn-primary {
   width: 100%;
   padding: var(--space-3);
+  margin-top: var(--space-2);
   border: none;
   border-radius: var(--radius-sm);
   background: var(--color-accent);
