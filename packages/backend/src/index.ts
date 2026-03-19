@@ -7,7 +7,9 @@ import authRoutes from './routes/auth'
 import syncRoutes from './routes/sync'
 import shareRoutes from './routes/share'
 import promptsRoutes from './routes/prompts'
+import adminRoutes from './routes/admin'
 import { authMiddleware, jwtOnlyMiddleware } from './middleware/auth'
+import { adminMiddleware } from './middleware/admin'
 import { errorHandler, notFoundHandler } from './middleware/error'
 
 const app = new Hono()
@@ -42,6 +44,10 @@ app.route('/api', promptsRoutes)
 
 // 分享路由（公开访问 + 私有接口）
 app.route('/api/share', shareRoutes)
+
+// 管理后台路由（仅限本机 + Admin Secret）
+app.use('/api/admin/*', adminMiddleware)
+app.route('/api/admin', adminRoutes)
 
 // 404 处理
 app.notFound(notFoundHandler)

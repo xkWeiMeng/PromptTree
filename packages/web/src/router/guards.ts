@@ -58,6 +58,17 @@ export function setupRouterGuards(router: Router) {
 
     // 公开页面直接放行
     const isPublic = to.matched.some((record: RouteRecordNormalized) => record.meta.isPublic === true)
+
+    // Admin 路由守卫：需要 admin secret
+    const isAdminRoute = to.matched.some((record: RouteRecordNormalized) => record.meta.isAdmin === true)
+    if (isAdminRoute) {
+      const hasSecret = !!localStorage.getItem('prompttree-admin-secret')
+      if (!hasSecret) {
+        return next({ name: 'admin-login' })
+      }
+      return next()
+    }
+
     if (isPublic) {
       return next()
     }

@@ -73,6 +73,32 @@ const router = createRouter({
       meta: { requiresAuth: false, titleKey: 'login.title' }
     },
 
+    // =================== 管理后台（仅本机访问） ===================
+    {
+      path: '/admin',
+      name: 'admin-login',
+      component: () => import('@/views/admin/AdminLogin.vue'),
+      meta: { requiresAuth: false, isPublic: true, title: 'Admin' }
+    },
+    {
+      path: '/admin/dashboard',
+      name: 'admin-dashboard',
+      component: () => import('@/views/admin/AdminDashboard.vue'),
+      meta: { requiresAuth: false, isPublic: true, isAdmin: true, title: 'Admin Dashboard' }
+    },
+    {
+      path: '/admin/users',
+      name: 'admin-users',
+      component: () => import('@/views/admin/AdminUsers.vue'),
+      meta: { requiresAuth: false, isPublic: true, isAdmin: true, title: 'Admin Users' }
+    },
+    {
+      path: '/admin/content',
+      name: 'admin-content',
+      component: () => import('@/views/admin/AdminContent.vue'),
+      meta: { requiresAuth: false, isPublic: true, isAdmin: true, title: 'Admin Content' }
+    },
+
     // =================== 旧路由兼容重定向 ===================
     {
       path: '/features',
