@@ -23,6 +23,13 @@ scripts/
 docs/
 prs/
 
+# Agent/Copilot config & CDN
+.agent/
+.agents/
+.claude/
+.github/
+cdn-preheat-urls.txt
+
 # IDE & OS
 .idea/
 .vscode/
