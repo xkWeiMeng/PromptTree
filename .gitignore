@@ -21,6 +21,7 @@ scripts/
 
 # Internal docs (not for open-source)
 docs/
+prs/
 
 # IDE & OS
 .idea/
