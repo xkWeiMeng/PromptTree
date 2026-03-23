@@ -19,6 +19,9 @@ build/
 .deploy.env
 scripts/
 
+# Internal docs (not for open-source)
+docs/
+
 # IDE & OS
 .idea/
 .vscode/
