@@ -10,11 +10,13 @@ build/
 .next/
 *.tsbuildinfo
 
-# Environment
+# Environment — block ALL .env variants except .env.example
 .env
-.env.local
-.env.*.local
+.env.*
 !.env.example
+
+# Deploy config
+.deploy.env
 
 # IDE & OS
 .idea/
@@ -25,6 +27,7 @@ build/
 *.suo
 .DS_Store
 Thumbs.db
+*.iml
 
 # Logs
 logs/
@@ -39,18 +42,31 @@ yarn-error.log*
 *.db-journal
 *.db-wal
 *.db-shm
+*.sqlite
+*.sqlite3
 data/
 
 # Testing
 coverage/
+.nyc_output/
 
 # Python (virtual env)
 .venv/
 __pycache__/
 *.pyc
+*.pyo
 
 # Playwright MCP
 .playwright-mcp/
+
+# Secrets & Certificates — never commit these
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.jks
+*.keystore
 
 # PWA dev artifacts
 dev-dist/
@@ -77,3 +93,4 @@ packages/extension/.wxt/
 .cache/
 .temp/
 .turbo/
+*.bak
