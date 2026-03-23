@@ -15,8 +15,9 @@ build/
 .env.*
 !.env.example
 
-# Deploy config
+# Deploy config & scripts
 .deploy.env
+scripts/
 
 # IDE & OS
 .idea/
