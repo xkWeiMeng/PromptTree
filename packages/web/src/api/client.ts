@@ -1,4 +1,7 @@
 import { useAuthStore } from '@/stores/auth'
+import { useToast } from '@/composables/useToast'
+import { useLoginModal } from '@/composables/useLoginModal'
+import { i18n } from '@/i18n'
 
 const BASE_URL = '/api'
 
@@ -13,6 +16,44 @@ export class ApiError extends Error {
   ) {
     super(message)
     this.name = 'ApiError'
+  }
+}
+
+// 防止重复弹出登录过期提示
+let isHandlingSessionExpiry = false
+
+/**
+ * 处理 401 登录过期：清除状态、提示用户重新登录
+ */
+export async function handleUnauthorized() {
+  if (isHandlingSessionExpiry) return
+  isHandlingSessionExpiry = true
+
+  try {
+    const authStore = useAuthStore()
+
+    // 只有已登录用户才需要提示（游客/离线模式不处理）
+    if (!authStore.accessToken) return
+
+    // 清除过期的认证状态（保留本地数据，不调 clearAllData）
+    authStore.accessToken = null
+    authStore.user = null
+
+    const toast = useToast()
+    const loginModal = useLoginModal()
+
+    toast.showWithAction(
+      i18n.global.t('auth.sessionExpired'),
+      'warning',
+      i18n.global.t('auth.reLogin'),
+      () => loginModal.open(),
+      0 // 不自动消失
+    )
+  } finally {
+    // 5 秒后重置标记，允许再次触发（防御性）
+    setTimeout(() => {
+      isHandlingSessionExpiry = false
+    }, 5000)
   }
 }
 
@@ -39,6 +80,11 @@ function createHeaders(includeAuth = true): HeadersInit {
  */
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
+    // 401 表示 token 过期或无效，触发重新登录流程
+    if (response.status === 401) {
+      await handleUnauthorized()
+    }
+
     const data = await response.json().catch(() => ({}))
     throw new ApiError(
       data.error || `HTTP ${response.status}`,

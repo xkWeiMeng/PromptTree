@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { SyncChange, TreeNode } from '@prompttree/shared'
 import * as dbOps from '@/db/operations'
+import { handleUnauthorized } from '@/api/client'
 import { useAuthStore } from './auth'
 import { useTreeStore } from './tree'
 
@@ -105,6 +106,10 @@ export const useSyncStore = defineStore('sync', () => {
       })
       
       if (!response.ok) {
+        if (response.status === 401) {
+          await handleUnauthorized()
+          return false
+        }
         throw new Error(`Sync failed: ${response.status}`)
       }
       
@@ -176,6 +181,10 @@ export const useSyncStore = defineStore('sync', () => {
       })
       
       if (!response.ok) {
+        if (response.status === 401) {
+          await handleUnauthorized()
+          return false
+        }
         throw new Error(`Full sync failed: ${response.status}`)
       }
       

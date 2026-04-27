@@ -1,4 +1,8 @@
 {
+  "auth": {
+    "sessionExpired": "セッションが期限切れです。再度ログインしてください。",
+    "reLogin": "ログイン"
+  },
   "common": {
     "untitled": "無題",
     "untitledFolder": "無題フォルダ",

@@ -1,4 +1,8 @@
 {
+  "auth": {
+    "sessionExpired": "登入已過期，請重新登入",
+    "reLogin": "重新登入"
+  },
   "common": {
     "untitled": "未命名",
     "untitledFolder": "未命名資料夾",

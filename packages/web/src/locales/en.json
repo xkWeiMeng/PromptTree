@@ -1,4 +1,8 @@
 {
+  "auth": {
+    "sessionExpired": "Your session has expired. Please log in again.",
+    "reLogin": "Log In"
+  },
   "common": {
     "untitled": "Untitled",
     "untitledFolder": "Untitled Folder",
