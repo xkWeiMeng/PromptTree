@@ -1,8 +1,9 @@
-import { onMounted, onUnmounted } from 'vue'
-import type { TreeNodeWithChildren } from '@prompttree/shared'
+import { onMounted, onUnmounted, ref } from 'vue'
+import type { TreeNode, TreeNodeWithChildren } from '@prompttree/shared'
 import { useTreeStore } from '@/stores/tree'
 import { useSyncStore } from '@/stores/sync'
 import { useConfirm } from './useConfirm'
+import { useToast } from './useToast'
 import { i18n } from '@/i18n'
 
 export interface KeyboardShortcut {
@@ -14,6 +15,10 @@ export interface KeyboardShortcut {
   description: string
   action: () => void | Promise<void>
 }
+
+// Module-level state for copy/paste
+const copiedNode = ref<TreeNode | null>(null)
+const isCutOperation = ref(false)
 
 /**
  * 检查是否正在编辑（焦点在输入框）
@@ -152,6 +157,61 @@ export function useKeyboard(options?: {
         const node = treeStore.selectedNode
         if (!node || node.type !== 'prompt') return
         options?.onCopyWithVariables?.()
+      }
+    },
+    {
+      key: 'c',
+      ctrl: true,
+      description: 'Copy selected node',
+      action: () => {
+        if (isEditing()) return
+        const node = treeStore.selectedNode
+        if (!node) return
+        copiedNode.value = { ...node }
+        isCutOperation.value = false
+        const toast = useToast()
+        toast.success(i18n.global.t('tree.nodeCopied'))
+      }
+    },
+    {
+      key: 'x',
+      ctrl: true,
+      description: 'Cut selected node',
+      action: () => {
+        if (isEditing()) return
+        const node = treeStore.selectedNode
+        if (!node) return
+        copiedNode.value = { ...node }
+        isCutOperation.value = true
+        const toast = useToast()
+        toast.success(i18n.global.t('tree.nodeCut'))
+      }
+    },
+    {
+      key: 'v',
+      ctrl: true,
+      description: 'Paste copied node',
+      action: async () => {
+        if (isEditing()) return
+        if (!copiedNode.value) return
+
+        const selected = treeStore.selectedNode
+        const parentId = selected
+          ? (selected.type === 'folder' ? selected.id : selected.parentId)
+          : null
+
+        await treeStore.createNode({
+          type: copiedNode.value.type,
+          parentId,
+          title: copiedNode.value.title,
+          content: copiedNode.value.content || ''
+        })
+
+        if (isCutOperation.value) {
+          await treeStore.deleteNode(copiedNode.value.id)
+          copiedNode.value = null
+          isCutOperation.value = false
+        }
       }
     },
     // =================== 树形面板快捷键 ===================

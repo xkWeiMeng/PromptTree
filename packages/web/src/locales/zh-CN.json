@@ -300,7 +300,15 @@
     "favoriteRemoved": "已取消收藏",
     "expandFolder": "展开文件夹",
     "collapseFolder": "折叠文件夹",
-    "clearSearch": "清除搜索"
+    "clearSearch": "清除搜索",
+    "emptyTitle": "还没有 Prompt",
+    "emptyDesc": "创建你的第一个 Prompt 开始使用",
+    "createFirstFolder": "创建文件夹",
+    "createFirstPrompt": "创建 Prompt",
+    "nodeCopied": "已复制到剪贴板",
+    "nodePasted": "粘贴成功",
+    "nodeCut": "已剪切到剪贴板",
+    "duplicate": "复制副本"
   },
   "editor": {
     "titlePlaceholder": "输入标题...",
@@ -322,7 +330,10 @@
     "editor": "编辑器",
     "outline": "大纲",
     "mindmap": "导图",
-    "editorDisabledHint": "选中 Prompt 后可编辑"
+    "editorDisabledHint": "选中 Prompt 后可编辑",
+    "editorDesc": "编辑 Prompt 内容",
+    "outlineDesc": "查看层级大纲",
+    "mindmapDesc": "可视化导图视图"
   },
   "layout": {
     "offlineMode": "离线模式",

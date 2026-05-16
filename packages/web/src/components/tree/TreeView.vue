@@ -6,7 +6,7 @@ import { useTreeStore } from '@/stores/tree'
 import { useConfirm } from '@/composables/useConfirm'
 import TreeNode from './TreeNode.vue'
 import {
-  FolderPlus, FilePlus, Star, StarOff, Trash2, FolderOpen, Pencil, Share2
+  FolderPlus, FilePlus, Star, StarOff, Trash2, FolderOpen, Pencil, Share2, Copy
 } from 'lucide-vue-next'
 
 const { t } = useI18n()
@@ -53,10 +53,21 @@ function hideContextMenu() {
 // Context menu ref for keyboard navigation
 const contextMenuRef = ref<HTMLElement | null>(null)
 
-// Focus first menu item when context menu opens
+// Focus first menu item when context menu opens + boundary detection
 watch(() => contextMenu.value.visible, async (visible) => {
   if (visible) {
     await nextTick()
+    // Boundary detection
+    const menuEl = contextMenuRef.value
+    if (menuEl) {
+      const rect = menuEl.getBoundingClientRect()
+      if (rect.right > window.innerWidth) {
+        contextMenu.value.x = Math.max(0, window.innerWidth - rect.width - 8)
+      }
+      if (rect.bottom > window.innerHeight) {
+        contextMenu.value.y = Math.max(0, contextMenu.value.y - rect.height)
+      }
+    }
     const firstItem = contextMenuRef.value?.querySelector('[role="menuitem"]') as HTMLElement | null
     firstItem?.focus()
   }
@@ -141,6 +152,20 @@ function handleShare() {
   hideContextMenu()
 }
 
+// 复制副本
+async function handleDuplicate() {
+  if (contextMenu.value.node) {
+    const original = contextMenu.value.node
+    await treeStore.createNode({
+      type: original.type,
+      parentId: original.parentId,
+      title: `${original.title || t('common.untitled')} (${t('common.copy')})`,
+      content: original.content || ''
+    })
+  }
+  hideContextMenu()
+}
+
 // 在空白处右键
 function handleEmptyContextMenu(e: MouseEvent) {
   e.preventDefault()
@@ -163,9 +188,19 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
   <div class="tree-view" @click="hideContextMenu" @contextmenu="handleEmptyContextMenu">
     <!-- 空状态 -->
     <div v-if="rootNodes.length === 0" class="empty-state">
-      <FolderOpen :size="40" class="empty-icon" />
-      <p>{{ t('tree.emptyState') }}</p>
-      <p class="hint">{{ t('tree.emptyHint') }}</p>
+      <FolderOpen :size="48" class="empty-icon" />
+      <p class="empty-title">{{ t('tree.emptyTitle') }}</p>
+      <p class="empty-desc">{{ t('tree.emptyDesc') }}</p>
+      <div class="empty-actions">
+        <button type="button" class="empty-btn" @click="handleCreateRoot('folder')">
+          <FolderPlus :size="15" />
+          <span>{{ t('tree.createFirstFolder') }}</span>
+        </button>
+        <button type="button" class="empty-btn primary" @click="handleCreateRoot('prompt')">
+          <FilePlus :size="15" />
+          <span>{{ t('tree.createFirstPrompt') }}</span>
+        </button>
+      </div>
     </div>
     
     <!-- 树节点列表 -->
@@ -226,6 +261,10 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
               <Share2 :size="15" />
               <span>{{ t('share.action') }}</span>
             </button>
+            <button type="button" class="menu-item" role="menuitem" @click="handleDuplicate">
+              <Copy :size="15" />
+              <span>{{ t('tree.duplicate') }}</span>
+            </button>
             <div class="menu-divider"></div>
             <button type="button" class="menu-item danger" role="menuitem" @click="handleDelete">
               <Trash2 :size="15" />
@@ -263,21 +302,60 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
   justify-content: center;
   height: 200px;
   color: var(--text-tertiary);
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
 .empty-icon {
   color: var(--text-quaternary);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
-.empty-state p {
+.empty-title {
   margin: 0;
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
 }
 
-.hint {
-  font-size: var(--font-size-xs) !important;
+.empty-desc {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.empty-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.empty-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+  font-family: inherit;
+}
+
+.empty-btn:hover {
+  background: var(--bg-hover);
+}
+
+.empty-btn.primary {
+  background: var(--color-accent);
+  color: var(--text-on-accent);
+  border-color: var(--color-accent);
+}
+
+.empty-btn.primary:hover {
+  background: var(--color-accent-hover);
 }
 
 /* ===================

@@ -300,7 +300,15 @@
     "favoriteRemoved": "已取消收藏",
     "expandFolder": "展開資料夾",
     "collapseFolder": "摺疊資料夾",
-    "clearSearch": "清除搜尋"
+    "clearSearch": "清除搜尋",
+    "emptyTitle": "還沒有 Prompt",
+    "emptyDesc": "建立你的第一個 Prompt 開始使用",
+    "createFirstFolder": "建立資料夾",
+    "createFirstPrompt": "建立 Prompt",
+    "nodeCopied": "已複製到剪貼簿",
+    "nodePasted": "貼上成功",
+    "nodeCut": "已剪下到剪貼簿",
+    "duplicate": "複製副本"
   },
   "editor": {
     "titlePlaceholder": "輸入標題...",
@@ -322,7 +330,10 @@
     "editor": "編輯器",
     "outline": "大綱",
     "mindmap": "心智圖",
-    "editorDisabledHint": "選取 Prompt 後可編輯"
+    "editorDisabledHint": "選取 Prompt 後可編輯",
+    "editorDesc": "編輯 Prompt 內容",
+    "outlineDesc": "檢視層級大綱",
+    "mindmapDesc": "視覺化心智圖"
   },
   "layout": {
     "offlineMode": "離線模式",

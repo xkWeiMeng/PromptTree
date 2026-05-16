@@ -24,6 +24,10 @@ const isSelected = computed(() => treeStore.selectedNodeId === props.node.id)
 const hasChildren = computed(() => props.node.children && props.node.children.length > 0)
 const isFolder = computed(() => props.node.type === 'folder')
 const isEditing = computed(() => treeStore.editingNodeId === props.node.id)
+const isDirty = computed(() => (props.node as any)._dirty === true)
+
+// Drop zone state
+const dropPosition = ref<'above' | 'inside' | 'below' | null>(null)
 
 // 重命名输入
 const renameInput = ref<HTMLInputElement | null>(null)
@@ -107,11 +111,33 @@ function handleDragEnd(e: DragEvent) {
   target.classList.remove('dragging')
 }
 
-// 拖拽经过
+// 拖拽经过（带位置检测）
 function handleDragOver(e: DragEvent) {
   e.preventDefault()
   if (!e.dataTransfer) return
   e.dataTransfer.dropEffect = 'move'
+
+  const target = e.currentTarget as HTMLElement
+  const rect = target.getBoundingClientRect()
+  const y = e.clientY - rect.top
+  const height = rect.height
+
+  if (y < height * 0.25) {
+    dropPosition.value = 'above'
+  } else if (y > height * 0.75) {
+    dropPosition.value = 'below'
+  } else {
+    dropPosition.value = isFolder.value ? 'inside' : (y < height * 0.5 ? 'above' : 'below')
+  }
+}
+
+// 拖拽离开
+function handleDragLeave(e: DragEvent) {
+  const related = e.relatedTarget as HTMLElement | null
+  const target = e.currentTarget as HTMLElement
+  if (!related || !target.contains(related)) {
+    dropPosition.value = null
+  }
 }
 
 // 放置
@@ -120,11 +146,26 @@ function handleDrop(e: DragEvent) {
   e.stopPropagation()
   
   const draggedId = e.dataTransfer?.getData('text/plain')
-  if (!draggedId || draggedId === props.node.id) return
-  
-  const newParentId = isFolder.value ? props.node.id : props.node.parentId
-  const newSortOrder = isFolder.value ? 0 : props.node.sortOrder + 1
-  
+  if (!draggedId || draggedId === props.node.id) {
+    dropPosition.value = null
+    return
+  }
+
+  let newParentId: string | null
+  let newSortOrder: number
+
+  if (dropPosition.value === 'inside' && isFolder.value) {
+    newParentId = props.node.id
+    newSortOrder = 0
+  } else if (dropPosition.value === 'above') {
+    newParentId = props.node.parentId
+    newSortOrder = props.node.sortOrder
+  } else {
+    newParentId = props.node.parentId
+    newSortOrder = props.node.sortOrder + 1
+  }
+
+  dropPosition.value = null
   treeStore.moveNode(draggedId, newParentId, newSortOrder)
 }
 </script>
@@ -133,7 +174,13 @@ function handleDrop(e: DragEvent) {
   <div class="tree-node-wrapper">
     <div
       class="tree-node"
-      :class="{ selected: isSelected, folder: isFolder }"
+      :class="{
+        selected: isSelected,
+        folder: isFolder,
+        'tree-node--drop-target': dropPosition === 'inside',
+        'tree-node--drop-above': dropPosition === 'above',
+        'tree-node--drop-below': dropPosition === 'below'
+      }"
       :style="{ paddingLeft: indent }"
       role="treeitem"
       :aria-expanded="isFolder ? isExpanded : undefined"
@@ -146,6 +193,7 @@ function handleDrop(e: DragEvent) {
       @dragstart="handleDragStart"
       @dragend="handleDragEnd"
       @dragover="handleDragOver"
+      @dragleave="handleDragLeave"
       @drop="handleDrop"
     >
       <!-- 展开/折叠箭头 -->
@@ -186,6 +234,9 @@ function handleDrop(e: DragEvent) {
       />
       <!-- 标题（普通模式） -->
       <span v-else class="title" :title="node.title">{{ node.title || t('common.untitled') }}</span>
+
+      <!-- 脏标记（待同步） -->
+      <span v-if="isDirty" class="dirty-indicator" :title="t('sync.pendingSync', { count: 1 })">•</span>
       
       <!-- 收藏标记 -->
       <Star v-if="node.isFavorite" :size="12" class="favorite" fill="currentColor" />
@@ -206,6 +257,7 @@ function handleDrop(e: DragEvent) {
 
 <style scoped>
 .tree-node {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -299,5 +351,35 @@ function handleDrop(e: DragEvent) {
 
 .children {
   /* 子节点容器 */
+}
+
+/* Drop zone indicators */
+.tree-node--drop-target {
+  background: var(--accent-bg-subtle, rgba(0, 122, 255, 0.08));
+  border-radius: var(--radius-sm);
+  outline: 2px dashed var(--color-accent);
+  outline-offset: -2px;
+}
+
+.tree-node--drop-above::before,
+.tree-node--drop-below::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-accent);
+  pointer-events: none;
+}
+
+.tree-node--drop-above::before { top: 0; }
+.tree-node--drop-below::after { bottom: 0; }
+
+/* Dirty indicator */
+.dirty-indicator {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 </style>

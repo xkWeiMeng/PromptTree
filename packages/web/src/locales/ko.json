@@ -300,7 +300,15 @@
     "favoriteRemoved": "즐겨찾기에서 제거됨",
     "expandFolder": "폴더 펼치기",
     "collapseFolder": "폴더 접기",
-    "clearSearch": "검색 지우기"
+    "clearSearch": "검색 지우기",
+    "emptyTitle": "프롬프트가 아직 없습니다",
+    "emptyDesc": "첫 번째 프롬프트를 만들어 시작하세요",
+    "createFirstFolder": "폴더 만들기",
+    "createFirstPrompt": "프롬프트 만들기",
+    "nodeCopied": "클립보드에 복사됨",
+    "nodePasted": "붙여넣기 완료",
+    "nodeCut": "클립보드에 잘라내기",
+    "duplicate": "복제"
   },
   "editor": {
     "titlePlaceholder": "제목 입력...",
@@ -322,7 +330,10 @@
     "editor": "편집기",
     "outline": "개요",
     "mindmap": "마인드맵",
-    "editorDisabledHint": "프롬프트를 선택하면 편집 가능"
+    "editorDisabledHint": "프롬프트를 선택하면 편집 가능",
+    "editorDesc": "프롬프트 내용 편집",
+    "outlineDesc": "계층 구조 개요 보기",
+    "mindmapDesc": "비주얼 마인드맵 보기"
   },
   "layout": {
     "offlineMode": "오프라인 모드",

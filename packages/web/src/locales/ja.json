@@ -300,7 +300,15 @@
     "favoriteRemoved": "お気に入りから削除しました",
     "expandFolder": "フォルダを展開",
     "collapseFolder": "フォルダを折りたたむ",
-    "clearSearch": "検索をクリア"
+    "clearSearch": "検索をクリア",
+    "emptyTitle": "Promptがまだありません",
+    "emptyDesc": "最初のPromptを作成して始めましょう",
+    "createFirstFolder": "フォルダを作成",
+    "createFirstPrompt": "Promptを作成",
+    "nodeCopied": "クリップボードにコピーしました",
+    "nodePasted": "貼り付けました",
+    "nodeCut": "クリップボードに切り取りました",
+    "duplicate": "複製"
   },
   "editor": {
     "titlePlaceholder": "タイトルを入力...",
@@ -322,7 +330,10 @@
     "editor": "エディタ",
     "outline": "アウトライン",
     "mindmap": "マインドマップ",
-    "editorDisabledHint": "Promptを選択すると編集可能"
+    "editorDisabledHint": "Promptを選択すると編集可能",
+    "editorDesc": "Promptの内容を編集",
+    "outlineDesc": "階層アウトラインを表示",
+    "mindmapDesc": "ビジュアルマインドマップ"
   },
   "layout": {
     "offlineMode": "オフラインモード",

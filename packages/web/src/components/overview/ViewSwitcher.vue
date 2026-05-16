@@ -15,10 +15,10 @@ const hasSelectedPrompt = computed(() => {
   return treeStore.selectedNode?.type === 'prompt'
 })
 
-const tabs = computed<{ mode: ViewMode; icon: Component; label: string }[]>(() => [
-  { mode: 'editor', icon: markRaw(Pencil), label: t('view.editor') },
-  { mode: 'outline', icon: markRaw(List), label: t('view.outline') },
-  { mode: 'mindmap', icon: markRaw(Network), label: t('view.mindmap') }
+const tabs = computed<{ mode: ViewMode; icon: Component; label: string; description: string }[]>(() => [
+  { mode: 'editor', icon: markRaw(Pencil), label: t('view.editor'), description: t('view.editorDesc') },
+  { mode: 'outline', icon: markRaw(List), label: t('view.outline'), description: t('view.outlineDesc') },
+  { mode: 'mindmap', icon: markRaw(Network), label: t('view.mindmap'), description: t('view.mindmapDesc') }
 ])
 
 function switchView(mode: ViewMode) {
@@ -41,7 +41,7 @@ function switchView(mode: ViewMode) {
         }"
         :aria-selected="treeStore.viewMode === tab.mode"
         :aria-disabled="tab.mode === 'editor' && !hasSelectedPrompt ? true : undefined"
-        :title="tab.mode === 'editor' && !hasSelectedPrompt ? t('view.editorDisabledHint') : tab.label"
+        :title="tab.mode === 'editor' && !hasSelectedPrompt ? t('view.editorDisabledHint') : tab.description"
         @click="switchView(tab.mode)"
       >
         <component :is="tab.icon" :size="14" class="tab-icon" />

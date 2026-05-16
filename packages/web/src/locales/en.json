@@ -300,7 +300,15 @@
     "favoriteRemoved": "Removed from favorites",
     "expandFolder": "Expand folder",
     "collapseFolder": "Collapse folder",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "emptyTitle": "No prompts yet",
+    "emptyDesc": "Create your first prompt to get started",
+    "createFirstFolder": "Create Folder",
+    "createFirstPrompt": "Create Prompt",
+    "nodeCopied": "Copied to clipboard",
+    "nodePasted": "Pasted successfully",
+    "nodeCut": "Cut to clipboard",
+    "duplicate": "Duplicate"
   },
   "editor": {
     "titlePlaceholder": "Enter title...",
@@ -322,7 +330,10 @@
     "editor": "Editor",
     "outline": "Outline",
     "mindmap": "Mind Map",
-    "editorDisabledHint": "Select a prompt to edit"
+    "editorDisabledHint": "Select a prompt to edit",
+    "editorDesc": "Edit prompt content",
+    "outlineDesc": "View hierarchical outline",
+    "mindmapDesc": "Visual mind map view"
   },
   "layout": {
     "offlineMode": "Offline Mode",
