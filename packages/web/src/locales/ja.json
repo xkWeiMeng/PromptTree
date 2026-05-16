@@ -186,7 +186,9 @@
     "backToBlog": "ブログに戻る",
     "relatedPosts": "関連記事",
     "notFound": "記事が見つかりません",
-    "backToList": "ブログ一覧に戻る"
+    "backToList": "ブログ一覧に戻る",
+    "tableOfContents": "目次",
+    "publishedOn": "{date}に公開"
   },
   "login": {
     "ariaLabel": "ユーザーログイン",
@@ -439,5 +441,10 @@
     "revoked": "API キーを無効化しました",
     "revokeFailed": "API キーの無効化に失敗しました",
     "revokeConfirm": "API キー「{name}」を無効化しますか？"
+  },
+  "breadcrumb": {
+    "home": "ホーム",
+    "blog": "ブログ",
+    "docs": "ドキュメント"
   }
 }

@@ -1,4 +1,6 @@
 export { useHead } from './useHead'
+export { useJsonLd, buildWebSiteSchema, buildProductSchema, buildArticleSchema, buildBreadcrumbSchema } from './useJsonLd'
+export type { ArticleSchemaOptions, BreadcrumbItem } from './useJsonLd'
 export { useSync } from './useSync'
 export { useToast } from './useToast'
 export type { Toast, ToastType, ToastAction } from './useToast'

@@ -3,11 +3,14 @@ import { computed } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@/composables'
+import { useJsonLd, buildArticleSchema, buildBreadcrumbSchema } from '@/composables'
 import { useLocalePath } from '@/composables/useLocalePath'
 import SiteLayout from '@/components/site/SiteLayout.vue'
 import MarkdownRenderer from '@/components/site/MarkdownRenderer.vue'
 import { getPostBySlug, getAllPosts } from '@/utils/content'
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft, ChevronRight } from 'lucide-vue-next'
+
+const SITE_URL = 'https://prompttree.app'
 
 const { t, locale } = useI18n()
 const { localePath } = useLocalePath()
@@ -30,35 +33,133 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString(locale.value, { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+// TOC — 从 markdown 提取 h2/h3 标题
+interface TocItem {
+  level: number
+  text: string
+  id: string
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+const toc = computed<TocItem[]>(() => {
+  if (!post.value) return []
+  const lines = post.value.content.split('\n')
+  const items: TocItem[] = []
+  for (const line of lines) {
+    const m2 = line.match(/^## (.+)$/)
+    if (m2) {
+      items.push({ level: 2, text: m2[1], id: slugify(m2[1]) })
+      continue
+    }
+    const m3 = line.match(/^### (.+)$/)
+    if (m3) {
+      items.push({ level: 3, text: m3[1], id: slugify(m3[1]) })
+    }
+  }
+  return items
+})
+
+// Author avatar initial
+const authorInitial = computed(() => {
+  if (!post.value?.meta.author) return '?'
+  return post.value.meta.author.charAt(0).toUpperCase()
+})
+
 // SEO
 const pageTitle = computed(() => post.value ? post.value.meta.title : t('blog.pageTitle'))
 const pageDesc = computed(() => post.value?.meta.description || '')
-useHead({ title: pageTitle, description: pageDesc })
+useHead({ title: pageTitle, description: pageDesc, ogType: 'article' })
+
+// JSON-LD: Article
+const articleSchema = computed(() => {
+  if (!post.value) return {}
+  return buildArticleSchema({
+    headline: post.value.meta.title,
+    description: post.value.meta.description,
+    url: `${SITE_URL}${route.path}`,
+    datePublished: post.value.meta.date,
+    author: post.value.meta.author,
+  })
+})
+useJsonLd('article', articleSchema)
+
+// JSON-LD: Breadcrumb
+const breadcrumbSchema = computed(() => {
+  if (!post.value) return {}
+  return buildBreadcrumbSchema([
+    { name: t('breadcrumb.home'), url: SITE_URL },
+    { name: t('breadcrumb.blog'), url: `${SITE_URL}${localePath('/blog')}` },
+    { name: post.value.meta.title, url: `${SITE_URL}${route.path}` },
+  ])
+})
+useJsonLd('breadcrumb', breadcrumbSchema)
 </script>
 
 <template>
   <SiteLayout>
     <template v-if="post">
-      <!-- 文章头 -->
+      <!-- 面包屑导航 -->
       <div class="blog-post__header">
         <div class="site-container">
-          <RouterLink :to="localePath('/blog')" class="blog-post__back" :aria-label="t('blog.backToBlog')">
-            <ArrowLeft :size="20" />
-            {{ t('blog.backToBlog') }}
-          </RouterLink>
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <ol class="breadcrumb__list">
+              <li class="breadcrumb__item">
+                <RouterLink :to="localePath('/')" class="breadcrumb__link">{{ t('breadcrumb.home') }}</RouterLink>
+                <ChevronRight :size="14" class="breadcrumb__separator" />
+              </li>
+              <li class="breadcrumb__item">
+                <RouterLink :to="localePath('/blog')" class="breadcrumb__link">{{ t('breadcrumb.blog') }}</RouterLink>
+                <ChevronRight :size="14" class="breadcrumb__separator" />
+              </li>
+              <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
+                {{ post.meta.title }}
+              </li>
+            </ol>
+          </nav>
+
           <h1 class="blog-post__title">{{ post.meta.title }}</h1>
-          <div class="blog-post__meta">
-            <span>{{ formatDate(post.meta.date) }}</span>
-            <span>{{ post.meta.author }}</span>
+
+          <!-- 作者信息卡片 -->
+          <div class="author-card">
+            <div class="author-card__avatar">{{ authorInitial }}</div>
+            <div class="author-card__info">
+              <span class="author-card__name">{{ post.meta.author }}</span>
+              <span class="author-card__date">{{ t('blog.publishedOn', { date: formatDate(post.meta.date) }) }}</span>
+            </div>
           </div>
+
           <div v-if="post.meta.tags.length" class="blog-post__tags">
             <span v-for="tag in post.meta.tags" :key="tag" class="blog-card__tag">{{ tag }}</span>
           </div>
         </div>
       </div>
 
-      <!-- 文章内容 -->
+      <!-- 文章内容 + TOC -->
       <div class="site-container site-container--narrow blog-post__body">
+        <!-- 目录 -->
+        <details v-if="toc.length > 0" class="toc" open>
+          <summary class="toc__title">{{ t('blog.tableOfContents') }}</summary>
+          <nav class="toc__nav">
+            <a
+              v-for="item in toc"
+              :key="item.id"
+              :href="`#${item.id}`"
+              class="toc__link"
+              :class="{ 'toc__link--h3': item.level === 3 }"
+            >
+              {{ item.text }}
+            </a>
+          </nav>
+        </details>
+
         <MarkdownRenderer :content="post.content" />
 
         <!-- 相关文章 -->
@@ -89,32 +190,162 @@ useHead({ title: pageTitle, description: pageDesc })
 </template>
 
 <style scoped>
-.blog-post__body {
-  padding-bottom: var(--space-16);
-}
-
-.blog-post__back {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  text-decoration: none;
+/* =================== Breadcrumb =================== */
+.breadcrumb {
   margin-bottom: var(--space-6);
 }
 
-.blog-post__back:hover {
-  color: var(--text-primary);
+.breadcrumb__list {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.breadcrumb__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+.breadcrumb__link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--duration-fast) ease;
+}
+
+.breadcrumb__link:hover {
+  color: var(--color-accent);
   text-decoration: none;
 }
 
-.blog-post__back:focus-visible {
+.breadcrumb__link:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
 
-/* Typography */
+.breadcrumb__separator {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.breadcrumb__item--current {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 240px;
+}
+
+/* =================== Author Card =================== */
+.author-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+}
+
+.author-card__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  flex-shrink: 0;
+}
+
+.author-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0);
+}
+
+.author-card__name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.author-card__date {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+/* =================== Table of Contents =================== */
+.toc {
+  margin-bottom: var(--space-8);
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border-secondary);
+}
+
+.toc__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.toc__title::before {
+  content: '▸';
+  font-size: var(--font-size-xs);
+  transition: transform var(--duration-fast) ease;
+}
+
+.toc[open] > .toc__title::before {
+  transform: rotate(90deg);
+}
+
+.toc__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+}
+
+.toc__link {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: var(--space-1) 0;
+  transition: color var(--duration-fast) ease;
+}
+
+.toc__link:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.toc__link--h3 {
+  padding-left: var(--space-4);
+  font-size: var(--font-size-xs);
+}
+
+/* =================== Existing styles =================== */
+.blog-post__body {
+  padding-bottom: var(--space-16);
+}
+
 .blog-post__title {
   text-wrap: balance;
 }
@@ -206,6 +437,14 @@ useHead({ title: pageTitle, description: pageDesc })
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-1);
+  }
+
+  .breadcrumb__item--current {
+    max-width: 160px;
+  }
+
+  .author-card {
+    padding: var(--space-3);
   }
 }
 </style>

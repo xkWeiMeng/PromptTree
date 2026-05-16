@@ -186,7 +186,9 @@
     "backToBlog": "返回部落格",
     "relatedPosts": "相關文章",
     "notFound": "文章不存在",
-    "backToList": "返回部落格列表"
+    "backToList": "返回部落格列表",
+    "tableOfContents": "目錄",
+    "publishedOn": "發佈於 {date}"
   },
   "login": {
     "ariaLabel": "使用者登入",
@@ -439,5 +441,10 @@
     "revoked": "API Key 已撤銷",
     "revokeFailed": "撤銷 API Key 失敗",
     "revokeConfirm": "確認撤銷 API Key「{name}」嗎？"
+  },
+  "breadcrumb": {
+    "home": "首頁",
+    "blog": "部落格",
+    "docs": "文件"
   }
 }

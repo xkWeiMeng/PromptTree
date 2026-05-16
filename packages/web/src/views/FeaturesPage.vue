@@ -10,7 +10,8 @@ const { t } = useI18n()
 
 useHead({
   title: t('features.pageTitle'),
-  description: t('features.metaDesc')
+  description: t('features.metaDesc'),
+  ogType: 'website',
 })
 
 const features = computed(() => [

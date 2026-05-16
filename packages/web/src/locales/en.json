@@ -186,7 +186,9 @@
     "backToBlog": "Back to Blog",
     "relatedPosts": "Related Posts",
     "notFound": "Post not found",
-    "backToList": "Back to blog"
+    "backToList": "Back to blog",
+    "tableOfContents": "Table of Contents",
+    "publishedOn": "Published on {date}"
   },
   "login": {
     "ariaLabel": "User Login",
@@ -439,5 +441,10 @@
     "revoked": "API key revoked",
     "revokeFailed": "Failed to revoke API key",
     "revokeConfirm": "Revoke API key \"{name}\"?"
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "blog": "Blog",
+    "docs": "Docs"
   }
 }

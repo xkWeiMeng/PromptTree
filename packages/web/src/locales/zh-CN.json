@@ -186,7 +186,9 @@
     "backToBlog": "返回博客",
     "relatedPosts": "相关文章",
     "notFound": "文章不存在",
-    "backToList": "返回博客列表"
+    "backToList": "返回博客列表",
+    "tableOfContents": "目录",
+    "publishedOn": "发布于 {date}"
   },
   "login": {
     "ariaLabel": "用户登录",
@@ -439,5 +441,10 @@
     "revoked": "API Key 已吊销",
     "revokeFailed": "吊销 API Key 失败",
     "revokeConfirm": "确认吊销 API Key「{name}」吗？"
+  },
+  "breadcrumb": {
+    "home": "首页",
+    "blog": "博客",
+    "docs": "文档"
   }
 }

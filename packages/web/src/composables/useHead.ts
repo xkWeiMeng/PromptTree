@@ -15,6 +15,7 @@ import {
 const SITE_NAME = 'PromptTree'
 const SITE_URL = 'https://prompttree.app'
 const DEFAULT_ROBOTS = 'index, follow'
+const DEFAULT_OG_IMAGE = '/og-image.png'
 
 interface HeadOptions {
   /** 页面标题（会自动追加站点名） */
@@ -23,6 +24,12 @@ interface HeadOptions {
   description?: string | Ref<string>
   /** robots 策略，如 noindex, nofollow */
   robots?: string | Ref<string>
+  /** Open Graph type (e.g. "website", "article") */
+  ogType?: string | Ref<string>
+  /** Open Graph image URL (absolute or root-relative) */
+  ogImage?: string | Ref<string>
+  /** Twitter card type (default: "summary_large_image") */
+  twitterCard?: string | Ref<string>
 }
 
 /**
@@ -72,13 +79,28 @@ export function useHead(options: HeadOptions = {}) {
     // OG URL
     _setMetaProperty('og:url', canonicalUrl)
 
+    // OG type
+    const ogType = unref(options.ogType)
+    _setMetaProperty('og:type', ogType || 'website')
+
     // OG title & description
     _setMetaProperty('og:title', title ? `${title} - ${SITE_NAME}` : document.title)
     _setMetaProperty('og:description', description || defaultDescription)
 
+    // OG image
+    const ogImage = unref(options.ogImage)
+    const resolvedImage = ogImage || DEFAULT_OG_IMAGE
+    _setMetaProperty('og:image', resolvedImage.startsWith('http') ? resolvedImage : `${SITE_URL}${resolvedImage}`)
+
+    // OG site_name
+    _setMetaProperty('og:site_name', SITE_NAME)
+
     // Twitter Card
+    const twitterCard = unref(options.twitterCard)
+    _setMetaName('twitter:card', twitterCard || 'summary_large_image')
     _setMetaName('twitter:title', title ? `${title} - ${SITE_NAME}` : document.title)
     _setMetaName('twitter:description', description || defaultDescription)
+    _setMetaName('twitter:image', resolvedImage.startsWith('http') ? resolvedImage : `${SITE_URL}${resolvedImage}`)
 
     // Hreflang 标签 — 为所有支持的语言生成
     _updateHreflangTags(currentPath)

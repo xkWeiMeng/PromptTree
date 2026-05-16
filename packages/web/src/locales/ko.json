@@ -186,7 +186,9 @@
     "backToBlog": "블로그로 돌아가기",
     "relatedPosts": "관련 글",
     "notFound": "글을 찾을 수 없습니다",
-    "backToList": "블로그 목록으로 돌아가기"
+    "backToList": "블로그 목록으로 돌아가기",
+    "tableOfContents": "목차",
+    "publishedOn": "{date}에 게시됨"
   },
   "login": {
     "ariaLabel": "사용자 로그인",
@@ -439,5 +441,10 @@
     "revoked": "API 키가 폐기되었습니다",
     "revokeFailed": "API 키 폐기에 실패했습니다",
     "revokeConfirm": "API 키 \"{name}\"를 폐기할까요?"
+  },
+  "breadcrumb": {
+    "home": "홈",
+    "blog": "블로그",
+    "docs": "문서"
   }
 }

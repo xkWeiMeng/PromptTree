@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@/composables'
+import { useJsonLd, buildWebSiteSchema, buildProductSchema } from '@/composables'
 import { useLocalePath } from '@/composables/useLocalePath'
 import SiteLayout from '@/components/site/SiteLayout.vue'
 import FeatureIllustration from '@/components/site/FeatureIllustration.vue'
@@ -12,8 +13,12 @@ const { localePath } = useLocalePath()
 
 useHead({
   title: t('landing.pageTitle'),
-  description: t('landing.metaDesc')
+  description: t('landing.metaDesc'),
+  ogType: 'website',
 })
+
+useJsonLd('website', buildWebSiteSchema())
+useJsonLd('product', buildProductSchema())
 
 const features = computed(() => [
   { illustration: 'tree', color: 'blue', title: t('landing.feature1Title'), desc: t('landing.feature1Desc') },

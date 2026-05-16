@@ -33,11 +33,11 @@ function renderMarkdown(md: string): string {
     return `<table><thead><tr>${ths}</tr></thead><tbody>${rows}</tbody></table>`
   })
 
-  // 标题
-  html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>')
-  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>')
-  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>')
+  // 标题 — 添加 id 属性用于锚点链接
+  html = html.replace(/^#### (.+)$/gm, (_m, text) => `<h4 id="${slugify(text)}">${text}</h4>`)
+  html = html.replace(/^### (.+)$/gm, (_m, text) => `<h3 id="${slugify(text)}">${text}</h3>`)
+  html = html.replace(/^## (.+)$/gm, (_m, text) => `<h2 id="${slugify(text)}">${text}</h2>`)
+  html = html.replace(/^# (.+)$/gm, (_m, text) => `<h1 id="${slugify(text)}">${text}</h1>`)
 
   // 引用
   html = html.replace(/^> (.+)$/gm, '<blockquote><p>$1</p></blockquote>')
@@ -90,9 +90,18 @@ function escapeHtml(str: string): string {
     .replace(/"/g, '&quot;')
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
 const rendered = computed(() =>
   DOMPurify.sanitize(renderMarkdown(props.content), {
-    ADD_ATTR: ['target', 'rel', 'loading'],
+    ADD_ATTR: ['target', 'rel', 'loading', 'id'],
     ADD_TAGS: ['img'],
   })
 )

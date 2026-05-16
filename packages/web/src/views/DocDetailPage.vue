@@ -3,11 +3,14 @@ import { computed } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@/composables'
+import { useJsonLd, buildArticleSchema, buildBreadcrumbSchema } from '@/composables'
 import { useLocalePath } from '@/composables/useLocalePath'
 import SiteLayout from '@/components/site/SiteLayout.vue'
 import MarkdownRenderer from '@/components/site/MarkdownRenderer.vue'
 import { getDocBySlug, getAllDocs } from '@/utils/content'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
+
+const SITE_URL = 'https://prompttree.app'
 
 const { t, locale } = useI18n()
 const { localePath } = useLocalePath()
@@ -24,7 +27,29 @@ const nextDoc = computed(() => currentIndex.value < allDocs.value.length - 1 ? a
 // SEO
 const pageTitle = computed(() => doc.value ? `${doc.value.meta.title} - ${t('docs.docMetaSuffix')}` : t('docs.pageTitle'))
 const pageDesc = computed(() => doc.value?.meta.description || '')
-useHead({ title: pageTitle, description: pageDesc })
+useHead({ title: pageTitle, description: pageDesc, ogType: 'article' })
+
+// JSON-LD: Article
+const articleSchema = computed(() => {
+  if (!doc.value) return {}
+  return buildArticleSchema({
+    headline: doc.value.meta.title,
+    description: doc.value.meta.description,
+    url: `${SITE_URL}${route.path}`,
+  })
+})
+useJsonLd('article', articleSchema)
+
+// JSON-LD: Breadcrumb
+const breadcrumbSchema = computed(() => {
+  if (!doc.value) return {}
+  return buildBreadcrumbSchema([
+    { name: t('breadcrumb.home'), url: SITE_URL },
+    { name: t('breadcrumb.docs'), url: `${SITE_URL}${localePath('/docs')}` },
+    { name: doc.value.meta.title, url: `${SITE_URL}${route.path}` },
+  ])
+})
+useJsonLd('breadcrumb', breadcrumbSchema)
 </script>
 
 <template>
@@ -55,6 +80,23 @@ useHead({ title: pageTitle, description: pageDesc })
       <!-- 内容 -->
       <div class="docs-content">
         <template v-if="doc">
+          <!-- 面包屑导航 -->
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <ol class="breadcrumb__list">
+              <li class="breadcrumb__item">
+                <RouterLink :to="localePath('/')" class="breadcrumb__link">{{ t('breadcrumb.home') }}</RouterLink>
+                <ChevronRight :size="14" class="breadcrumb__separator" />
+              </li>
+              <li class="breadcrumb__item">
+                <RouterLink :to="localePath('/docs')" class="breadcrumb__link">{{ t('breadcrumb.docs') }}</RouterLink>
+                <ChevronRight :size="14" class="breadcrumb__separator" />
+              </li>
+              <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
+                {{ doc.meta.title }}
+              </li>
+            </ol>
+          </nav>
+
           <h1 class="doc-detail__title">
             {{ doc.meta.title }}
           </h1>
@@ -96,7 +138,60 @@ useHead({ title: pageTitle, description: pageDesc })
 </template>
 
 <style scoped>
-/* Title */
+/* =================== Breadcrumb =================== */
+.breadcrumb {
+  margin-bottom: var(--space-4);
+}
+
+.breadcrumb__list {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.breadcrumb__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+.breadcrumb__link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--duration-fast) ease;
+}
+
+.breadcrumb__link:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.breadcrumb__link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.breadcrumb__separator {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.breadcrumb__item--current {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 240px;
+}
+
+/* =================== Title =================== */
 .doc-detail__title {
   font-size: var(--font-size-h2);
   font-weight: var(--font-weight-bold);
