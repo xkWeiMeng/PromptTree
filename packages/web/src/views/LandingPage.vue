@@ -6,7 +6,7 @@ import { useJsonLd, buildWebSiteSchema, buildProductSchema } from '@/composables
 import { useLocalePath } from '@/composables/useLocalePath'
 import SiteLayout from '@/components/site/SiteLayout.vue'
 import FeatureIllustration from '@/components/site/FeatureIllustration.vue'
-import { TreePine, Smartphone, Monitor, Puzzle, ArrowRight } from 'lucide-vue-next'
+import { TreePine, Smartphone, Monitor, Puzzle, ArrowRight, Star } from 'lucide-vue-next'
 
 const { t } = useI18n()
 const { localePath } = useLocalePath()
@@ -77,6 +77,29 @@ const platforms = computed(() => [
           </RouterLink>
         </div>
         <p class="hero__free-note">{{ t('landing.ctaFreeNote') }}</p>
+      </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="social-proof">
+      <div class="site-container">
+        <div class="social-proof__inner">
+          <span class="social-proof__badge">{{ t('landing.socialProofBadge') }}</span>
+          <a
+            href="https://github.com/xkWeiMeng/PromptTree"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-proof__github"
+          >
+            <Star :size="14" />
+            {{ t('landing.githubStars') }}
+          </a>
+          <div class="social-proof__stats">
+            <span>{{ t('landing.statPrompts') }}</span>
+            <span class="social-proof__divider">·</span>
+            <span>{{ t('landing.statUsers') }}</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -203,6 +226,57 @@ const platforms = computed(() => [
   margin-top: var(--space-3);
   font-size: var(--font-size-sm);
   color: var(--text-tertiary);
+}
+
+/* ===================
+   Social Proof
+   =================== */
+.social-proof {
+  padding: var(--space-6) 0;
+  text-align: center;
+}
+
+.social-proof__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.social-proof__badge {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.social-proof__github {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border: 0.5px solid var(--border-secondary);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: border-color var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.social-proof__github:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.social-proof__stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.social-proof__divider {
+  color: var(--border-secondary);
 }
 
 /* ===================

@@ -49,8 +49,8 @@ export interface PublicShareResponse {
 /**
  * 创建（或获取）分享链接
  */
-export async function createShare(nodeId: string): Promise<CreateShareResponse> {
-  return post<CreateShareResponse>('/share', { nodeId })
+export async function createShare(nodeId: string, options?: { expiresAt?: string }): Promise<CreateShareResponse> {
+  return post<CreateShareResponse>('/share', { nodeId, ...options })
 }
 
 /**

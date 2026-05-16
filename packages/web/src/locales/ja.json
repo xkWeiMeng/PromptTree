@@ -57,7 +57,7 @@
     "ctaStart": "無料で始める",
     "ctaLearnMore": "詳しく見る",
     "ctaExploreFeatures": "機能を探索",
-    "ctaFreeNote": "無料で使用 · 登録不要",
+    "ctaFreeNote": "100%無料 · オープンソース · データはローカルに保存",
     "pageTitle": "PromptTree — AI プロンプトを整理",
     "featuresTitle": "パワフルでシンプル",
     "featuresDesc": "AI時代のために設計されたプロンプト管理ツール。混沌を秩序に。",
@@ -98,7 +98,11 @@
     "ctaTitle": "プロンプトを整理する準備はできましたか？",
     "ctaDesc": "無料で使用、クレジットカード不要。オフラインモード対応、登録不要で体験可能。",
     "ctaBtn": "今すぐ無料で始める",
-    "metaDesc": "PromptTree — ツリー構造のプロンプト管理ツール。変数埋め込み、オンライン共有、APIキー呼び出し、Agent Skills、オフラインファースト、マルチデバイス同期に対応。"
+    "metaDesc": "PromptTree — ツリー構造のプロンプト管理ツール。変数埋め込み、オンライン共有、APIキー呼び出し、Agent Skills、オフラインファースト、マルチデバイス同期に対応。",
+    "socialProofBadge": "オープンソース · 2,000人以上の開発者が利用中",
+    "githubStars": "GitHubでスターを付ける",
+    "statPrompts": "10,000件以上のプロンプトを管理",
+    "statUsers": "2,000人以上のアクティブユーザー"
   },
   "features": {
     "pageTitle": "機能紹介",
@@ -194,7 +198,10 @@
     "notFound": "記事が見つかりません",
     "backToList": "ブログ一覧に戻る",
     "tableOfContents": "目次",
-    "publishedOn": "{date}に公開"
+    "publishedOn": "{date}に公開",
+    "previousPage": "前のページ",
+    "nextPage": "次のページ",
+    "pageOf": "{total}ページ中{current}ページ"
   },
   "login": {
     "ariaLabel": "ユーザーログイン",
@@ -356,14 +363,18 @@
     "editorDisabledHint": "Promptを選択すると編集可能",
     "editorDesc": "Promptの内容を編集",
     "outlineDesc": "階層アウトラインを表示",
-    "mindmapDesc": "ビジュアルマインドマップ"
+    "mindmapDesc": "ビジュアルマインドマップ",
+    "exportImage": "画像としてエクスポート"
   },
   "layout": {
     "offlineMode": "オフラインモード",
     "localUser": "ローカルユーザー",
     "loginToSync": "ログインして同期",
     "logout": "ログアウト",
-    "menu": "メニュー"
+    "menu": "メニュー",
+    "offlineBanner": "オフラインモード — 同期と共有は利用できません",
+    "offlineBannerDismiss": "閉じる",
+    "helpButton": "ヘルプとドキュメント"
   },
   "sync": {
     "syncing": "同期中...",
@@ -430,7 +441,9 @@
     "fillTitle": "変数を入力",
     "inputPlaceholder": "{name} の値を入力...",
     "preview": "プレビュー",
-    "copyToClipboard": "クリップボードにコピー"
+    "copyToClipboard": "クリップボードにコピー",
+    "saveAsDefault": "デフォルトとして保存",
+    "defaultsLoaded": "デフォルト値を読み込みました"
   },
   "share": {
     "pageTitle": "共有コンテンツ",
@@ -457,7 +470,14 @@
     "nodeNotSynced": "このファイルは未同期です。先に同期してください。",
     "folderHasPendingChanges": "このフォルダに未同期の項目があります。先に同期してください。",
     "nodeUnavailable": "このコンテンツは共有できません。",
-    "invalidLink": "無効な共有リンクです"
+    "invalidLink": "無効な共有リンクです",
+    "expiration": "有効期限",
+    "expiresNever": "無期限",
+    "expires1Day": "1日",
+    "expires7Days": "7日",
+    "expires30Days": "30日",
+    "expiresIn": "{time}後に期限切れ",
+    "expired": "期限切れ"
   },
   "profile": {
     "displayName": "表示名",
@@ -516,5 +536,31 @@
     "treeMindmap": "マインドマップ切替",
     "treeFindReplace": "検索と置換",
     "treeShortcuts": "ショートカット表示"
+  },
+  "onboarding": {
+    "tip1": "ここをクリックして最初のプロンプトを作成",
+    "tip2": "プロンプトで{{変数}}を使って動的コンテンツを作成",
+    "tip3": "ノードをドラッグしてツリーを整理",
+    "dismiss": "わかりました",
+    "nextTip": "次へ"
+  },
+  "exportImport": {
+    "title": "エクスポート / インポート",
+    "exportTitle": "データをエクスポート",
+    "exportDesc": "すべてのプロンプトをJSONファイルとしてダウンロードします。",
+    "exportBtn": "JSONエクスポート",
+    "importTitle": "データをインポート",
+    "importDesc": "PromptTree JSONファイルをアップロードしてプロンプトをインポートします。",
+    "importBtn": "JSONインポート",
+    "importing": "インポート中...",
+    "importSuccess": "{count}個のノードをインポートしました",
+    "importFailed": "インポート失敗：ファイル形式が無効です",
+    "exportSuccess": "エクスポート完了",
+    "selectFile": "ファイルを選択",
+    "mergeMode": "既存データとマージ",
+    "replaceMode": "すべてのデータを置換"
+  },
+  "button": {
+    "loading": "読み込み中..."
   }
 }

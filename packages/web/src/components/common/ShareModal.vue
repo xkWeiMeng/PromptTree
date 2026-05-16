@@ -29,6 +29,7 @@ const operating = ref(false)
 const shareInfo = ref<ShareInfo | null>(null)
 const shareStats = ref<ShareStats>({ readerCount: 0, readCount: 0 })
 const errorMessage = ref('')
+const expirationOption = ref<'never' | '1day' | '7days' | '30days'>('never')
 
 const currentNode = computed(() => {
   if (!props.nodeId) return null
@@ -118,7 +119,8 @@ async function handleCreateShare() {
   operating.value = true
   errorMessage.value = ''
   try {
-    const response = await createShare(props.nodeId)
+    const expiresAt = getExpirationDate()
+    const response = await createShare(props.nodeId, expiresAt ? { expiresAt } : undefined)
     shareInfo.value = response.share
     shareStats.value = response.stats
     toast.success(t('share.created'))
@@ -127,6 +129,28 @@ async function handleCreateShare() {
   } finally {
     operating.value = false
   }
+}
+
+function getExpirationDate(): string | undefined {
+  const now = Date.now()
+  switch (expirationOption.value) {
+    case '1day': return new Date(now + 86400000).toISOString()
+    case '7days': return new Date(now + 7 * 86400000).toISOString()
+    case '30days': return new Date(now + 30 * 86400000).toISOString()
+    default: return undefined
+  }
+}
+
+function getExpirationDisplay(): string {
+  if (!shareInfo.value) return ''
+  const info = shareInfo.value as ShareInfo & { expiresAt?: string }
+  if (!info.expiresAt) return ''
+  const expires = new Date(info.expiresAt).getTime()
+  const now = Date.now()
+  if (expires <= now) return t('share.expired')
+  const diff = expires - now
+  const days = Math.ceil(diff / 86400000)
+  return t('share.expiresIn', { time: `${days}d` })
 }
 
 async function handleCopyLink() {
@@ -229,6 +253,9 @@ watch(() => props.visible, async (visible) => {
                     <Users :size="14" />
                     {{ t('share.readerCount', { count: shareStats.readerCount }) }}
                   </span>
+                  <span v-if="getExpirationDisplay()" class="stat-item stat-expiry">
+                    {{ getExpirationDisplay() }}
+                  </span>
                 </div>
 
                 <div class="actions">
@@ -244,6 +271,15 @@ watch(() => props.visible, async (visible) => {
 
               <div v-else class="share-body">
                 <p class="hint">{{ t('share.description') }}</p>
+                <div class="expiration-picker">
+                  <label class="label">{{ t('share.expiration') }}</label>
+                  <select v-model="expirationOption" class="expiration-select">
+                    <option value="never">{{ t('share.expiresNever') }}</option>
+                    <option value="1day">{{ t('share.expires1Day') }}</option>
+                    <option value="7days">{{ t('share.expires7Days') }}</option>
+                    <option value="30days">{{ t('share.expires30Days') }}</option>
+                  </select>
+                </div>
                 <div class="actions">
                   <button class="btn-secondary" :disabled="operating" @click="closeModal">
                     {{ t('common.close') }}
@@ -360,6 +396,33 @@ watch(() => props.visible, async (visible) => {
   gap: var(--space-1);
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
+}
+
+.stat-expiry {
+  margin-left: var(--space-3);
+  color: var(--text-warning);
+}
+
+.expiration-picker {
+  margin: var(--space-3) 0;
+}
+
+.expiration-select {
+  margin-top: var(--space-1);
+  width: 100%;
+  padding: var(--space-2);
+  border: 0.5px solid var(--border-secondary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  outline: none;
+}
+
+.expiration-select:focus {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-focus-ring);
 }
 
 .actions {

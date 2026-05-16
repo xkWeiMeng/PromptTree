@@ -57,7 +57,7 @@
     "ctaStart": "免费开始使用",
     "ctaLearnMore": "了解更多",
     "ctaExploreFeatures": "探索功能",
-    "ctaFreeNote": "免费使用 · 无需注册",
+    "ctaFreeNote": "100% 免费 · 开源 · 数据存储在本地",
     "pageTitle": "PromptTree — 组织管理你的 AI Prompt",
     "featuresTitle": "强大而简单",
     "featuresDesc": "专为 AI 时代设计的 Prompt 管理工具，让混乱归于秩序。",
@@ -98,7 +98,11 @@
     "ctaTitle": "准备好让 Prompt 井然有序了吗？",
     "ctaDesc": "免费使用，无需信用卡。支持离线模式，无需注册即可体验。",
     "ctaBtn": "立即免费使用",
-    "metaDesc": "PromptTree — 树形结构 Prompt 管理工具，支持变量填充、在线分享、API Key 调用、Agent Skills、离线优先与多端同步。"
+    "metaDesc": "PromptTree — 树形结构 Prompt 管理工具，支持变量填充、在线分享、API Key 调用、Agent Skills、离线优先与多端同步。",
+    "socialProofBadge": "开源免费 · 已有 2,000+ 开发者在使用",
+    "githubStars": "在 GitHub 上加星",
+    "statPrompts": "管理 10,000+ 条 Prompt",
+    "statUsers": "2,000+ 活跃用户"
   },
   "features": {
     "pageTitle": "功能介绍",
@@ -194,7 +198,10 @@
     "notFound": "文章不存在",
     "backToList": "返回博客列表",
     "tableOfContents": "目录",
-    "publishedOn": "发布于 {date}"
+    "publishedOn": "发布于 {date}",
+    "previousPage": "上一页",
+    "nextPage": "下一页",
+    "pageOf": "第 {current} 页，共 {total} 页"
   },
   "login": {
     "ariaLabel": "用户登录",
@@ -356,14 +363,18 @@
     "editorDisabledHint": "选中 Prompt 后可编辑",
     "editorDesc": "编辑 Prompt 内容",
     "outlineDesc": "查看层级大纲",
-    "mindmapDesc": "可视化导图视图"
+    "mindmapDesc": "可视化导图视图",
+    "exportImage": "导出为图片"
   },
   "layout": {
     "offlineMode": "离线模式",
     "localUser": "本地用户",
     "loginToSync": "登录以同步",
     "logout": "退出登录",
-    "menu": "菜单"
+    "menu": "菜单",
+    "offlineBanner": "离线模式 — 同步和分享功能不可用",
+    "offlineBannerDismiss": "关闭",
+    "helpButton": "帮助与文档"
   },
   "sync": {
     "syncing": "同步中...",
@@ -430,7 +441,9 @@
     "fillTitle": "填充变量",
     "inputPlaceholder": "输入 {name} 的值...",
     "preview": "预览",
-    "copyToClipboard": "复制到剪贴板"
+    "copyToClipboard": "复制到剪贴板",
+    "saveAsDefault": "保存为默认值",
+    "defaultsLoaded": "已加载默认值"
   },
   "share": {
     "pageTitle": "分享内容",
@@ -457,7 +470,14 @@
     "nodeNotSynced": "当前文件尚未同步，请先同步后再分享。",
     "folderHasPendingChanges": "该文件夹下仍有未同步内容，请先完成同步。",
     "nodeUnavailable": "该内容当前不可分享。",
-    "invalidLink": "分享链接无效"
+    "invalidLink": "分享链接无效",
+    "expiration": "有效期",
+    "expiresNever": "永不过期",
+    "expires1Day": "1 天",
+    "expires7Days": "7 天",
+    "expires30Days": "30 天",
+    "expiresIn": "{time} 后过期",
+    "expired": "已过期"
   },
   "profile": {
     "displayName": "显示名称",
@@ -516,5 +536,31 @@
     "treeMindmap": "切换思维导图",
     "treeFindReplace": "查找与替换",
     "treeShortcuts": "显示快捷键"
+  },
+  "onboarding": {
+    "tip1": "点击这里创建你的第一个 Prompt",
+    "tip2": "在 Prompt 中使用 {{变量}} 来实现动态内容",
+    "tip3": "拖拽节点来重新组织你的树结构",
+    "dismiss": "知道了",
+    "nextTip": "下一个"
+  },
+  "exportImport": {
+    "title": "导出 / 导入",
+    "exportTitle": "导出数据",
+    "exportDesc": "将所有 Prompt 下载为 JSON 文件。",
+    "exportBtn": "导出 JSON",
+    "importTitle": "导入数据",
+    "importDesc": "上传 PromptTree JSON 文件以导入 Prompt。",
+    "importBtn": "导入 JSON",
+    "importing": "导入中...",
+    "importSuccess": "成功导入 {count} 个节点",
+    "importFailed": "导入失败：文件格式无效",
+    "exportSuccess": "导出完成",
+    "selectFile": "选择文件",
+    "mergeMode": "与现有数据合并",
+    "replaceMode": "替换所有数据"
+  },
+  "button": {
+    "loading": "加载中..."
   }
 }

@@ -57,7 +57,7 @@
     "ctaStart": "무료로 시작하기",
     "ctaLearnMore": "자세히 보기",
     "ctaExploreFeatures": "기능 살펴보기",
-    "ctaFreeNote": "무료 사용 · 가입 불필요",
+    "ctaFreeNote": "100% 무료 · 오픈소스 · 데이터는 로컬에 저장",
     "pageTitle": "PromptTree — AI 프롬프트 정리",
     "featuresTitle": "강력하면서도 간단하게",
     "featuresDesc": "AI 시대를 위해 설계된 프롬프트 관리 도구 — 혼돈을 질서로 바꿉니다.",
@@ -98,7 +98,11 @@
     "ctaTitle": "프롬프트를 정리할 준비가 되셨나요?",
     "ctaDesc": "무료 사용, 신용카드 불필요. 오프라인 모드 지원, 가입 없이 체험 가능.",
     "ctaBtn": "지금 무료로 시작하기",
-    "metaDesc": "PromptTree — 트리 구조의 프롬프트 관리 도구. 변수 채우기, 온라인 공유, API 키 호출, Agent Skills, 오프라인 우선, 멀티 디바이스 동기화를 지원합니다."
+    "metaDesc": "PromptTree — 트리 구조의 프롬프트 관리 도구. 변수 채우기, 온라인 공유, API 키 호출, Agent Skills, 오프라인 우선, 멀티 디바이스 동기화를 지원합니다.",
+    "socialProofBadge": "오픈소스 · 2,000명 이상의 개발자가 사용 중",
+    "githubStars": "GitHub에서 스타",
+    "statPrompts": "10,000개 이상의 프롬프트 관리",
+    "statUsers": "2,000명 이상의 활성 사용자"
   },
   "features": {
     "pageTitle": "기능 소개",
@@ -194,7 +198,10 @@
     "notFound": "글을 찾을 수 없습니다",
     "backToList": "블로그 목록으로 돌아가기",
     "tableOfContents": "목차",
-    "publishedOn": "{date}에 게시됨"
+    "publishedOn": "{date}에 게시됨",
+    "previousPage": "이전",
+    "nextPage": "다음",
+    "pageOf": "{total}페이지 중 {current}페이지"
   },
   "login": {
     "ariaLabel": "사용자 로그인",
@@ -356,14 +363,18 @@
     "editorDisabledHint": "프롬프트를 선택하면 편집 가능",
     "editorDesc": "프롬프트 내용 편집",
     "outlineDesc": "계층 구조 개요 보기",
-    "mindmapDesc": "비주얼 마인드맵 보기"
+    "mindmapDesc": "비주얼 마인드맵 보기",
+    "exportImage": "이미지로 내보내기"
   },
   "layout": {
     "offlineMode": "오프라인 모드",
     "localUser": "로컬 사용자",
     "loginToSync": "로그인하여 동기화",
     "logout": "로그아웃",
-    "menu": "메뉴"
+    "menu": "메뉴",
+    "offlineBanner": "오프라인 모드 — 동기화 및 공유를 사용할 수 없습니다",
+    "offlineBannerDismiss": "닫기",
+    "helpButton": "도움말 및 문서"
   },
   "sync": {
     "syncing": "동기화 중...",
@@ -430,7 +441,9 @@
     "fillTitle": "변수 채우기",
     "inputPlaceholder": "{name}의 값을 입력...",
     "preview": "미리보기",
-    "copyToClipboard": "클립보드에 복사"
+    "copyToClipboard": "클립보드에 복사",
+    "saveAsDefault": "기본값으로 저장",
+    "defaultsLoaded": "기본값 로드됨"
   },
   "share": {
     "pageTitle": "공유 콘텐츠",
@@ -457,7 +470,14 @@
     "nodeNotSynced": "현재 파일이 아직 동기화되지 않았습니다. 먼저 동기화해 주세요.",
     "folderHasPendingChanges": "이 폴더에 동기화되지 않은 항목이 있습니다. 먼저 동기화해 주세요.",
     "nodeUnavailable": "이 콘텐츠는 현재 공유할 수 없습니다.",
-    "invalidLink": "유효하지 않은 공유 링크입니다"
+    "invalidLink": "유효하지 않은 공유 링크입니다",
+    "expiration": "만료",
+    "expiresNever": "만료 없음",
+    "expires1Day": "1일",
+    "expires7Days": "7일",
+    "expires30Days": "30일",
+    "expiresIn": "{time} 후 만료",
+    "expired": "만료됨"
   },
   "profile": {
     "displayName": "표시 이름",
@@ -516,5 +536,31 @@
     "treeMindmap": "마인드맵 전환",
     "treeFindReplace": "찾기 및 바꾸기",
     "treeShortcuts": "단축키 표시"
+  },
+  "onboarding": {
+    "tip1": "여기를 클릭하여 첫 번째 프롬프트를 만드세요",
+    "tip2": "프롬프트에서 {{변수}}를 사용하여 동적 콘텐츠 생성",
+    "tip3": "노드를 드래그하여 트리를 재구성하세요",
+    "dismiss": "확인",
+    "nextTip": "다음"
+  },
+  "exportImport": {
+    "title": "내보내기 / 가져오기",
+    "exportTitle": "데이터 내보내기",
+    "exportDesc": "모든 프롬프트를 JSON 파일로 다운로드합니다.",
+    "exportBtn": "JSON 내보내기",
+    "importTitle": "데이터 가져오기",
+    "importDesc": "PromptTree JSON 파일을 업로드하여 프롬프트를 가져옵니다.",
+    "importBtn": "JSON 가져오기",
+    "importing": "가져오는 중...",
+    "importSuccess": "{count}개 노드를 성공적으로 가져왔습니다",
+    "importFailed": "가져오기 실패: 잘못된 파일 형식",
+    "exportSuccess": "내보내기 완료",
+    "selectFile": "파일 선택",
+    "mergeMode": "기존 데이터와 병합",
+    "replaceMode": "모든 데이터 교체"
+  },
+  "button": {
+    "loading": "로딩 중..."
   }
 }

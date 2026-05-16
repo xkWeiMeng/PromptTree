@@ -8,7 +8,7 @@ import type { TreeNodeWithChildren } from '@prompttree/shared'
 import { extractVariables } from '@prompttree/shared'
 import { useTreeStore } from '@/stores/tree'
 import { useI18n } from 'vue-i18n'
-import { Network, ArrowUp, ZoomIn, ZoomOut, RotateCcw, Folder, FileText, TreePine } from 'lucide-vue-next'
+import { Network, ArrowUp, ZoomIn, ZoomOut, RotateCcw, Folder, FileText, TreePine, Download } from 'lucide-vue-next'
 
 const { t } = useI18n()
 const treeStore = useTreeStore()
@@ -321,6 +321,39 @@ function truncateTitle(title: string, max = 16): string {
   if (!title) return t('common.untitled')
   return title.length > max ? title.slice(0, max) + '...' : title
 }
+
+function exportAsPng() {
+  if (!svgRef.value) return
+
+  const svgEl = svgRef.value
+  const serializer = new XMLSerializer()
+  const svgStr = serializer.serializeToString(svgEl)
+  const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' })
+  const url = URL.createObjectURL(svgBlob)
+
+  const img = new Image()
+  img.onload = () => {
+    const canvas = document.createElement('canvas')
+    canvas.width = svgEl.clientWidth * 2
+    canvas.height = svgEl.clientHeight * 2
+    const ctx = canvas.getContext('2d')!
+    ctx.scale(2, 2)
+    ctx.fillStyle = '#1a1a2e'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.drawImage(img, 0, 0)
+    URL.revokeObjectURL(url)
+
+    canvas.toBlob((blob) => {
+      if (!blob) return
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `prompttree-mindmap-${new Date().toISOString().slice(0, 10)}.png`
+      a.click()
+      URL.revokeObjectURL(a.href)
+    }, 'image/png')
+  }
+  img.src = url
+}
 </script>
 
 <template>
@@ -356,6 +389,7 @@ function truncateTitle(title: string, max = 16): string {
       </div>
 
       <div class="toolbar-right">
+        <button class="icon-btn zoom-btn" :title="t('view.exportImage')" :aria-label="t('view.exportImage')" @click="exportAsPng"><Download :size="16" /></button>
         <button class="icon-btn zoom-btn" :title="t('mindmapView.zoomIn')" aria-label="Zoom in" @click="zoomIn"><ZoomIn :size="16" /></button>
         <button class="icon-btn zoom-btn" :title="t('mindmapView.zoomOut')" aria-label="Zoom out" @click="zoomOut"><ZoomOut :size="16" /></button>
         <button class="icon-btn zoom-btn" :title="t('mindmapView.resetView')" aria-label="Reset zoom" @click="resetZoom"><RotateCcw :size="16" /></button>

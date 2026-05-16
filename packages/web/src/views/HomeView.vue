@@ -16,6 +16,8 @@ import OutlineView from '@/components/overview/OutlineView.vue'
 import MindMapView from '@/components/overview/MindMapView.vue'
 import ShareModal from '@/components/common/ShareModal.vue'
 import ShortcutsPanel from '@/components/common/ShortcutsPanel.vue'
+import OnboardingTip from '@/components/common/OnboardingTip.vue'
+import ExportImportModal from '@/components/common/ExportImportModal.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -85,6 +87,7 @@ const showViewSwitcher = computed(() => treeStore.viewMode !== 'welcome')
 // 变量填充弹窗
 const showVariableModal = ref(false)
 const showShareModal = ref(false)
+const showExportImportModal = ref(false)
 const shareTargetNodeId = ref<string | null>(null)
 const currentVariables = computed(() => {
   if (!selectedNode.value?.content) return []
@@ -162,7 +165,7 @@ useKeyboard({
   <MainLayout>
     <!-- 侧边栏：工具栏 + 树视图 -->
     <template #sidebar>
-      <TreeToolbar ref="treeToolbarRef" @create="handleToolbarCreate" />
+      <TreeToolbar ref="treeToolbarRef" @create="handleToolbarCreate" @export-import="showExportImportModal = true" />
       <TreeView @create="handleCreate" @share="handleShare" />
     </template>
     
@@ -284,6 +287,13 @@ useKeyboard({
   />
 
   <ShortcutsPanel ref="shortcutsPanelRef" />
+
+  <OnboardingTip />
+
+  <ExportImportModal
+    :visible="showExportImportModal"
+    @close="showExportImportModal = false"
+  />
 </template>
 
 <style scoped>

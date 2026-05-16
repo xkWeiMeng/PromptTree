@@ -5,13 +5,14 @@ import { useTreeStore } from '@/stores/tree'
 import { useSearch } from '@/composables/useSearch'
 import {
   Search, X, Folder, FileText, Plus,
-  ChevronsDownUp, ChevronsUpDown, ArrowUpDown
+  ChevronsDownUp, ChevronsUpDown, ArrowUpDown, Download
 } from 'lucide-vue-next'
 
 const { t } = useI18n()
 
 const emit = defineEmits<{
   (e: 'create', type: 'folder' | 'prompt'): void
+  (e: 'exportImport'): void
 }>()
 
 const treeStore = useTreeStore()
@@ -220,6 +221,16 @@ defineExpose({ focusSearch, sortOption })
         :aria-label="isAllExpanded ? t('tree.collapseAll') : t('tree.expandAll')"
       >
         <component :is="isAllExpanded ? ChevronsDownUp : ChevronsUpDown" :size="16" />
+      </button>
+
+      <!-- 导出/导入按钮 -->
+      <button
+        class="toolbar-btn"
+        :title="t('exportImport.title')"
+        :aria-label="t('exportImport.title')"
+        @click="emit('exportImport')"
+      >
+        <Download :size="16" />
       </button>
     </div>
   </div>

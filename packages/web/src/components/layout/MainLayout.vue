@@ -6,7 +6,7 @@ import { useSyncStore } from '@/stores/sync'
 import { useLoginModal } from '@/composables/useLoginModal'
 import {
   RefreshCw, AlertTriangle, User,
-  WifiOff, CheckCircle, Menu
+  WifiOff, CheckCircle, Menu, HelpCircle, X
 } from 'lucide-vue-next'
 import BrandLogo from '@/components/common/BrandLogo.vue'
 import ThemeToggle from '@/components/common/ThemeToggle.vue'
@@ -26,6 +26,9 @@ const maxWidth = 500
 // 移动端菜单
 const isMobileMenuOpen = ref(false)
 const isMobile = ref(false)
+
+// Offline banner dismiss
+const offlineBannerDismissed = ref(false)
 
 function checkMobile() {
   isMobile.value = window.matchMedia('(max-width: 768px)').matches
@@ -110,10 +113,30 @@ onUnmounted(() => {
   document.removeEventListener('mouseup', stopResize)
   window.removeEventListener('resize', checkMobile)
 })
+
+function dismissOfflineBanner() {
+  offlineBannerDismissed.value = true
+}
+
+function openHelp() {
+  window.open('/docs', '_blank')
+}
 </script>
 
 <template>
   <div class="main-layout" :class="{ resizing: isResizing }">
+    <!-- Offline banner -->
+    <div v-if="isOfflineMode && !offlineBannerDismissed" class="offline-banner" role="status">
+      <span class="offline-banner__text">{{ t('layout.offlineBanner') }}</span>
+      <button
+        class="offline-banner__close"
+        :aria-label="t('layout.offlineBannerDismiss')"
+        @click="dismissOfflineBanner"
+      >
+        <X :size="14" />
+      </button>
+    </div>
+
     <!-- Skip to main content -->
     <a href="#main-content" class="skip-link">{{ t('common.skipToContent') }}</a>
 
@@ -199,6 +222,15 @@ onUnmounted(() => {
         />
         <div class="footer-actions">
           <ThemeToggle placement="top" />
+          <!-- Help button -->
+          <button
+            class="icon-btn"
+            :title="t('layout.helpButton')"
+            :aria-label="t('layout.helpButton')"
+            @click="openHelp"
+          >
+            <HelpCircle :size="15" />
+          </button>
           <!-- 离线模式：显示登录按钮 -->
           <button v-if="isOfflineMode" class="btn-login" @click="openLogin">
             {{ t('layout.loginToSync') }}
@@ -224,6 +256,46 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/* ===================
+   Offline Banner
+   =================== */
+.offline-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-4);
+  background: var(--color-warning-bg);
+  border-bottom: 0.5px solid var(--color-warning);
+  font-size: var(--font-size-xs);
+  color: var(--text-warning);
+  position: relative;
+  z-index: 50;
+}
+
+.offline-banner__text {
+  flex: 1;
+  text-align: center;
+}
+
+.offline-banner__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-warning);
+  border: none;
+  cursor: pointer;
+  transition: background var(--duration-fast) ease;
+}
+
+.offline-banner__close:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
 /* ===================
    Skip Link (a11y)
    =================== */

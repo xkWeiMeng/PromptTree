@@ -5,6 +5,8 @@ import { X, Copy, Check } from 'lucide-vue-next'
 
 const { t } = useI18n()
 
+const VAR_DEFAULTS_KEY = 'prompttree-var-defaults'
+
 const props = defineProps<{
   visible: boolean
   variables: string[]
@@ -20,14 +22,39 @@ const modalRef = ref<HTMLElement | null>(null)
 
 // 变量值映射
 const variableValues = ref<Record<string, string>>({})
+const saveDefaults = ref<Record<string, boolean>>({})
+
+// Load saved defaults
+function loadDefaults(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(VAR_DEFAULTS_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+
+function saveDefaultValues() {
+  const defaults = loadDefaults()
+  for (const [key, shouldSave] of Object.entries(saveDefaults.value)) {
+    if (shouldSave && variableValues.value[key]) {
+      defaults[key] = variableValues.value[key]
+    }
+  }
+  localStorage.setItem(VAR_DEFAULTS_KEY, JSON.stringify(defaults))
+}
 
 // 初始化变量值
 watch(() => props.variables, (vars) => {
+  const defaults = loadDefaults()
   const newValues: Record<string, string> = {}
+  const newSaveFlags: Record<string, boolean> = {}
   for (const v of vars) {
-    newValues[v] = variableValues.value[v] || ''
+    newValues[v] = variableValues.value[v] || defaults[v] || ''
+    newSaveFlags[v] = !!defaults[v]
   }
   variableValues.value = newValues
+  saveDefaults.value = newSaveFlags
 }, { immediate: true })
 
 // 预览内容
@@ -52,6 +79,7 @@ let copyTimer: ReturnType<typeof setTimeout> | null = null
 // 复制并关闭
 async function handleCopy() {
   try {
+    saveDefaultValues()
     await navigator.clipboard.writeText(previewContent.value)
     copySuccess.value = true
     if (copyTimer) clearTimeout(copyTimer)
@@ -128,6 +156,10 @@ watch(() => props.visible, async (visible) => {
                     type="text"
                     :placeholder="t('variableModal.inputPlaceholder', { name: v })"
                   />
+                  <label class="save-default-label">
+                    <input type="checkbox" v-model="saveDefaults[v]" />
+                    <span>{{ t('variableModal.saveAsDefault') }}</span>
+                  </label>
                 </div>
               </div>
               
@@ -255,10 +287,27 @@ watch(() => props.visible, async (visible) => {
               box-shadow var(--duration-fast) ease;
 }
 
-.form-item input:focus {
+.form-item input[type="text"]:focus {
   outline: none;
   border-color: var(--border-focus);
   box-shadow: var(--shadow-focus-ring);
+}
+
+.save-default-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  font-size: var(--font-size-xs) !important;
+  color: var(--text-tertiary) !important;
+  font-weight: var(--font-weight-normal) !important;
+  font-family: inherit !important;
+  cursor: pointer;
+}
+
+.save-default-label input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--color-accent);
 }
 
 .preview-section h4 {

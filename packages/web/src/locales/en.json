@@ -57,7 +57,7 @@
     "ctaStart": "Start Free",
     "ctaLearnMore": "Learn More",
     "ctaExploreFeatures": "Explore Features",
-    "ctaFreeNote": "Free to use · No sign-up required",
+    "ctaFreeNote": "100% free · Open source · Your data stays local",
     "pageTitle": "PromptTree — Organize Your AI Prompts",
     "featuresTitle": "Powerful Yet Simple",
     "featuresDesc": "A prompt management tool designed for the AI era — bring order to chaos.",
@@ -98,7 +98,11 @@
     "ctaTitle": "Ready to Get Your Prompts Organized?",
     "ctaDesc": "Free to use, no credit card required. Supports offline mode — no sign-up needed to try.",
     "ctaBtn": "Start Free Now",
-    "metaDesc": "PromptTree — A tree-structured prompt manager with variable filling, online sharing, API key calls, Agent Skills support, offline-first design, and multi-device sync."
+    "metaDesc": "PromptTree — A tree-structured prompt manager with variable filling, online sharing, API key calls, Agent Skills support, offline-first design, and multi-device sync.",
+    "socialProofBadge": "Open Source · Used by 2,000+ developers",
+    "githubStars": "Star on GitHub",
+    "statPrompts": "10,000+ prompts managed",
+    "statUsers": "2,000+ active users"
   },
   "features": {
     "pageTitle": "Features",
@@ -194,7 +198,10 @@
     "notFound": "Post not found",
     "backToList": "Back to blog",
     "tableOfContents": "Table of Contents",
-    "publishedOn": "Published on {date}"
+    "publishedOn": "Published on {date}",
+    "previousPage": "Previous",
+    "nextPage": "Next",
+    "pageOf": "Page {current} of {total}"
   },
   "login": {
     "ariaLabel": "User Login",
@@ -356,14 +363,18 @@
     "editorDisabledHint": "Select a prompt to edit",
     "editorDesc": "Edit prompt content",
     "outlineDesc": "View hierarchical outline",
-    "mindmapDesc": "Visual mind map view"
+    "mindmapDesc": "Visual mind map view",
+    "exportImage": "Export as PNG"
   },
   "layout": {
     "offlineMode": "Offline Mode",
     "localUser": "Local User",
     "loginToSync": "Log in to Sync",
     "logout": "Log Out",
-    "menu": "Menu"
+    "menu": "Menu",
+    "offlineBanner": "Offline mode — Sync and sharing are not available",
+    "offlineBannerDismiss": "Dismiss",
+    "helpButton": "Help & Documentation"
   },
   "sync": {
     "syncing": "Syncing...",
@@ -430,7 +441,9 @@
     "fillTitle": "Fill Variables",
     "inputPlaceholder": "Enter value for {name}...",
     "preview": "Preview",
-    "copyToClipboard": "Copy to Clipboard"
+    "copyToClipboard": "Copy to Clipboard",
+    "saveAsDefault": "Save as default",
+    "defaultsLoaded": "Defaults loaded"
   },
   "share": {
     "pageTitle": "Shared Content",
@@ -457,7 +470,14 @@
     "nodeNotSynced": "This file is not synced yet. Please sync first.",
     "folderHasPendingChanges": "This folder contains unsynced items. Please sync them first.",
     "nodeUnavailable": "This content is unavailable for sharing.",
-    "invalidLink": "Invalid share link"
+    "invalidLink": "Invalid share link",
+    "expiration": "Expiration",
+    "expiresNever": "Never",
+    "expires1Day": "1 day",
+    "expires7Days": "7 days",
+    "expires30Days": "30 days",
+    "expiresIn": "Expires in {time}",
+    "expired": "Expired"
   },
   "profile": {
     "displayName": "Display Name",
@@ -516,5 +536,31 @@
     "treeMindmap": "Toggle mind map",
     "treeFindReplace": "Find & Replace",
     "treeShortcuts": "Show shortcuts"
+  },
+  "onboarding": {
+    "tip1": "Click here to create your first prompt",
+    "tip2": "Use {{variables}} in your prompts for dynamic content",
+    "tip3": "Drag nodes to reorganize your tree",
+    "dismiss": "Got it",
+    "nextTip": "Next"
+  },
+  "exportImport": {
+    "title": "Export / Import",
+    "exportTitle": "Export Data",
+    "exportDesc": "Download all your prompts as a JSON file.",
+    "exportBtn": "Export JSON",
+    "importTitle": "Import Data",
+    "importDesc": "Upload a PromptTree JSON file to import prompts.",
+    "importBtn": "Import JSON",
+    "importing": "Importing...",
+    "importSuccess": "Imported {count} nodes successfully",
+    "importFailed": "Import failed: invalid file format",
+    "exportSuccess": "Export completed",
+    "selectFile": "Select file",
+    "mergeMode": "Merge with existing data",
+    "replaceMode": "Replace all data"
+  },
+  "button": {
+    "loading": "Loading..."
   }
 }
