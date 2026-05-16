@@ -52,6 +52,9 @@
     "heroSubtitle": "用樹狀結構管理 Prompt，支援變數填充 {variable}、離線優先、多端同步。",
     "ctaStart": "免費開始使用",
     "ctaLearnMore": "了解更多",
+    "ctaExploreFeatures": "探索功能",
+    "ctaFreeNote": "免費使用 · 無需註冊",
+    "pageTitle": "PromptTree — 組織管理你的 AI Prompt",
     "featuresTitle": "強大而簡單",
     "featuresDesc": "專為 AI 時代設計的 Prompt 管理工具，讓混亂歸於秩序。",
     "feature1Title": "樹狀結構管理",
@@ -306,7 +309,8 @@
     "saving": "儲存中...",
     "saved": "已儲存 ✓",
     "saveFailed": "儲存失敗",
-    "clickToEdit": "點擊編輯"
+    "clickToEdit": "點擊編輯",
+    "fillAllVariables": "請先填寫所有變數"
   },
   "view": {
     "editor": "編輯器",

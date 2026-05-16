@@ -183,7 +183,7 @@ function handleDrop(e: DragEvent) {
         @dblclick.stop
       />
       <!-- 标题（普通模式） -->
-      <span v-else class="title">{{ node.title || t('common.untitled') }}</span>
+      <span v-else class="title" :title="node.title">{{ node.title || t('common.untitled') }}</span>
       
       <!-- 收藏标记 -->
       <Star v-if="node.isFavorite" :size="12" class="favorite" fill="currentColor" />

@@ -21,9 +21,13 @@ export function setupRouterGuards(router: Router) {
     const routeLocale = to.params.locale as string | undefined
 
     if (routeLocale && isValidLocale(routeLocale)) {
-      // 路由中有合法的 locale 参数，切换语言
+      // 路由中有合法的 locale 参数，切换语言（setLocale 内部同步更新 <html lang>）
       await setLocale(routeLocale as SupportedLocale)
       saveLocalePreference(routeLocale as SupportedLocale)
+    } else if (!routeLocale) {
+      // 非 locale 路由（如 /app），确保 <html lang> 与当前 locale 一致
+      const currentLocale = resolveLocale()
+      document.documentElement.setAttribute('lang', currentLocale)
     }
 
     // 根路径 '/' 需要重定向到带 locale 前缀的路径

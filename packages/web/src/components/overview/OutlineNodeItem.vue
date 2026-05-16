@@ -93,7 +93,7 @@ function getVarCount(content: string): number {
 
       <!-- 信息 -->
       <div class="node-info">
-        <div class="node-title">
+        <div class="node-title" :title="node.title">
           <span v-html="highlightText(node.title || t('common.untitled'))" />
           <Star v-if="node.isFavorite" :size="12" fill="currentColor" class="fav-star" />
         </div>

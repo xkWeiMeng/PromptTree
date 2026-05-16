@@ -52,6 +52,9 @@
     "heroSubtitle": "用树形结构管理 Prompt，支持变量填充 {variable}、离线优先、多端同步。",
     "ctaStart": "免费开始使用",
     "ctaLearnMore": "了解更多",
+    "ctaExploreFeatures": "探索功能",
+    "ctaFreeNote": "免费使用 · 无需注册",
+    "pageTitle": "PromptTree — 组织管理你的 AI Prompt",
     "featuresTitle": "强大而简单",
     "featuresDesc": "专为 AI 时代设计的 Prompt 管理工具，让混乱归于秩序。",
     "feature1Title": "树形结构管理",
@@ -306,7 +309,8 @@
     "saving": "保存中...",
     "saved": "已保存 ✓",
     "saveFailed": "保存失败",
-    "clickToEdit": "点击编辑"
+    "clickToEdit": "点击编辑",
+    "fillAllVariables": "请先填写所有变量"
   },
   "view": {
     "editor": "编辑器",

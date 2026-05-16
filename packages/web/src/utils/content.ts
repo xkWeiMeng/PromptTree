@@ -74,13 +74,20 @@ export function parseFrontmatter(raw: string): { meta: Record<string, string | n
 const docModules = import.meta.glob<string>('/src/content/docs/**/*.md', { query: '?raw', import: 'default', eager: true })
 const blogModules = import.meta.glob<string>('/src/content/blog/**/*.md', { query: '?raw', import: 'default', eager: true })
 
-/** 支持的 fallback 链: 请求语言 → en → zh-CN */
-const FALLBACK_CHAIN = ['en', 'zh-CN']
+/**
+ * 根据当前 locale 构建 fallback 链
+ * 中文变体之间互相 fallback，其他语言直接 fallback 到 en
+ */
+function getFallbackChain(locale: string): string[] {
+  if (locale === 'zh-CN') return ['en']
+  if (locale === 'zh-TW') return ['zh-CN', 'en']
+  return ['en']
+}
 
 /**
  * 从 glob 模块中按 locale 筛选条目
  * 路径格式: /src/content/{type}/{locale}/{slug}.md
- * fallback: 如果目标 locale 不存在，依次尝试 en → zh-CN
+ * fallback: 如果目标 locale 不存在，按 getFallbackChain 顺序补充
  */
 function getModulesByLocale(
   modules: Record<string, string>,
@@ -103,7 +110,7 @@ function getModulesByLocale(
   }
 
   // Fallback: 对未找到的 slug，从 fallback 链中补充
-  for (const fallbackLocale of FALLBACK_CHAIN) {
+  for (const fallbackLocale of getFallbackChain(locale)) {
     if (fallbackLocale === locale) continue
     const fallbackPrefix = `${prefix}${fallbackLocale}/`
     for (const [path, raw] of Object.entries(modules)) {

@@ -145,7 +145,6 @@ watch(() => props.visible, async (visible) => {
               <button 
                 class="btn-copy" 
                 :class="{ 'copy-success': copySuccess }"
-                :disabled="!allFilled"
                 @click="handleCopy"
               >
                 <Check v-if="copySuccess" :size="14" />

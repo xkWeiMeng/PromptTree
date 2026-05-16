@@ -52,6 +52,9 @@
     "heroSubtitle": "트리 구조로 프롬프트를 관리하세요. 변수 채우기 {variable}, 오프라인 우선, 멀티 디바이스 동기화를 지원합니다.",
     "ctaStart": "무료로 시작하기",
     "ctaLearnMore": "자세히 보기",
+    "ctaExploreFeatures": "기능 살펴보기",
+    "ctaFreeNote": "무료 사용 · 가입 불필요",
+    "pageTitle": "PromptTree — AI 프롬프트 정리",
     "featuresTitle": "강력하면서도 간단하게",
     "featuresDesc": "AI 시대를 위해 설계된 프롬프트 관리 도구 — 혼돈을 질서로 바꿉니다.",
     "feature1Title": "트리 구조 관리",
@@ -306,7 +309,8 @@
     "saving": "저장 중...",
     "saved": "저장됨 ✓",
     "saveFailed": "저장 실패",
-    "clickToEdit": "클릭하여 편집"
+    "clickToEdit": "클릭하여 편집",
+    "fillAllVariables": "모든 변수를 먼저 입력해 주세요"
   },
   "view": {
     "editor": "편집기",

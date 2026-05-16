@@ -52,6 +52,9 @@
     "heroSubtitle": "Manage prompts with a tree structure, variable filling {variable}, offline-first, and multi-device sync.",
     "ctaStart": "Start Free",
     "ctaLearnMore": "Learn More",
+    "ctaExploreFeatures": "Explore Features",
+    "ctaFreeNote": "Free to use · No sign-up required",
+    "pageTitle": "PromptTree — Organize Your AI Prompts",
     "featuresTitle": "Powerful Yet Simple",
     "featuresDesc": "A prompt management tool designed for the AI era — bring order to chaos.",
     "feature1Title": "Tree Structure Management",
@@ -306,7 +309,8 @@
     "saving": "Saving...",
     "saved": "Saved ✓",
     "saveFailed": "Save failed",
-    "clickToEdit": "Click to edit"
+    "clickToEdit": "Click to edit",
+    "fillAllVariables": "Please fill in all variables first"
   },
   "view": {
     "editor": "Editor",

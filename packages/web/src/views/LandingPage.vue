@@ -11,7 +11,7 @@ const { t } = useI18n()
 const { localePath } = useLocalePath()
 
 useHead({
-  title: '',
+  title: t('landing.pageTitle'),
   description: t('landing.metaDesc')
 })
 
@@ -68,9 +68,10 @@ const platforms = computed(() => [
             <ArrowRight :size="18" />
           </RouterLink>
           <RouterLink :to="localePath('/features')" class="hero__btn hero__btn--secondary">
-            {{ t('landing.ctaLearnMore') }}
+            {{ t('landing.ctaExploreFeatures') }}
           </RouterLink>
         </div>
+        <p class="hero__free-note">{{ t('landing.ctaFreeNote') }}</p>
       </div>
     </section>
 
@@ -191,6 +192,12 @@ const platforms = computed(() => [
   transition: background-color var(--duration-normal) var(--ease-out),
               color var(--duration-normal) var(--ease-out),
               transform var(--duration-normal) var(--ease-out);
+}
+
+.hero__free-note {
+  margin-top: var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
 }
 
 /* ===================

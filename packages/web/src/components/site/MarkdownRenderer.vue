@@ -25,7 +25,7 @@ function renderMarkdown(md: string): string {
 
   // 表格
   html = html.replace(/^(\|.+\|)\r?\n(\|[-:| ]+\|)\r?\n((?:\|.+\|\r?\n?)+)/gm, (_m, header, _sep, body) => {
-    const ths = header.split('|').filter(Boolean).map((c: string) => `<th>${c.trim()}</th>`).join('')
+    const ths = header.split('|').filter(Boolean).map((c: string) => `<th scope="col">${c.trim()}</th>`).join('')
     const rows = body.trim().split('\n').map((row: string) => {
       const tds = row.split('|').filter(Boolean).map((c: string) => `<td>${c.trim()}</td>`).join('')
       return `<tr>${tds}</tr>`

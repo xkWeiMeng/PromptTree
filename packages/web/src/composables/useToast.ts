@@ -26,7 +26,7 @@ export function useToast() {
   /**
    * 显示 toast 通知
    */
-  function show(message: string, type: ToastType = 'info', duration = 3000) {
+  function show(message: string, type: ToastType = 'info', duration = 5000) {
     const id = nextId++
     const toast: Toast = { id, type, message, duration }
     
@@ -45,7 +45,7 @@ export function useToast() {
   /**
    * 成功提示
    */
-  function success(message: string, duration = 3000) {
+  function success(message: string, duration = 5000) {
     return show(message, 'success', duration)
   }
 
@@ -59,14 +59,14 @@ export function useToast() {
   /**
    * 警告提示
    */
-  function warning(message: string, duration = 3500) {
+  function warning(message: string, duration = 5000) {
     return show(message, 'warning', duration)
   }
 
   /**
    * 信息提示
    */
-  function info(message: string, duration = 3000) {
+  function info(message: string, duration = 5000) {
     return show(message, 'info', duration)
   }
 

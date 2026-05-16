@@ -52,6 +52,9 @@
     "heroSubtitle": "ツリー構造でプロンプトを管理。変数埋め込み {variable}、オフラインファースト、マルチデバイス同期に対応。",
     "ctaStart": "無料で始める",
     "ctaLearnMore": "詳しく見る",
+    "ctaExploreFeatures": "機能を探索",
+    "ctaFreeNote": "無料で使用 · 登録不要",
+    "pageTitle": "PromptTree — AI プロンプトを整理",
     "featuresTitle": "パワフルでシンプル",
     "featuresDesc": "AI時代のために設計されたプロンプト管理ツール。混沌を秩序に。",
     "feature1Title": "ツリー構造管理",
@@ -306,7 +309,8 @@
     "saving": "保存中...",
     "saved": "保存済み ✓",
     "saveFailed": "保存に失敗",
-    "clickToEdit": "クリックして編集"
+    "clickToEdit": "クリックして編集",
+    "fillAllVariables": "すべての変数を入力してください"
   },
   "view": {
     "editor": "エディタ",
