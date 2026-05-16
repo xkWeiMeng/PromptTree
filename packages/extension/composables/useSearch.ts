@@ -53,10 +53,21 @@ export function useSearch() {
     isSearching.value = false
   }
 
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+  }
+
   function highlightText(text: string, q: string): string {
     if (!text) return ''
-    const regex = new RegExp(`(${escapeRegex(q)})`, 'gi')
-    return text.replace(regex, '<mark>$1</mark>')
+    const escaped = escapeHtml(text)
+    const escapedQuery = escapeHtml(q)
+    const regex = new RegExp(`(${escapeRegex(escapedQuery)})`, 'gi')
+    return escaped.replace(regex, '<mark>$1</mark>')
   }
 
   function getSnippet(content: string, q: string, ctx = 50): string {

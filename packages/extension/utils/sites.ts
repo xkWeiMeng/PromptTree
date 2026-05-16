@@ -102,9 +102,47 @@ export const siteAdapters: SiteAdapter[] = [
   }
 ]
 
+export const genericAdapter: SiteAdapter = {
+  name: 'Generic',
+  match: /.*/,
+  getInputElement: () =>
+    (document.querySelector('textarea:not([readonly]):not([disabled])') ||
+     document.querySelector('[contenteditable="true"]') ||
+     document.querySelector('[role="textbox"]')) as HTMLElement | null,
+  insertText: (el, text) => {
+    if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+      const nativeSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLTextAreaElement.prototype, 'value'
+      )?.set
+      if (nativeSetter) {
+        nativeSetter.call(el, text)
+      } else {
+        (el as HTMLTextAreaElement).value = text
+      }
+    } else {
+      el.innerHTML = `<p>${text}</p>`
+    }
+    el.dispatchEvent(new InputEvent('input', { bubbles: true }))
+    el.dispatchEvent(new Event('change', { bubbles: true }))
+  },
+  isReady() { return !!this.getInputElement() },
+  waitForInput(timeout) { return defaultWaitForInput(this, timeout) }
+}
+
 export function getCurrentAdapter(): SiteAdapter | null {
   const url = window.location.href
-  return siteAdapters.find(a => a.match.test(url)) ?? null
+  const specific = siteAdapters.find(a => a.match.test(url))
+  if (specific) {
+    console.log(`[PromptTree] using ${specific.name} adapter`)
+    return specific
+  }
+  // Fallback to generic adapter
+  if (genericAdapter.isReady()) {
+    console.log('[PromptTree] using Generic fallback adapter')
+    return genericAdapter
+  }
+  console.log('[PromptTree] no adapter matched, generic not ready')
+  return null
 }
 
 /**

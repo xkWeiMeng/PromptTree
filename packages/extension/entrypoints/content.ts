@@ -1,4 +1,4 @@
-import { getCurrentAdapter, getSiteInfo } from '@/utils/sites'
+import { getCurrentAdapter, genericAdapter, getSiteInfo } from '@/utils/sites'
 
 export default defineContentScript({
   matches: [
@@ -33,7 +33,21 @@ export default defineContentScript({
 
 async function injectPrompt(text: string): Promise<boolean> {
   const adapter = getCurrentAdapter()
-  if (!adapter) return false
+  if (!adapter) {
+    // Last resort: try generic adapter even if not initially ready
+    const el = await genericAdapter.waitForInput(3000)
+    if (el) {
+      try {
+        console.log('[PromptTree] late generic fallback succeeded')
+        genericAdapter.insertText(el, text)
+        el.focus()
+        return true
+      } catch (err) {
+        console.error('[PromptTree] generic fallback inject failed:', err)
+      }
+    }
+    return false
+  }
 
   // 等待输入框就绪
   let input = adapter.getInputElement()
@@ -47,7 +61,22 @@ async function injectPrompt(text: string): Promise<boolean> {
     input.focus()
     return true
   } catch (err) {
-    console.error('[PromptTree] inject failed:', err)
+    console.error(`[PromptTree] ${adapter.name} inject failed:`, err)
+
+    // Fallback to generic adapter if specific adapter fails
+    if (adapter.name !== 'Generic') {
+      console.log('[PromptTree] falling back to generic adapter')
+      const genericInput = genericAdapter.getInputElement()
+      if (genericInput) {
+        try {
+          genericAdapter.insertText(genericInput, text)
+          genericInput.focus()
+          return true
+        } catch (fallbackErr) {
+          console.error('[PromptTree] generic fallback also failed:', fallbackErr)
+        }
+      }
+    }
     return false
   }
 }

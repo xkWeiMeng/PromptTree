@@ -25,6 +25,7 @@ export default defineBackground(() => {
   browser.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === ALARM_SYNC) {
       await backgroundSync()
+      await updateBadgeFromStorage()
     }
   })
 
@@ -68,6 +69,7 @@ export default defineBackground(() => {
     if (details.reason === 'install') {
       console.log('[PromptTree] extension installed')
     }
+    updateBadgeFromStorage()
   })
 })
 
@@ -75,7 +77,10 @@ export default defineBackground(() => {
 async function backgroundSync(): Promise<{ success: boolean; error?: string }> {
   try {
     const offlineMode = await getOfflineMode()
-    if (offlineMode) return { success: true }
+    if (offlineMode) {
+      await updateBadge(0)
+      return { success: true }
+    }
 
     const token = await getAccessToken()
     if (!token) return { success: false, error: 'not_authenticated' }
@@ -88,7 +93,10 @@ async function backgroundSync(): Promise<{ success: boolean; error?: string }> {
 
     const allNodes = await getNodes()
     const dirtyNodes = allNodes.filter(n => n._dirty)
-    if (dirtyNodes.length === 0) return { success: true }
+    if (dirtyNodes.length === 0) {
+      await updateBadge(0)
+      return { success: true }
+    }
 
     // 标记为 pendingSync
     const pendingIds = dirtyNodes.map(n => n.id)
@@ -124,14 +132,32 @@ async function backgroundSync(): Promise<{ success: boolean; error?: string }> {
       // 清除已同步节点的 dirty 标记
       await clearDirty(pendingIds)
 
+      await updateBadge(0)
       return { success: true }
     }
 
+    // Sync failed — update badge with current dirty count
+    await updateBadgeFromStorage()
     return { success: false, error: response.error || 'sync_failed' }
   } catch (err) {
     console.error('[PromptTree] background sync error:', err)
+    await updateBadgeFromStorage()
     return { success: false, error: String(err) }
   }
+}
+
+// =================== Badge 管理 ===================
+async function updateBadge(count: number) {
+  const text = count > 0 ? String(count) : ''
+  await browser.action.setBadgeText({ text })
+  if (count > 0) {
+    await browser.action.setBadgeBackgroundColor({ color: '#f59e0b' })
+  }
+}
+
+async function updateBadgeFromStorage() {
+  const dirtyNodes = await getDirtyNodes()
+  await updateBadge(dirtyNodes.length)
 }
 
 // =================== 工具函数 ===================

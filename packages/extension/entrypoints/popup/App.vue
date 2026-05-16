@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, defineAsyncComponent, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useTreeStore } from '@/stores/tree'
 import { useSyncStore } from '@/stores/sync'
 import { useToast } from '@/composables/useToast'
 import { getTheme, type ThemeMode } from '@/utils/storage'
-import LoginView from './views/LoginView.vue'
-import MainView from './views/MainView.vue'
-import SettingsView from './views/SettingsView.vue'
 import Toast from './components/Toast.vue'
 import ConfirmDialog from './components/ConfirmDialog.vue'
 
+const LoginView = defineAsyncComponent(() => import('./views/LoginView.vue'))
+const MainView = defineAsyncComponent(() => import('./views/MainView.vue'))
+const SettingsView = defineAsyncComponent(() => import('./views/SettingsView.vue'))
+
 type ViewName = 'login' | 'main' | 'settings'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const treeStore = useTreeStore()
 const syncStore = useSyncStore()
@@ -87,23 +90,31 @@ watch(() => authStore.canAccessApp, (canAccess) => {
   <div class="popup">
     <div v-if="loading" class="loading">
       <div class="spinner" />
-      <span>加载中…</span>
+      <span>{{ t('common.loading') }}</span>
     </div>
     <template v-else>
-      <LoginView
-        v-if="currentView === 'login'"
-        @success="handleLoginSuccess"
-        @offline="handleOfflineMode"
-      />
-      <SettingsView
-        v-else-if="currentView === 'settings'"
-        @back="backToMain"
-        @theme-change="applyTheme"
-      />
-      <MainView
-        v-else
-        @open-settings="openSettings"
-      />
+      <Suspense>
+        <LoginView
+          v-if="currentView === 'login'"
+          @success="handleLoginSuccess"
+          @offline="handleOfflineMode"
+        />
+        <SettingsView
+          v-else-if="currentView === 'settings'"
+          @back="backToMain"
+          @theme-change="applyTheme"
+        />
+        <MainView
+          v-else
+          @open-settings="openSettings"
+        />
+        <template #fallback>
+          <div class="loading">
+            <div class="spinner" />
+            <span>{{ t('common.loading') }}</span>
+          </div>
+        </template>
+      </Suspense>
     </template>
     <Toast />
   </div>
@@ -170,7 +181,7 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* 全局滚动条 */
+/* 全局滚动条 — Webkit */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -186,5 +197,11 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-secondary);
+}
+
+/* 全局滚动条 — Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
 }
 </style>

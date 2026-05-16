@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTreeStore } from '@/stores/tree'
 
@@ -21,6 +21,7 @@ const treeStore = useTreeStore()
 const nodeType = ref<'folder' | 'prompt'>(props.defaultType ?? 'prompt')
 const title = ref('')
 const content = ref('')
+const hasUnsavedChanges = ref(false)
 
 // 如果是编辑模式，加载已有数据
 if (props.editNodeId) {
@@ -32,13 +33,54 @@ if (props.editNodeId) {
   }
 }
 
+// =================== Auto-save (edit mode only) ===================
+let autoSaveTimer: ReturnType<typeof setTimeout> | null = null
+const AUTO_SAVE_DEBOUNCE_MS = 500
+
+function scheduleAutoSave() {
+  if (!props.editNodeId) return
+  hasUnsavedChanges.value = true
+  if (autoSaveTimer) clearTimeout(autoSaveTimer)
+  autoSaveTimer = setTimeout(() => {
+    performAutoSave()
+  }, AUTO_SAVE_DEBOUNCE_MS)
+}
+
+async function performAutoSave() {
+  if (!props.editNodeId) return
+  await treeStore.updateNode(props.editNodeId, {
+    title: title.value,
+    content: content.value,
+  })
+  hasUnsavedChanges.value = false
+}
+
+watch(title, () => scheduleAutoSave())
+watch(content, () => scheduleAutoSave())
+
+function handleBlur() {
+  if (hasUnsavedChanges.value && props.editNodeId) {
+    if (autoSaveTimer) clearTimeout(autoSaveTimer)
+    performAutoSave()
+  }
+}
+
+onBeforeUnmount(() => {
+  if (autoSaveTimer) clearTimeout(autoSaveTimer)
+  if (hasUnsavedChanges.value && props.editNodeId) {
+    performAutoSave()
+  }
+})
+
 async function handleSave() {
+  if (autoSaveTimer) clearTimeout(autoSaveTimer)
   if (props.editNodeId) {
     // 编辑
     await treeStore.updateNode(props.editNodeId, {
       title: title.value,
       content: content.value,
     })
+    hasUnsavedChanges.value = false
   } else {
     // 新建
     await treeStore.createNode({
@@ -82,6 +124,7 @@ async function handleSave() {
           v-model="title"
           type="text"
           :placeholder="nodeType === 'folder' ? t('editor.typeFolder') : t('editor.typePrompt')"
+          @blur="handleBlur"
         />
       </div>
 
@@ -92,11 +135,13 @@ async function handleSave() {
           v-model="content"
           :placeholder="t('editor.contentPlaceholder')"
           rows="8"
+          @blur="handleBlur"
         />
       </div>
     </div>
 
     <div class="editor-footer">
+      <span v-if="editNodeId && hasUnsavedChanges" class="unsaved-indicator">{{ t('editor.unsavedChanges') }}</span>
       <button class="btn btn--secondary" @click="$emit('close')">{{ t('common.cancel') }}</button>
       <button class="btn btn--primary" @click="handleSave">{{ t('common.save') }}</button>
     </div>
@@ -226,5 +271,12 @@ async function handleSave() {
 
 .btn--secondary:hover {
   background: var(--color-hover, #f3f4f6);
+}
+
+.unsaved-indicator {
+  font-size: 11px;
+  color: var(--color-warning, #f59e0b);
+  margin-right: auto;
+  align-self: center;
 }
 </style>

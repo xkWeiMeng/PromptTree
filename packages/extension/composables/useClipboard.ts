@@ -9,6 +9,7 @@ const t = i18n.global.t
 export function useClipboard() {
   const { success, error } = useToast()
   const isCopying = ref(false)
+  const isInjecting = ref(false)
 
   /** 复制文本到剪贴板 */
   async function copy(text: string): Promise<boolean> {
@@ -47,31 +48,41 @@ export function useClipboard() {
     const variables = extractVariables(content)
     if (variables.length > 0) return false
 
-    const response = await sendToCurrentTab({ type: 'INJECT_PROMPT', text: content })
-    if (response.success) {
-      success(t('clipboard.injected'))
-      return true
-    } else {
-      // fallback 到剪贴板
-      await copy(content)
-      error(t('clipboard.injectFailed'))
-      return false
+    isInjecting.value = true
+    try {
+      const response = await sendToCurrentTab({ type: 'INJECT_PROMPT', text: content })
+      if (response.success) {
+        success(t('clipboard.injected'))
+        return true
+      } else {
+        // fallback 到剪贴板
+        await copy(content)
+        error(t('clipboard.injectFailed'))
+        return false
+      }
+    } finally {
+      isInjecting.value = false
     }
   }
 
   /** 填充变量后填入 */
   async function injectWithVariables(content: string, values: Record<string, string>): Promise<boolean> {
     const filled = fillVariables(content, values)
-    const response = await sendToCurrentTab({ type: 'INJECT_PROMPT', text: filled })
-    if (response.success) {
-      success(t('clipboard.injected'))
-      return true
-    } else {
-      await copy(filled)
-      error(t('clipboard.injectFailed'))
-      return false
+    isInjecting.value = true
+    try {
+      const response = await sendToCurrentTab({ type: 'INJECT_PROMPT', text: filled })
+      if (response.success) {
+        success(t('clipboard.injected'))
+        return true
+      } else {
+        await copy(filled)
+        error(t('clipboard.injectFailed'))
+        return false
+      }
+    } finally {
+      isInjecting.value = false
     }
   }
 
-  return { isCopying, copy, copyContent, copyWithVariables, injectContent, injectWithVariables }
+  return { isCopying, isInjecting, copy, copyContent, copyWithVariables, injectContent, injectWithVariables }
 }

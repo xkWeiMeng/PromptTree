@@ -45,7 +45,8 @@
     "create": "创建",
     "update": "更新",
     "editTitle": "编辑",
-    "newTitle": "新建"
+    "newTitle": "新建",
+    "unsavedChanges": "未保存的更改"
   },
   "sync": {
     "syncing": "同步中...",
@@ -56,7 +57,11 @@
     "justNow": "刚刚",
     "minutesAgo": "{n} 分钟前",
     "hoursAgo": "{n} 小时前",
-    "clickToSync": "点击同步"
+    "clickToSync": "点击同步",
+    "retry": "重试",
+    "dismiss": "关闭",
+    "notAuthenticated": "未登录",
+    "networkError": "网络错误"
   },
   "confirm": {
     "defaultTitle": "确认",
@@ -67,7 +72,8 @@
     "copied": "已复制到剪贴板",
     "copyFailed": "复制失败，请手动复制",
     "injected": "已填入输入框",
-    "injectFailed": "填入失败"
+    "injectFailed": "填入失败",
+    "injecting": "填入中..."
   },
   "settings": {
     "title": "设置",

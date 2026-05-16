@@ -45,7 +45,8 @@
     "create": "Create",
     "update": "Update",
     "editTitle": "Edit",
-    "newTitle": "New"
+    "newTitle": "New",
+    "unsavedChanges": "Unsaved changes"
   },
   "sync": {
     "syncing": "Syncing...",
@@ -56,7 +57,11 @@
     "justNow": "Just now",
     "minutesAgo": "{n} min ago",
     "hoursAgo": "{n} hr ago",
-    "clickToSync": "Click to sync"
+    "clickToSync": "Click to sync",
+    "retry": "Retry",
+    "dismiss": "Dismiss",
+    "notAuthenticated": "Not authenticated",
+    "networkError": "Network error"
   },
   "confirm": {
     "defaultTitle": "Confirm",
@@ -67,7 +72,8 @@
     "copied": "Copied to clipboard",
     "copyFailed": "Copy failed, please copy manually",
     "injected": "Injected to input",
-    "injectFailed": "Inject failed"
+    "injectFailed": "Inject failed",
+    "injecting": "Injecting..."
   },
   "settings": {
     "title": "Settings",
