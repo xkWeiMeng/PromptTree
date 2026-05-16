@@ -177,7 +177,9 @@
     "sidebarTitle": "목차",
     "notFound": "문서를 찾을 수 없습니다",
     "backToList": "문서 목록으로 돌아가기",
-    "docMetaSuffix": "문서"
+    "docMetaSuffix": "문서",
+    "openSidebar": "사이드바 열기",
+    "closeSidebar": "사이드바 닫기"
   },
   "blog": {
     "pageTitle": "블로그",

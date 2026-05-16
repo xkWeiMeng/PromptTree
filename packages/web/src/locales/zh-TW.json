@@ -177,7 +177,9 @@
     "sidebarTitle": "文件目錄",
     "notFound": "文件不存在",
     "backToList": "返回文件列表",
-    "docMetaSuffix": "文件"
+    "docMetaSuffix": "文件",
+    "openSidebar": "開啟側邊欄",
+    "closeSidebar": "關閉側邊欄"
   },
   "blog": {
     "pageTitle": "部落格",

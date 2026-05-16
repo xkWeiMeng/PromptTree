@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@/composables'
@@ -8,7 +8,7 @@ import { useLocalePath } from '@/composables/useLocalePath'
 import SiteLayout from '@/components/site/SiteLayout.vue'
 import MarkdownRenderer from '@/components/site/MarkdownRenderer.vue'
 import { getDocBySlug, getAllDocs } from '@/utils/content'
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-vue-next'
 
 const SITE_URL = 'https://prompttree.app'
 
@@ -18,6 +18,18 @@ const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 const doc = computed(() => getDocBySlug(slug.value, locale.value))
 const allDocs = computed(() => getAllDocs(locale.value))
+
+// Mobile sidebar state
+const sidebarOpen = ref(false)
+
+function toggleSidebar() {
+  sidebarOpen.value = !sidebarOpen.value
+}
+
+// Auto-close sidebar on route change
+watch(() => route.path, () => {
+  sidebarOpen.value = false
+})
 
 // 前后导航
 const currentIndex = computed(() => allDocs.value.findIndex(d => d.meta.slug === slug.value))
@@ -55,16 +67,41 @@ useJsonLd('breadcrumb', breadcrumbSchema)
 <template>
   <SiteLayout>
     <div class="docs-layout">
-      <!-- Sidebar toggle for mobile -->
-      <input id="docs-sidebar-toggle" type="checkbox" class="docs-sidebar__checkbox" aria-hidden="true" />
-
       <!-- 侧边栏 -->
-      <aside class="docs-sidebar">
-        <label for="docs-sidebar-toggle" class="docs-sidebar__toggle-label">
-          {{ t('docs.sidebarTitle') }}
-        </label>
+      <aside class="docs-sidebar" :class="{ 'docs-sidebar--open': sidebarOpen }">
+        <button
+          class="docs-sidebar__toggle"
+          :aria-expanded="sidebarOpen"
+          :aria-label="sidebarOpen ? t('docs.closeSidebar') : t('docs.openSidebar')"
+          @click="toggleSidebar"
+        >
+          <component :is="sidebarOpen ? X : Menu" :size="18" />
+          <span>{{ t('docs.sidebarTitle') }}</span>
+        </button>
         <div class="docs-sidebar__title docs-sidebar__title--desktop">{{ t('docs.sidebarTitle') }}</div>
-        <nav class="docs-sidebar__list" role="navigation" :aria-label="t('docs.sidebarTitle')">
+        <Transition name="sidebar-slide">
+          <nav
+            v-show="sidebarOpen"
+            class="docs-sidebar__list docs-sidebar__list--mobile"
+            role="navigation"
+            :aria-label="t('docs.sidebarTitle')"
+          >
+            <RouterLink
+              v-for="d in allDocs"
+              :key="d.meta.slug"
+              :to="localePath(`/docs/${d.meta.slug}`)"
+              class="docs-sidebar__link"
+              :class="{ 'docs-sidebar__link--active': d.meta.slug === slug }"
+            >
+              {{ d.meta.title }}
+            </RouterLink>
+          </nav>
+        </Transition>
+        <nav
+          class="docs-sidebar__list docs-sidebar__list--desktop"
+          role="navigation"
+          :aria-label="t('docs.sidebarTitle')"
+        >
           <RouterLink
             v-for="d in allDocs"
             :key="d.meta.slug"
@@ -212,21 +249,44 @@ useJsonLd('breadcrumb', breadcrumbSchema)
   display: inline-block;
 }
 
-/* Sidebar collapsible checkbox (hidden) */
-.docs-sidebar__checkbox {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Mobile toggle label (hidden on desktop) */
-.docs-sidebar__toggle-label {
+/* Sidebar collapsible — hidden toggle on desktop */
+.docs-sidebar__toggle {
   display: none;
 }
 
-/* Desktop sidebar title (hidden on mobile when toggle visible) */
+/* Desktop sidebar title */
 .docs-sidebar__title--desktop {
   display: block;
+}
+
+/* Mobile nav list (shown via Transition) */
+.docs-sidebar__list--mobile {
+  display: none;
+}
+
+/* Desktop nav list (always visible on desktop) */
+.docs-sidebar__list--desktop {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar slide transition */
+.sidebar-slide-enter-active {
+  transition: max-height var(--duration-normal) ease, opacity var(--duration-normal) ease;
+}
+.sidebar-slide-leave-active {
+  transition: max-height var(--duration-fast) ease, opacity var(--duration-fast) ease;
+}
+.sidebar-slide-enter-from,
+.sidebar-slide-leave-to {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+.sidebar-slide-enter-to {
+  max-height: 60vh;
+  opacity: 1;
+  overflow: hidden;
 }
 
 /* Navigation */
@@ -277,15 +337,24 @@ useJsonLd('breadcrumb', breadcrumbSchema)
     padding: var(--space-12) 0;
   }
 
-  /* Collapsible sidebar via checkbox hack */
+  /* Show mobile toggle, hide desktop title & list */
   .docs-sidebar__title--desktop {
     display: none;
   }
 
-  .docs-sidebar__toggle-label {
+  .docs-sidebar__list--desktop {
+    display: none;
+  }
+
+  .docs-sidebar__list--mobile {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .docs-sidebar__toggle {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: var(--space-2);
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
     color: var(--text-tertiary);
@@ -293,26 +362,14 @@ useJsonLd('breadcrumb', breadcrumbSchema)
     letter-spacing: var(--letter-spacing-wide);
     cursor: pointer;
     padding: var(--space-2) 0;
-    user-select: none;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
   }
 
-  .docs-sidebar__toggle-label::after {
-    content: '▸';
-    transition: transform var(--duration-fast) ease;
-  }
-
-  .docs-sidebar__checkbox:checked ~ .docs-sidebar .docs-sidebar__toggle-label::after {
-    transform: rotate(90deg);
-  }
-
-  .docs-sidebar__list {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height var(--duration-normal) ease;
-  }
-
-  .docs-sidebar__checkbox:checked ~ .docs-sidebar .docs-sidebar__list {
-    max-height: 60vh;
+  .docs-sidebar__toggle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 
   /* Nav buttons stack vertically */

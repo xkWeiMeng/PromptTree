@@ -1,8 +1,35 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+
 defineProps<{ name: string }>()
+
+const el = ref<HTMLElement | null>(null)
+const isVisible = ref(false)
+
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  if (!el.value) return
+  observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) {
+        isVisible.value = true
+        observer?.disconnect()
+      }
+    },
+    { rootMargin: '100px' }
+  )
+  observer.observe(el.value)
+})
+
+onUnmounted(() => {
+  observer?.disconnect()
+})
 </script>
 
 <template>
+  <div ref="el" class="illustration-wrapper">
+    <template v-if="isVisible">
   <!-- 树形结构管理 -->
   <svg v-if="name === 'tree'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-tree-title" fill="none" xmlns="http://www.w3.org/2000/svg">
     <title id="illust-tree-title">Tree structure illustration</title>
@@ -306,4 +333,28 @@ defineProps<{ name: string }>()
     <rect width="56" height="56" rx="14" fill="#8E8E93"/>
     <circle cx="28" cy="28" r="10" fill="#fff" opacity=".3"/>
   </svg>
+    </template>
+    <!-- Placeholder while not visible -->
+    <div v-else class="illustration-placeholder" aria-hidden="true"></div>
+  </div>
 </template>
+
+<style scoped>
+.illustration-wrapper {
+  display: inline-flex;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.illustration-placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-2xl, 14px);
+  background: var(--bg-tertiary, rgba(0, 0, 0, 0.04));
+}
+
+.illustration-wrapper > svg {
+  width: 100%;
+  height: auto;
+}
+</style>

@@ -177,7 +177,9 @@
     "sidebarTitle": "Table of Contents",
     "notFound": "Document not found",
     "backToList": "Back to documentation",
-    "docMetaSuffix": "Docs"
+    "docMetaSuffix": "Docs",
+    "openSidebar": "Open sidebar",
+    "closeSidebar": "Close sidebar"
   },
   "blog": {
     "pageTitle": "Blog",

@@ -177,7 +177,9 @@
     "sidebarTitle": "文档目录",
     "notFound": "文档不存在",
     "backToList": "返回文档列表",
-    "docMetaSuffix": "文档"
+    "docMetaSuffix": "文档",
+    "openSidebar": "打开侧边栏",
+    "closeSidebar": "关闭侧边栏"
   },
   "blog": {
     "pageTitle": "博客",

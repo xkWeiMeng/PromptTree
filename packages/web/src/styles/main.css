@@ -29,6 +29,7 @@ html {
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
 }
 
 body {
@@ -182,13 +183,15 @@ img, svg {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
+  border: none;
+  background: transparent;
   cursor: pointer;
+  border-radius: var(--radius-sm);
   transition: background var(--duration-fast) ease,
               color var(--duration-fast) ease;
+  color: var(--text-secondary);
+  min-width: var(--icon-btn-md);
+  min-height: var(--icon-btn-md);
 }
 
 .icon-btn:hover {
@@ -203,6 +206,16 @@ img, svg {
 .icon-btn:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+.icon-btn--sm {
+  min-width: var(--icon-btn-sm);
+  min-height: var(--icon-btn-sm);
+}
+
+.icon-btn--lg {
+  min-width: var(--icon-btn-lg);
+  min-height: var(--icon-btn-lg);
 }
 
 /* macOS-style primary button */

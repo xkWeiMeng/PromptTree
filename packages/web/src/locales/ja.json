@@ -177,7 +177,9 @@
     "sidebarTitle": "目次",
     "notFound": "ドキュメントが見つかりません",
     "backToList": "ドキュメント一覧に戻る",
-    "docMetaSuffix": "ドキュメント"
+    "docMetaSuffix": "ドキュメント",
+    "openSidebar": "サイドバーを開く",
+    "closeSidebar": "サイドバーを閉じる"
   },
   "blog": {
     "pageTitle": "ブログ",

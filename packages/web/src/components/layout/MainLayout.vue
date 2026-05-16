@@ -261,6 +261,9 @@ onUnmounted(() => {
   height: 100dvh;
   overflow: hidden;
   background: var(--bg-primary);
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .main-layout.resizing {
@@ -530,10 +533,11 @@ onUnmounted(() => {
     top: 0;
     bottom: 0;
     width: 80vw;
-    max-width: 320px;
+    max-width: calc(80vw - env(safe-area-inset-right, 0));
     z-index: 100;
     transform: translateX(-100%);
     transition: transform var(--duration-normal) ease;
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
   .sidebar.sidebar--open {
