@@ -179,22 +179,24 @@ useKeyboard({
         <!-- 视图切换栏 -->
         <ViewSwitcher v-if="showViewSwitcher" />
 
+        <Transition name="view-fade" mode="out-in">
         <!-- 编辑器视图 -->
         <PromptEditor
           v-if="showEditor && treeStore.selectedNodeId"
+          :key="'editor-' + treeStore.selectedNodeId"
           :node-id="treeStore.selectedNodeId"
           @show-variables="handleShowVariables"
           @share="handleShare"
         />
 
         <!-- 大纲视图 -->
-        <OutlineView v-else-if="treeStore.viewMode === 'outline'" />
+        <OutlineView v-else-if="treeStore.viewMode === 'outline'" key="outline" />
 
         <!-- 思维导图视图 -->
-        <MindMapView v-else-if="treeStore.viewMode === 'mindmap'" />
+        <MindMapView v-else-if="treeStore.viewMode === 'mindmap'" key="mindmap" />
       
         <!-- 选中文件夹时的提示（仅在 welcome 模式） -->
-        <section v-else-if="selectedNode?.type === 'folder' && treeStore.viewMode === 'welcome'" class="folder-selected" :aria-label="t('app.folderDetailAriaLabel')">
+        <section v-else-if="selectedNode?.type === 'folder' && treeStore.viewMode === 'welcome'" key="folder-detail" class="folder-selected" :aria-label="t('app.folderDetailAriaLabel')">
           <Folder :size="48" class="state-icon folder" aria-hidden="true" />
           <h2>{{ selectedNode.title || t('common.untitledFolder') }}</h2>
           <p class="hint">{{ t('app.folderHint') }}</p>
@@ -211,7 +213,7 @@ useKeyboard({
         </section>
       
         <!-- 欢迎页 -->
-        <section v-else class="empty-state" :aria-label="t('app.welcomeAriaLabel')">
+        <section v-else key="welcome" class="empty-state" :aria-label="t('app.welcomeAriaLabel')">
           <FileText :size="48" class="state-icon" aria-hidden="true" />
           <h2>{{ t('app.welcomeTitle') }}</h2>
           <p>{{ t('app.welcomeDesc') }}</p>
@@ -246,6 +248,7 @@ useKeyboard({
             </ul>
           </aside>
         </section>
+        </Transition>
         </template>
       </div>
     </template>

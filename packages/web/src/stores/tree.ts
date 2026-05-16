@@ -42,10 +42,23 @@ export const useTreeStore = defineStore('tree', () => {
   // Getters
   // ===================
   
-  /** 树形结构 */
+  /** 树形结构（缓存上次结果，仅当活跃节点真正变化时重建） */
+  let _prevActiveIds: string | null = null
+  let _prevUpdatedKeys: string | null = null
+  let _cachedTree: TreeNodeWithChildren[] = []
+
   const rootNodes = computed<TreeNodeWithChildren[]>(() => {
     const activeNodes = nodes.value.filter((n: LocalNode) => n.deletedAt === null)
-    return buildTree(activeNodes)
+    // 构建快照指纹：id + parentId + sortOrder + updatedAt 决定树结构
+    const idKey = activeNodes.map(n => n.id).join(',')
+    const updatedKey = activeNodes.map(n => `${n.parentId}|${n.sortOrder}|${n.updatedAt}`).join(',')
+    if (idKey === _prevActiveIds && updatedKey === _prevUpdatedKeys) {
+      return _cachedTree
+    }
+    _prevActiveIds = idKey
+    _prevUpdatedKeys = updatedKey
+    _cachedTree = buildTree(activeNodes)
+    return _cachedTree
   })
 
   /** 当前选中的节点 */

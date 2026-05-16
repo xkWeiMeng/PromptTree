@@ -86,7 +86,7 @@ onMounted(() => {
   <main class="shared-page">
     <section class="shared-container">
       <div v-if="isLoading" class="state loading" aria-live="polite">
-        <Loader2 :size="18" class="spin" />
+        <Loader2 :size="18" class="animate-spin" />
         <span>{{ t('share.loading') }}</span>
       </div>
 
@@ -269,21 +269,6 @@ onMounted(() => {
 .state.error p {
   margin: 0;
   font-size: var(--font-size-sm);
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .spin {
-    animation: none;
-  }
 }
 
 @media (max-width: 640px) {

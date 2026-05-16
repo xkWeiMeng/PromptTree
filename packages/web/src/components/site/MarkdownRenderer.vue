@@ -7,11 +7,20 @@ const props = defineProps<{
 }>()
 
 /**
+ * Markdown 渲染缓存 — 避免对相同内容重复解析
+ */
+const RENDER_CACHE_MAX = 50
+const renderCache = new Map<string, string>()
+
+/**
  * 简易 Markdown → HTML 转换器
  * 支持: h1-h4, p, ul/ol, code, pre, blockquote, strong, em, a, hr, table
  * 无需外部依赖
  */
 function renderMarkdown(md: string): string {
+  const cached = renderCache.get(md)
+  if (cached !== undefined) return cached
+
   let html = md
 
   // 代码块（```...```）
@@ -78,6 +87,13 @@ function renderMarkdown(md: string): string {
 
   // 清理多余空行产生的空 <p>
   html = html.replace(/<p>\s*<\/p>/g, '')
+
+  // 存入缓存，超限时淘汰最早条目
+  if (renderCache.size >= RENDER_CACHE_MAX) {
+    const firstKey = renderCache.keys().next().value!
+    renderCache.delete(firstKey)
+  }
+  renderCache.set(md, html)
 
   return html
 }

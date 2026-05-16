@@ -108,6 +108,17 @@
   --radius-full: 9999px;
 
   /* ===========================================================================
+     MindMap Node Colors
+     =========================================================================== */
+  --mindmap-root-color: #007AFF;
+  --mindmap-root-stroke: #0051A8;
+  --mindmap-folder-color: #5856D6;
+  --mindmap-folder-stroke: #3634A3;
+  --mindmap-prompt-color: #34C759;
+  --mindmap-prompt-stroke: #248A3D;
+  --mindmap-selected-stroke: #FF9500;
+
+  /* ===========================================================================
      Typography
      =========================================================================== */
   --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
@@ -115,6 +126,8 @@
   --font-mono: 'SF Mono', SFMono-Regular, ui-monospace, 'Cascadia Code',
     'Fira Code', Menlo, Monaco, Consolas, monospace;
 
+  /* Font Size Scale (ascending hierarchy)
+     xs(11) → sm(13) → base(14) → md(15) → lg(17) → xl(20) → 2xl(24) → 3xl(28) */
   --font-size-xs: 11px;
   --font-size-sm: 13px;
   --font-size-base: 14px;
@@ -207,6 +220,15 @@
 
 /* Manual dark mode — user explicitly chose "dark" */
 html[data-theme="dark"] {
+  /* MindMap Node Colors (Dark) */
+  --mindmap-root-color: #0A84FF;
+  --mindmap-root-stroke: #409CFF;
+  --mindmap-folder-color: #5E5CE6;
+  --mindmap-folder-stroke: #7B79F2;
+  --mindmap-prompt-color: #30D158;
+  --mindmap-prompt-stroke: #4BDA6A;
+  --mindmap-selected-stroke: #FF9F0A;
+
   /* Apple System Colors (Dark) — slightly brighter for dark bg */
   --apple-blue: #0A84FF;
   --apple-green: #30D158;
@@ -286,6 +308,15 @@ html[data-theme="dark"] {
 /* System preference dark mode — only when user chose "system" (default) */
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"] {
+    /* MindMap Node Colors (Dark) */
+    --mindmap-root-color: #0A84FF;
+    --mindmap-root-stroke: #409CFF;
+    --mindmap-folder-color: #5E5CE6;
+    --mindmap-folder-stroke: #7B79F2;
+    --mindmap-prompt-color: #30D158;
+    --mindmap-prompt-stroke: #4BDA6A;
+    --mindmap-selected-stroke: #FF9F0A;
+
     /* Apple System Colors (Dark) */
     --apple-blue: #0A84FF;
     --apple-green: #30D158;

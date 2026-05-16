@@ -198,7 +198,7 @@ watch(() => props.visible, async (visible) => {
             </div>
 
             <div v-if="loading" class="loading">
-              <Loader2 :size="16" class="spin" />
+              <Loader2 :size="16" class="animate-spin" />
               <span>{{ t('share.loading') }}</span>
             </div>
 
@@ -446,15 +446,6 @@ watch(() => props.visible, async (visible) => {
   padding: var(--space-4) var(--space-5);
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 480px) {

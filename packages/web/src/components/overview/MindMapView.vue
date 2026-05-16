@@ -232,6 +232,11 @@ function updateSize() {
 }
 
 let resizeObserver: ResizeObserver | null = null
+let resizeTimer: ReturnType<typeof setTimeout>
+const debouncedUpdateSize = () => {
+  clearTimeout(resizeTimer)
+  resizeTimer = setTimeout(updateSize, 150)
+}
 
 onMounted(() => {
   updateSize()
@@ -242,7 +247,7 @@ onMounted(() => {
   })
 
   resizeObserver = new ResizeObserver(() => {
-    updateSize()
+    debouncedUpdateSize()
   })
   if (containerRef.value) {
     resizeObserver.observe(containerRef.value)
@@ -250,6 +255,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  clearTimeout(resizeTimer)
   resizeObserver?.disconnect()
 })
 
@@ -264,14 +270,14 @@ watch([rootData], () => {
 // ===================
 
 function getNodeFill(node: HierarchyPointNode<TreeNodeWithChildren>): string {
-  if (node.data.id === '__root__') return '#007AFF'
-  return node.data.type === 'folder' ? '#5856D6' : '#34C759'
+  if (node.data.id === '__root__') return 'var(--mindmap-root-color)'
+  return node.data.type === 'folder' ? 'var(--mindmap-folder-color)' : 'var(--mindmap-prompt-color)'
 }
 
 function getNodeStroke(node: HierarchyPointNode<TreeNodeWithChildren>): string {
-  if (node.data.id === treeStore.selectedNodeId) return '#FF9500'
-  if (node.data.id === '__root__') return '#0051A8'
-  return node.data.type === 'folder' ? '#3634A3' : '#248A3D'
+  if (node.data.id === treeStore.selectedNodeId) return 'var(--mindmap-selected-stroke)'
+  if (node.data.id === '__root__') return 'var(--mindmap-root-stroke)'
+  return node.data.type === 'folder' ? 'var(--mindmap-folder-stroke)' : 'var(--mindmap-prompt-stroke)'
 }
 
 function getNodeIcon(node: HierarchyPointNode<TreeNodeWithChildren>): string {

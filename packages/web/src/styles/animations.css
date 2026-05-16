@@ -205,6 +205,19 @@
 }
 
 /* ===========================================================================
+   Vue Transition Classes — View Fade (editor/outline/mindmap switch)
+   =========================================================================== */
+
+.view-fade-enter-active,
+.view-fade-leave-active {
+  transition: opacity var(--duration-fast) ease;
+}
+.view-fade-enter-from,
+.view-fade-leave-to {
+  opacity: 0;
+}
+
+/* ===========================================================================
    Utility Classes
    =========================================================================== */
 
