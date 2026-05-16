@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { extractVariables } from '@prompttree/shared'
 import { useTreeStore } from '@/stores/tree'
-import { Pencil, Braces, Copy, X, FileText, Share2 } from 'lucide-vue-next'
+import { Pencil, Braces, Copy, Check, X, FileText, Share2 } from 'lucide-vue-next'
 
 const { t } = useI18n()
 
@@ -34,6 +34,14 @@ const variables = computed(() => {
   return extractVariables(content.value)
 })
 
+// 自动保存状态
+const saveStatus = ref<'idle' | 'saving' | 'saved' | 'error'>('idle')
+let savedTimer: ReturnType<typeof setTimeout> | null = null
+
+// 复制按钮成功动画
+const copySuccess = ref(false)
+let copyTimer: ReturnType<typeof setTimeout> | null = null
+
 // 保存定时器
 let saveTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -44,6 +52,7 @@ let lastNodeId = ''
 watch(() => props.nodeId, (newId) => {
   if (newId !== lastNodeId) {
     lastNodeId = newId
+    saveStatus.value = 'idle'
     if (node.value) {
       title.value = node.value.title
       content.value = node.value.content || ''
@@ -55,12 +64,24 @@ watch(() => props.nodeId, (newId) => {
 watch([title, content], () => {
   if (!node.value) return
   if (saveTimer) clearTimeout(saveTimer)
+  if (savedTimer) clearTimeout(savedTimer)
+  saveStatus.value = 'saving'
   saveTimer = setTimeout(async () => {
     if (title.value !== node.value?.title || content.value !== node.value?.content) {
-      await treeStore.updateNode(props.nodeId, {
-        title: title.value,
-        content: content.value
-      })
+      try {
+        await treeStore.updateNode(props.nodeId, {
+          title: title.value,
+          content: content.value
+        })
+        saveStatus.value = 'saved'
+        savedTimer = setTimeout(() => {
+          saveStatus.value = 'idle'
+        }, 2000)
+      } catch {
+        saveStatus.value = 'error'
+      }
+    } else {
+      saveStatus.value = 'idle'
     }
   }, 500)
 })
@@ -109,6 +130,11 @@ function insertVariable(varName: string = 'variable') {
 async function copyContent() {
   try {
     await navigator.clipboard.writeText(content.value)
+    copySuccess.value = true
+    if (copyTimer) clearTimeout(copyTimer)
+    copyTimer = setTimeout(() => {
+      copySuccess.value = false
+    }, 2000)
   } catch (e) {
     console.error('复制失败:', e)
   }
@@ -164,6 +190,7 @@ onMounted(() => {
         <h1 v-else class="title" role="button" tabindex="0" @click="startEditTitle" @keydown.enter="startEditTitle">
           {{ title || t('common.untitled') }}
           <Pencil :size="14" class="edit-hint" />
+          <span class="click-to-edit-hint">{{ t('editor.clickToEdit') }}</span>
         </h1>
       </div>
       
@@ -171,8 +198,9 @@ onMounted(() => {
         <button class="icon-btn" :title="t('editor.insertVariable')" :aria-label="t('editor.insertVariable')" @click="insertVariable()">
           <Braces :size="16" />
         </button>
-        <button class="icon-btn" :title="t('common.copy')" :aria-label="t('common.copy')" @click="copyContent">
-          <Copy :size="16" />
+        <button class="icon-btn" :class="{ 'copy-success': copySuccess }" :title="t('common.copy')" :aria-label="t('common.copy')" @click="copyContent">
+          <Check v-if="copySuccess" :size="16" />
+          <Copy v-else :size="16" />
         </button>
         <button class="icon-btn" :title="t('share.action')" :aria-label="t('share.action')" @click="shareCurrentNode">
           <Share2 :size="16" />
@@ -210,7 +238,19 @@ onMounted(() => {
     
     <!-- 底部状态 -->
     <div class="editor-footer">
-      <span class="char-count">{{ content.length }} {{ t('editor.charCount') }}</span>
+      <div class="footer-left">
+        <span class="char-count">{{ content.length }} {{ t('editor.charCount') }}</span>
+        <span
+          v-if="saveStatus !== 'idle'"
+          class="save-status"
+          :class="saveStatus"
+          aria-live="polite"
+        >
+          <template v-if="saveStatus === 'saving'">{{ t('editor.saving') }}</template>
+          <template v-else-if="saveStatus === 'saved'">{{ t('editor.saved') }}</template>
+          <template v-else-if="saveStatus === 'error'">{{ t('editor.saveFailed') }}</template>
+        </span>
+      </div>
       <span v-if="node.updatedAt" class="update-time" aria-live="polite">
         {{ t('editor.lastUpdated') }} {{ new Date(node.updatedAt).toLocaleString() }}
       </span>
@@ -257,16 +297,30 @@ onMounted(() => {
   align-items: center;
   gap: var(--space-2);
   color: var(--text-primary);
+  border-bottom: 1.5px dashed var(--border-secondary);
+  padding-bottom: 2px;
 }
 
 .edit-hint {
-  opacity: 0;
+  opacity: 0.3;
   color: var(--text-tertiary);
   transition: opacity var(--duration-fast) ease;
 }
 
 .title:hover .edit-hint {
-  opacity: 0.6;
+  opacity: 0.8;
+}
+
+.click-to-edit-hint {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-quaternary);
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease;
+}
+
+.title:hover .click-to-edit-hint {
+  opacity: 1;
 }
 
 .title-input {
@@ -364,6 +418,13 @@ onMounted(() => {
 }
 
 /* ===================
+   Copy Success
+   =================== */
+.icon-btn.copy-success {
+  color: var(--color-success);
+}
+
+/* ===================
    Footer
    =================== */
 .editor-footer {
@@ -373,6 +434,29 @@ onMounted(() => {
   border-top: 1px solid var(--border-secondary);
   font-size: var(--font-size-xs);
   color: var(--text-tertiary);
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.save-status {
+  transition: opacity var(--duration-fast) ease;
+}
+
+.save-status.saving {
+  color: var(--text-secondary);
+}
+
+.save-status.saved {
+  color: var(--color-success);
+  animation: fade-out 0.5s ease 1.5s forwards;
+}
+
+.save-status.error {
+  color: var(--color-danger);
 }
 
 /* ===================

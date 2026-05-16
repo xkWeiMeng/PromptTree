@@ -156,6 +156,26 @@ useKeyboard({
     <!-- 主内容：视图切换 -->
     <template #content>
       <div class="content-wrapper">
+        <!-- 骨架加载状态 -->
+        <div v-if="treeStore.isLoading" class="skeleton-wrapper" :aria-label="t('common.loading')">
+          <div class="skeleton-header">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-actions">
+              <div class="skeleton-circle"></div>
+              <div class="skeleton-circle"></div>
+              <div class="skeleton-circle"></div>
+            </div>
+          </div>
+          <div class="skeleton-cards">
+            <div v-for="i in 4" :key="i" class="skeleton-card">
+              <div class="skeleton-line skeleton-card-title"></div>
+              <div class="skeleton-line skeleton-card-body"></div>
+              <div class="skeleton-line skeleton-card-body short"></div>
+            </div>
+          </div>
+        </div>
+
+        <template v-else>
         <!-- 视图切换栏 -->
         <ViewSwitcher v-if="showViewSwitcher" />
 
@@ -226,6 +246,7 @@ useKeyboard({
             </ul>
           </aside>
         </section>
+        </template>
       </div>
     </template>
   </MainLayout>
@@ -381,6 +402,81 @@ h2 {
   margin: var(--space-2) 0;
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
+}
+
+/* ===================
+   Skeleton Loading
+   =================== */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.skeleton-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--space-6) var(--space-8);
+  gap: var(--space-6);
+}
+
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.skeleton-line {
+  background: var(--bg-quaternary);
+  border-radius: var(--radius-sm);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 200px;
+}
+
+.skeleton-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.skeleton-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--bg-quaternary);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.skeleton-card {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.skeleton-card-title {
+  height: 16px;
+  width: 40%;
+}
+
+.skeleton-card-body {
+  height: 12px;
+  width: 90%;
+}
+
+.skeleton-card-body.short {
+  width: 60%;
 }
 
 /* ===================

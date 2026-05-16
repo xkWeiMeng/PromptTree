@@ -5,6 +5,7 @@ import { buildTree } from '@prompttree/shared'
 import * as dbOps from '@/db/operations'
 import type { LocalNode } from '@/db'
 import { i18n } from '@/i18n'
+import { useToast } from '@/composables'
 
 /**
  * 检查 targetId 是否是 nodeId 的后代
@@ -135,6 +136,10 @@ export const useTreeStore = defineStore('tree', () => {
     // 选中新节点
     selectedNodeId.value = newNode.id
     
+    // 成功提示
+    const toast = useToast()
+    toast.success(i18n.global.t('tree.nodeCreated'))
+    
     return newNode
   }
 
@@ -195,6 +200,10 @@ export const useTreeStore = defineStore('tree', () => {
         viewMode.value = 'welcome'
       }
     }
+    
+    // 成功提示
+    const toast = useToast()
+    toast.success(i18n.global.t('tree.nodeDeleted'))
   }
 
   /**
@@ -241,6 +250,10 @@ export const useTreeStore = defineStore('tree', () => {
       parentId: newParentId,
       sortOrder: newSortOrder
     })
+    
+    // 成功提示
+    const toast = useToast()
+    toast.success(i18n.global.t('tree.nodeMoved'))
   }
 
   /**
@@ -250,7 +263,12 @@ export const useTreeStore = defineStore('tree', () => {
     const node = nodes.value.find((n: LocalNode) => n.id === id)
     if (!node) return
     
-    await updateNode(id, { isFavorite: !node.isFavorite })
+    const willFavorite = !node.isFavorite
+    await updateNode(id, { isFavorite: willFavorite })
+    
+    // 成功提示
+    const toast = useToast()
+    toast.success(i18n.global.t(willFavorite ? 'tree.favoriteAdded' : 'tree.favoriteRemoved'))
   }
 
   /**

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { X, Copy } from 'lucide-vue-next'
+import { X, Copy, Check } from 'lucide-vue-next'
 
 const { t } = useI18n()
 
@@ -45,12 +45,21 @@ const allFilled = computed(() => {
   return props.variables.every(v => variableValues.value[v]?.trim())
 })
 
+// 复制按钮成功动画
+const copySuccess = ref(false)
+let copyTimer: ReturnType<typeof setTimeout> | null = null
+
 // 复制并关闭
 async function handleCopy() {
   try {
     await navigator.clipboard.writeText(previewContent.value)
-    emit('copy', previewContent.value)
-    emit('close')
+    copySuccess.value = true
+    if (copyTimer) clearTimeout(copyTimer)
+    copyTimer = setTimeout(() => {
+      copySuccess.value = false
+      emit('copy', previewContent.value)
+      emit('close')
+    }, 1200)
   } catch (e) {
     console.error('复制失败:', e)
   }
@@ -135,11 +144,13 @@ watch(() => props.visible, async (visible) => {
               <button class="btn-cancel" @click="handleClose">{{ t('common.cancel') }}</button>
               <button 
                 class="btn-copy" 
+                :class="{ 'copy-success': copySuccess }"
                 :disabled="!allFilled"
                 @click="handleCopy"
               >
-                <Copy :size="14" />
-                {{ t('variableModal.copyToClipboard') }}
+                <Check v-if="copySuccess" :size="14" />
+                <Copy v-else :size="14" />
+                {{ copySuccess ? t('editor.saved') : t('variableModal.copyToClipboard') }}
               </button>
             </div>
           </div>
@@ -315,6 +326,10 @@ watch(() => props.visible, async (visible) => {
 
 .btn-copy:hover:not(:disabled) {
   background: var(--color-accent-hover);
+}
+
+.btn-copy.copy-success {
+  background: var(--color-success);
 }
 
 .btn-copy:disabled {

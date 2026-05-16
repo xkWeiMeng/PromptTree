@@ -286,7 +286,12 @@
     "createNew": "新建",
     "collapseAll": "全部折叠",
     "expandAll": "全部展开",
-    "rename": "重命名"
+    "rename": "重命名",
+    "nodeCreated": "创建成功",
+    "nodeDeleted": "删除成功",
+    "nodeMoved": "移动成功",
+    "favoriteAdded": "已添加收藏",
+    "favoriteRemoved": "已取消收藏"
   },
   "editor": {
     "titlePlaceholder": "输入标题...",
@@ -297,7 +302,11 @@
     "contentPlaceholder": "在这里编写你的 Prompt...",
     "charCount": "字符",
     "lastUpdated": "最后更新:",
-    "emptyState": "选择一个 Prompt 开始编辑"
+    "emptyState": "选择一个 Prompt 开始编辑",
+    "saving": "保存中...",
+    "saved": "已保存 ✓",
+    "saveFailed": "保存失败",
+    "clickToEdit": "点击编辑"
   },
   "view": {
     "editor": "编辑器",

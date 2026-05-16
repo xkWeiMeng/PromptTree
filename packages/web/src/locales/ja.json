@@ -286,7 +286,12 @@
     "createNew": "新規",
     "collapseAll": "すべて折りたたむ",
     "expandAll": "すべて展開",
-    "rename": "名前を変更"
+    "rename": "名前を変更",
+    "nodeCreated": "作成しました",
+    "nodeDeleted": "削除しました",
+    "nodeMoved": "移動しました",
+    "favoriteAdded": "お気に入りに追加しました",
+    "favoriteRemoved": "お気に入りから削除しました"
   },
   "editor": {
     "titlePlaceholder": "タイトルを入力...",
@@ -297,7 +302,11 @@
     "contentPlaceholder": "ここにPromptを書く...",
     "charCount": "文字",
     "lastUpdated": "最終更新:",
-    "emptyState": "Promptを選択して編集開始"
+    "emptyState": "Promptを選択して編集開始",
+    "saving": "保存中...",
+    "saved": "保存済み ✓",
+    "saveFailed": "保存に失敗",
+    "clickToEdit": "クリックして編集"
   },
   "view": {
     "editor": "エディタ",

@@ -286,7 +286,12 @@
     "createNew": "New",
     "collapseAll": "Collapse All",
     "expandAll": "Expand All",
-    "rename": "Rename"
+    "rename": "Rename",
+    "nodeCreated": "Created successfully",
+    "nodeDeleted": "Deleted successfully",
+    "nodeMoved": "Moved successfully",
+    "favoriteAdded": "Added to favorites",
+    "favoriteRemoved": "Removed from favorites"
   },
   "editor": {
     "titlePlaceholder": "Enter title...",
@@ -297,7 +302,11 @@
     "contentPlaceholder": "Write your prompt here...",
     "charCount": "chars",
     "lastUpdated": "Last updated:",
-    "emptyState": "Select a prompt to start editing"
+    "emptyState": "Select a prompt to start editing",
+    "saving": "Saving...",
+    "saved": "Saved ✓",
+    "saveFailed": "Save failed",
+    "clickToEdit": "Click to edit"
   },
   "view": {
     "editor": "Editor",

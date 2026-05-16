@@ -286,7 +286,12 @@
     "createNew": "새로 만들기",
     "collapseAll": "모두 접기",
     "expandAll": "모두 펼치기",
-    "rename": "이름 바꾸기"
+    "rename": "이름 바꾸기",
+    "nodeCreated": "생성 완료",
+    "nodeDeleted": "삭제 완료",
+    "nodeMoved": "이동 완료",
+    "favoriteAdded": "즐겨찾기에 추가됨",
+    "favoriteRemoved": "즐겨찾기에서 제거됨"
   },
   "editor": {
     "titlePlaceholder": "제목 입력...",
@@ -297,7 +302,11 @@
     "contentPlaceholder": "여기에 프롬프트를 작성하세요...",
     "charCount": "글자",
     "lastUpdated": "마지막 업데이트:",
-    "emptyState": "프롬프트를 선택하여 편집 시작"
+    "emptyState": "프롬프트를 선택하여 편집 시작",
+    "saving": "저장 중...",
+    "saved": "저장됨 ✓",
+    "saveFailed": "저장 실패",
+    "clickToEdit": "클릭하여 편집"
   },
   "view": {
     "editor": "편집기",
