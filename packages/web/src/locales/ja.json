@@ -13,7 +13,10 @@
     "save": "保存",
     "confirm": "OK",
     "loading": "読み込み中...",
-    "skipToContent": "メインコンテンツへスキップ"
+    "skipToContent": "メインコンテンツへスキップ",
+    "undo": "元に戻す",
+    "undoSuccess": "元に戻しました",
+    "redo": "やり直す"
   },
   "theme": {
     "label": "テーマ切替",
@@ -310,7 +313,18 @@
     "nodeCopied": "クリップボードにコピーしました",
     "nodePasted": "貼り付けました",
     "nodeCut": "クリップボードに切り取りました",
-    "duplicate": "複製"
+    "duplicate": "複製",
+    "sortDefault": "デフォルト",
+    "sortNameAsc": "名前 A-Z",
+    "sortNameDesc": "名前 Z-A",
+    "sortNewest": "新しい順",
+    "sortOldest": "古い順",
+    "sortBy": "並び替え",
+    "multiSelect": "複数選択",
+    "exitMultiSelect": "複数選択を終了",
+    "deleteSelected": "選択を削除",
+    "moveSelected": "選択を移動",
+    "selectedCount": "{count} 件選択中"
   },
   "editor": {
     "titlePlaceholder": "タイトルを入力...",
@@ -326,7 +340,14 @@
     "saved": "保存済み ✓",
     "saveFailed": "保存に失敗",
     "clickToEdit": "クリックして編集",
-    "fillAllVariables": "すべての変数を入力してください"
+    "fillAllVariables": "すべての変数を入力してください",
+    "findReplace": "検索と置換",
+    "find": "検索",
+    "replace": "置換",
+    "replaceOne": "置換",
+    "replaceAll": "すべて置換",
+    "matchCount": "{count} 件一致",
+    "noMatches": "一致なし"
   },
   "view": {
     "editor": "エディタ",
@@ -358,7 +379,8 @@
     "hoursAgo": "{n} 時間前",
     "syncingTitle": "同期中...",
     "clickToSync": "クリックして同期",
-    "label": "同期状態"
+    "label": "同期状態",
+    "conflictsResolved": "{count} 件がサーバーから更新されました"
   },
   "confirm": {
     "defaultTitle": "確認",
@@ -400,7 +422,9 @@
     "resetView": "ビューをリセット",
     "variables": "変数:",
     "clickToDrill": "クリックしてドリルダウン",
-    "clickToEdit": "クリックして編集"
+    "clickToEdit": "クリックして編集",
+    "collapse": "折りたたむ",
+    "expand": "展開"
   },
   "variableModal": {
     "fillTitle": "変数を入力",
@@ -466,5 +490,31 @@
     "home": "ホーム",
     "blog": "ブログ",
     "docs": "ドキュメント"
+  },
+  "shortcuts": {
+    "panelTitle": "キーボードショートカット",
+    "navigation": "ナビゲーション",
+    "editing": "編集",
+    "treeOps": "ツリー操作",
+    "navUp": "前のノードを選択",
+    "navDown": "次のノードを選択",
+    "navLeft": "フォルダを折りたたむ / 親へ移動",
+    "navRight": "フォルダを展開 / 最初の子",
+    "navEnter": "ノードを開く",
+    "editRename": "名前変更",
+    "editCopy": "ノードをコピー",
+    "editCut": "ノードを切り取り",
+    "editPaste": "ノードを貼り付け",
+    "editUndo": "元に戻す",
+    "treeNew": "新規プロンプト",
+    "treeNewFolder": "新規フォルダ",
+    "treeDelete": "ノードを削除",
+    "treeSearch": "検索",
+    "treeSync": "同期",
+    "treeCopyVar": "変数付きコピー",
+    "treeOutline": "アウトライン切替",
+    "treeMindmap": "マインドマップ切替",
+    "treeFindReplace": "検索と置換",
+    "treeShortcuts": "ショートカット表示"
   }
 }

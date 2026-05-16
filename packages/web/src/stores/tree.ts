@@ -72,6 +72,14 @@ export const useTreeStore = defineStore('tree', () => {
     return nodes.value.filter((n: LocalNode) => n.isFavorite && n.deletedAt === null)
   })
 
+  /** 最近编辑/访问的节点（按 updatedAt 降序，最多 10 个，排除已删除） */
+  const recentNodes = computed(() => {
+    return nodes.value
+      .filter((n: LocalNode) => n.deletedAt === null)
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .slice(0, 10)
+  })
+
   // ===================
   // Actions
   // ===================
@@ -391,6 +399,7 @@ export const useTreeStore = defineStore('tree', () => {
     rootNodes,
     selectedNode,
     favoriteNodes,
+    recentNodes,
     // Actions
     loadFromDB,
     getNode,

@@ -13,7 +13,10 @@
     "save": "儲存",
     "confirm": "確定",
     "loading": "載入中...",
-    "skipToContent": "跳至主內容"
+    "skipToContent": "跳至主內容",
+    "undo": "復原",
+    "undoSuccess": "復原成功",
+    "redo": "重做"
   },
   "theme": {
     "label": "切換主題",
@@ -310,7 +313,18 @@
     "nodeCopied": "已複製到剪貼簿",
     "nodePasted": "貼上成功",
     "nodeCut": "已剪下到剪貼簿",
-    "duplicate": "複製副本"
+    "duplicate": "複製副本",
+    "sortDefault": "預設排序",
+    "sortNameAsc": "名稱 A-Z",
+    "sortNameDesc": "名稱 Z-A",
+    "sortNewest": "最新優先",
+    "sortOldest": "最舊優先",
+    "sortBy": "排序方式",
+    "multiSelect": "多選",
+    "exitMultiSelect": "退出多選",
+    "deleteSelected": "刪除選取",
+    "moveSelected": "移動選取",
+    "selectedCount": "已選 {count} 項"
   },
   "editor": {
     "titlePlaceholder": "輸入標題...",
@@ -326,7 +340,14 @@
     "saved": "已儲存 ✓",
     "saveFailed": "儲存失敗",
     "clickToEdit": "點擊編輯",
-    "fillAllVariables": "請先填寫所有變數"
+    "fillAllVariables": "請先填寫所有變數",
+    "findReplace": "尋找與取代",
+    "find": "尋找",
+    "replace": "取代",
+    "replaceOne": "取代",
+    "replaceAll": "全部取代",
+    "matchCount": "{count} 個符合",
+    "noMatches": "無符合"
   },
   "view": {
     "editor": "編輯器",
@@ -358,7 +379,8 @@
     "hoursAgo": "{n} 小時前",
     "syncingTitle": "正在同步...",
     "clickToSync": "點擊同步",
-    "label": "同步狀態"
+    "label": "同步狀態",
+    "conflictsResolved": "{count} 項已從伺服器更新"
   },
   "confirm": {
     "defaultTitle": "確認",
@@ -400,7 +422,9 @@
     "resetView": "重置檢視",
     "variables": "變數:",
     "clickToDrill": "點擊下探查看",
-    "clickToEdit": "點擊開啟編輯"
+    "clickToEdit": "點擊開啟編輯",
+    "collapse": "摺疊",
+    "expand": "展開"
   },
   "variableModal": {
     "fillTitle": "填充變數",
@@ -466,5 +490,31 @@
     "home": "首頁",
     "blog": "部落格",
     "docs": "文件"
+  },
+  "shortcuts": {
+    "panelTitle": "鍵盤快捷鍵",
+    "navigation": "導覽",
+    "editing": "編輯",
+    "treeOps": "樹操作",
+    "navUp": "選擇上一個節點",
+    "navDown": "選擇下一個節點",
+    "navLeft": "摺疊資料夾 / 跳至父級",
+    "navRight": "展開資料夾 / 第一個子節點",
+    "navEnter": "開啟節點",
+    "editRename": "重新命名",
+    "editCopy": "複製節點",
+    "editCut": "剪下節點",
+    "editPaste": "貼上節點",
+    "editUndo": "復原",
+    "treeNew": "新建 Prompt",
+    "treeNewFolder": "新建資料夾",
+    "treeDelete": "刪除節點",
+    "treeSearch": "搜尋",
+    "treeSync": "同步",
+    "treeCopyVar": "複製並填充變數",
+    "treeOutline": "切換大綱檢視",
+    "treeMindmap": "切換心智圖",
+    "treeFindReplace": "尋找與取代",
+    "treeShortcuts": "顯示快捷鍵"
   }
 }

@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { extractVariables } from '@prompttree/shared'
 import { useTreeStore } from '@/stores/tree'
-import { useSync, useKeyboard, useHead, useToast } from '@/composables'
+import { useSync, useKeyboard, useHead, useToast, useUndoRedo } from '@/composables'
 import { Folder, List, Network, FileText } from 'lucide-vue-next'
 import MainLayout from '@/components/layout/MainLayout.vue'
 import TreeView from '@/components/tree/TreeView.vue'
@@ -15,6 +15,7 @@ import ViewSwitcher from '@/components/overview/ViewSwitcher.vue'
 import OutlineView from '@/components/overview/OutlineView.vue'
 import MindMapView from '@/components/overview/MindMapView.vue'
 import ShareModal from '@/components/common/ShareModal.vue'
+import ShortcutsPanel from '@/components/common/ShortcutsPanel.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -24,6 +25,15 @@ const treeStore = useTreeStore()
 
 // 启用同步
 useSync()
+
+// Undo/Redo
+const { undo } = useUndoRedo()
+
+// Shortcuts panel ref
+const shortcutsPanelRef = ref<InstanceType<typeof ShortcutsPanel> | null>(null)
+
+// Find/Replace event forwarding
+const promptEditorRef = ref<InstanceType<typeof PromptEditor> | null>(null)
 
 // 处理邮箱验证成功的提示
 const errorMessages: Record<string, string> = {
@@ -137,6 +147,9 @@ useKeyboard({
   onCreatePrompt: () => handleToolbarCreate('prompt'),
   onCreateFolder: () => handleToolbarCreate('folder'),
   onSearch: () => treeToolbarRef.value?.focusSearch(),
+  onUndo: () => undo(),
+  onShowShortcuts: () => shortcutsPanelRef.value?.open(),
+  onFindReplace: () => promptEditorRef.value?.toggleFindReplace?.(),
   onCopyWithVariables: () => {
     if (selectedNode.value?.type === 'prompt' && currentVariables.value.length > 0) {
       showVariableModal.value = true
@@ -183,6 +196,7 @@ useKeyboard({
         <!-- 编辑器视图 -->
         <PromptEditor
           v-if="showEditor && treeStore.selectedNodeId"
+          ref="promptEditorRef"
           :key="'editor-' + treeStore.selectedNodeId"
           :node-id="treeStore.selectedNodeId"
           @show-variables="handleShowVariables"
@@ -268,6 +282,8 @@ useKeyboard({
     :node-id="shareTargetNodeId"
     @close="closeShareModal"
   />
+
+  <ShortcutsPanel ref="shortcutsPanelRef" />
 </template>
 
 <style scoped>

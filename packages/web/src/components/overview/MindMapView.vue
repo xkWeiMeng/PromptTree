@@ -22,6 +22,9 @@ const tooltip = ref<{ visible: boolean; x: number; y: number; node: TreeNodeWith
   visible: false, x: 0, y: 0, node: null
 })
 
+// Collapsed folders in mindmap
+const collapsedFolders = ref<Set<string>>(new Set())
+
 // 布局后的节点与连线
 const layoutNodes = ref<HierarchyPointNode<TreeNodeWithChildren>[]>([])
 const layoutLinks = ref<{ source: HierarchyPointNode<TreeNodeWithChildren>; target: HierarchyPointNode<TreeNodeWithChildren> }[]>([])
@@ -44,12 +47,18 @@ const folderOptions = computed(() => {
     .map(n => ({ id: n.id, title: n.title || t('common.untitledFolder') }))
 })
 
-/** 根据 mindmapRootId 获取树形数据 */
+/** 根据 mindmapRootId 获取树形数据（过滤折叠节点） */
 const rootData = computed<TreeNodeWithChildren>(() => {
   const rootId = treeStore.mindmapRootId
 
+  function filterCollapsed(nodes: TreeNodeWithChildren[]): TreeNodeWithChildren[] {
+    return nodes.map(n => ({
+      ...n,
+      children: collapsedFolders.value.has(n.id) ? [] : filterCollapsed(n.children)
+    }))
+  }
+
   if (!rootId) {
-    // 全局：创建虚拟根节点
     return {
       id: '__root__',
       parentId: null,
@@ -63,7 +72,7 @@ const rootData = computed<TreeNodeWithChildren>(() => {
       updatedAt: 0,
       deletedAt: null,
       version: 0,
-      children: treeStore.rootNodes
+      children: filterCollapsed(treeStore.rootNodes)
     }
   }
 
@@ -78,7 +87,12 @@ const rootData = computed<TreeNodeWithChildren>(() => {
   }
 
   const found = findNode(treeStore.rootNodes, rootId)
-  if (found) return found
+  if (found) {
+    return {
+      ...found,
+      children: collapsedFolders.value.has(found.id) ? [] : filterCollapsed(found.children)
+    }
+  }
 
   return {
     id: '__root__',
@@ -189,6 +203,24 @@ function handleNodeClick(node: HierarchyPointNode<TreeNodeWithChildren>) {
     // 文件夹：下钻
     treeStore.setMindmapRoot(node.data.id)
   }
+}
+
+function handleNodeDblClick(node: HierarchyPointNode<TreeNodeWithChildren>) {
+  if (node.data.id === '__root__') return
+  if (node.data.type !== 'folder') return
+
+  // Toggle collapse
+  if (collapsedFolders.value.has(node.data.id)) {
+    collapsedFolders.value.delete(node.data.id)
+  } else {
+    collapsedFolders.value.add(node.data.id)
+  }
+  // Trigger reactivity
+  collapsedFolders.value = new Set(collapsedFolders.value)
+}
+
+function isCollapsed(nodeId: string): boolean {
+  return collapsedFolders.value.has(nodeId)
 }
 
 function handleNodeHover(event: MouseEvent, node: HierarchyPointNode<TreeNodeWithChildren>) {
@@ -364,6 +396,7 @@ function truncateTitle(title: string, max = 16): string {
           role="button"
           :aria-label="node.data.title || t('common.untitled')"
           @click.stop="handleNodeClick(node)"
+          @dblclick.stop="handleNodeDblClick(node)"
           @keydown.enter="handleNodeClick(node)"
           @mouseenter="(e: MouseEvent) => handleNodeHover(e, node)"
           @mouseleave="handleNodeLeave"
@@ -419,6 +452,19 @@ function truncateTitle(title: string, max = 16): string {
             :y="-NODE_HEIGHT / 2 + 14"
             font-size="12"
           >⭐</text>
+
+          <!-- Collapse/Expand indicator for folders -->
+          <text
+            v-if="node.data.type === 'folder' && node.data.id !== '__root__'"
+            :x="NODE_WIDTH / 2 - 6"
+            :y="NODE_HEIGHT / 2 - 6"
+            font-size="14"
+            font-weight="bold"
+            fill="rgba(255,255,255,0.8)"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            class="collapse-indicator"
+          >{{ isCollapsed(node.data.id) ? '+' : '−' }}</text>
         </g>
       </g>
     </svg>
@@ -560,6 +606,11 @@ function truncateTitle(title: string, max = 16): string {
 
 .mindmap-node.node-root {
   cursor: default;
+}
+
+.collapse-indicator {
+  cursor: pointer;
+  pointer-events: all;
 }
 
 /* ===================

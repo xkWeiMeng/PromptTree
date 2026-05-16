@@ -6,7 +6,8 @@ import { useTreeStore } from '@/stores/tree'
 import { useConfirm } from '@/composables/useConfirm'
 import TreeNode from './TreeNode.vue'
 import {
-  FolderPlus, FilePlus, Star, StarOff, Trash2, FolderOpen, Pencil, Share2, Copy
+  FolderPlus, FilePlus, Star, StarOff, Trash2, FolderOpen, Pencil, Share2, Copy,
+  CheckSquare, X
 } from 'lucide-vue-next'
 
 const { t } = useI18n()
@@ -21,6 +22,56 @@ const { confirm } = useConfirm()
 
 // 根节点列表
 const rootNodes = computed(() => treeStore.rootNodes)
+
+// ===================
+// Multi-select
+// ===================
+const multiSelectMode = ref(false)
+const selectedIds = ref<Set<string>>(new Set())
+
+function toggleMultiSelect() {
+  multiSelectMode.value = !multiSelectMode.value
+  if (!multiSelectMode.value) {
+    selectedIds.value.clear()
+  }
+}
+
+function toggleNodeSelection(nodeId: string) {
+  if (selectedIds.value.has(nodeId)) {
+    selectedIds.value.delete(nodeId)
+  } else {
+    selectedIds.value.add(nodeId)
+  }
+  // Trigger reactivity
+  selectedIds.value = new Set(selectedIds.value)
+}
+
+async function deleteSelected() {
+  if (selectedIds.value.size === 0) return
+  const count = selectedIds.value.size
+  const confirmed = await confirm({
+    title: t('tree.deleteConfirmTitle'),
+    message: t('tree.deleteSelected') + ` (${count})`,
+    type: 'danger',
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel')
+  })
+  if (confirmed) {
+    for (const id of selectedIds.value) {
+      await treeStore.deleteNode(id)
+    }
+    selectedIds.value.clear()
+  }
+}
+
+async function moveSelected() {
+  if (selectedIds.value.size === 0) return
+  // Move all selected to root
+  for (const id of selectedIds.value) {
+    await treeStore.moveNode(id, null, 0)
+  }
+  selectedIds.value.clear()
+}
 
 // 右键菜单状态
 const contextMenu = ref<{
@@ -186,6 +237,15 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
 
 <template>
   <div class="tree-view" @click="hideContextMenu" @contextmenu="handleEmptyContextMenu">
+    <!-- Multi-select toggle -->
+    <div v-if="multiSelectMode" class="multi-select-bar">
+      <span class="multi-select-count">{{ t('tree.selectedCount', { count: selectedIds.size }) }}</span>
+      <button class="multi-select-exit" @click="toggleMultiSelect">
+        <X :size="14" />
+        {{ t('tree.exitMultiSelect') }}
+      </button>
+    </div>
+
     <!-- 空状态 -->
     <div v-if="rootNodes.length === 0" class="empty-state">
       <FolderOpen :size="48" class="empty-icon" />
@@ -210,7 +270,10 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
         :key="node.id"
         :node="node"
         :level="0"
+        :multi-select-mode="multiSelectMode"
+        :selected-ids="selectedIds"
         @contextmenu="showContextMenu"
+        @toggle-select="toggleNodeSelection"
       />
     </div>
     
@@ -265,6 +328,10 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
               <Copy :size="15" />
               <span>{{ t('tree.duplicate') }}</span>
             </button>
+            <button type="button" class="menu-item" role="menuitem" @click="toggleMultiSelect">
+              <CheckSquare :size="15" />
+              <span>{{ t('tree.multiSelect') }}</span>
+            </button>
             <div class="menu-divider"></div>
             <button type="button" class="menu-item danger" role="menuitem" @click="handleDelete">
               <Trash2 :size="15" />
@@ -285,6 +352,20 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
         </div>
       </Transition>
     </Teleport>
+
+    <!-- Floating action bar for multi-select -->
+    <Transition name="menu">
+      <div v-if="multiSelectMode && selectedIds.size > 0" class="floating-actions">
+        <button class="floating-btn danger" @click="deleteSelected">
+          <Trash2 :size="14" />
+          {{ t('tree.deleteSelected') }}
+        </button>
+        <button class="floating-btn" @click="moveSelected">
+          <FolderOpen :size="14" />
+          {{ t('tree.moveSelected') }}
+        </button>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -420,5 +501,83 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
   height: 0.5px;
   background-color: var(--border-secondary);
   margin: var(--space-1) var(--space-2);
+}
+
+/* ===================
+   Multi-select
+   =================== */
+.multi-select-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2);
+  background: var(--accent-bg-subtle);
+  border-radius: var(--radius-sm);
+  margin: var(--space-1);
+  font-size: var(--font-size-xs);
+}
+
+.multi-select-count {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.multi-select-exit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--space-1);
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-xs);
+}
+
+.multi-select-exit:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.floating-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--bg-elevated);
+  border-top: 0.5px solid var(--border-secondary);
+  box-shadow: var(--shadow-md);
+  justify-content: center;
+}
+
+.floating-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+  font-family: inherit;
+}
+
+.floating-btn:hover {
+  background: var(--bg-hover);
+}
+
+.floating-btn.danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.floating-btn.danger:hover {
+  background: var(--color-danger);
+  color: white;
 }
 </style>

@@ -10,10 +10,13 @@ const { t } = useI18n()
 const props = defineProps<{
   node: TreeNodeWithChildren
   level: number
+  multiSelectMode?: boolean
+  selectedIds?: Set<string>
 }>()
 
 const emit = defineEmits<{
   (e: 'contextmenu', event: MouseEvent, node: TreeNodeWithChildren): void
+  (e: 'toggleSelect', nodeId: string): void
 }>()
 
 const treeStore = useTreeStore()
@@ -21,6 +24,7 @@ const treeStore = useTreeStore()
 // 计算属性
 const isExpanded = computed(() => treeStore.expandedIds.has(props.node.id))
 const isSelected = computed(() => treeStore.selectedNodeId === props.node.id)
+const isMultiSelected = computed(() => props.selectedIds?.has(props.node.id) ?? false)
 const hasChildren = computed(() => props.node.children && props.node.children.length > 0)
 const isFolder = computed(() => props.node.type === 'folder')
 const isEditing = computed(() => treeStore.editingNodeId === props.node.id)
@@ -73,6 +77,10 @@ const indent = computed(() => `${props.level * 16}px`)
 
 // 点击处理
 function handleClick() {
+  if (props.multiSelectMode) {
+    emit('toggleSelect', props.node.id)
+    return
+  }
   treeStore.selectNode(props.node.id)
 }
 
@@ -176,6 +184,7 @@ function handleDrop(e: DragEvent) {
       class="tree-node"
       :class="{
         selected: isSelected,
+        'multi-selected': isMultiSelected,
         folder: isFolder,
         'tree-node--drop-target': dropPosition === 'inside',
         'tree-node--drop-above': dropPosition === 'above',
@@ -196,6 +205,15 @@ function handleDrop(e: DragEvent) {
       @dragleave="handleDragLeave"
       @drop="handleDrop"
     >
+      <!-- 多选复选框 -->
+      <input
+        v-if="multiSelectMode"
+        type="checkbox"
+        class="multi-checkbox"
+        :checked="isMultiSelected"
+        @click.stop="emit('toggleSelect', node.id)"
+      />
+
       <!-- 展开/折叠箭头 -->
       <span
         class="toggle"
@@ -249,7 +267,10 @@ function handleDrop(e: DragEvent) {
         :key="child.id"
         :node="child"
         :level="level + 1"
+        :multi-select-mode="multiSelectMode"
+        :selected-ids="selectedIds"
         @contextmenu="(e, n) => emit('contextmenu', e, n)"
+        @toggle-select="(id) => emit('toggleSelect', id)"
       />
     </div>
   </div>
@@ -351,6 +372,20 @@ function handleDrop(e: DragEvent) {
 
 .children {
   /* 子节点容器 */
+}
+
+.tree-node.multi-selected {
+  background-color: var(--accent-bg-subtle);
+  outline: 1px solid var(--color-accent);
+  outline-offset: -1px;
+}
+
+.multi-checkbox {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
 }
 
 /* Drop zone indicators */

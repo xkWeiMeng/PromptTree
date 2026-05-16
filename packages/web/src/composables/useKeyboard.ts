@@ -81,6 +81,9 @@ export function useKeyboard(options?: {
   onDelete?: () => void
   onSearch?: () => void
   onCopyWithVariables?: () => void
+  onUndo?: () => void
+  onShowShortcuts?: () => void
+  onFindReplace?: () => void
 }) {
   const treeStore = useTreeStore()
   const syncStore = useSyncStore()
@@ -146,6 +149,31 @@ export function useKeyboard(options?: {
       ctrl: true,
       description: 'Force Sync',
       action: async () => { await syncStore.sync() }
+    },
+    {
+      key: 'z',
+      ctrl: true,
+      description: 'Undo',
+      action: () => {
+        if (isEditing()) return
+        options?.onUndo?.()
+      }
+    },
+    {
+      key: '/',
+      ctrl: true,
+      description: 'Show keyboard shortcuts',
+      action: () => {
+        options?.onShowShortcuts?.()
+      }
+    },
+    {
+      key: 'h',
+      ctrl: true,
+      description: 'Find and Replace',
+      action: () => {
+        options?.onFindReplace?.()
+      }
     },
     {
       key: 'c',

@@ -13,7 +13,10 @@
     "save": "Save",
     "confirm": "OK",
     "loading": "Loading...",
-    "skipToContent": "Skip to main content"
+    "skipToContent": "Skip to main content",
+    "undo": "Undo",
+    "undoSuccess": "Undo successful",
+    "redo": "Redo"
   },
   "theme": {
     "label": "Toggle theme",
@@ -310,7 +313,18 @@
     "nodeCopied": "Copied to clipboard",
     "nodePasted": "Pasted successfully",
     "nodeCut": "Cut to clipboard",
-    "duplicate": "Duplicate"
+    "duplicate": "Duplicate",
+    "sortDefault": "Default",
+    "sortNameAsc": "Name A-Z",
+    "sortNameDesc": "Name Z-A",
+    "sortNewest": "Newest first",
+    "sortOldest": "Oldest first",
+    "sortBy": "Sort by",
+    "multiSelect": "Multi-select",
+    "exitMultiSelect": "Exit multi-select",
+    "deleteSelected": "Delete selected",
+    "moveSelected": "Move selected",
+    "selectedCount": "{count} selected"
   },
   "editor": {
     "titlePlaceholder": "Enter title...",
@@ -326,7 +340,14 @@
     "saved": "Saved ✓",
     "saveFailed": "Save failed",
     "clickToEdit": "Click to edit",
-    "fillAllVariables": "Please fill in all variables first"
+    "fillAllVariables": "Please fill in all variables first",
+    "findReplace": "Find & Replace",
+    "find": "Find",
+    "replace": "Replace",
+    "replaceOne": "Replace",
+    "replaceAll": "Replace All",
+    "matchCount": "{count} matches",
+    "noMatches": "No matches"
   },
   "view": {
     "editor": "Editor",
@@ -358,7 +379,8 @@
     "hoursAgo": "{n} hr ago",
     "syncingTitle": "Syncing...",
     "clickToSync": "Click to sync",
-    "label": "Sync status"
+    "label": "Sync status",
+    "conflictsResolved": "{count} item(s) updated from server"
   },
   "confirm": {
     "defaultTitle": "Confirm",
@@ -400,7 +422,9 @@
     "resetView": "Reset view",
     "variables": "Variables:",
     "clickToDrill": "Click to drill down",
-    "clickToEdit": "Click to edit"
+    "clickToEdit": "Click to edit",
+    "collapse": "Collapse",
+    "expand": "Expand"
   },
   "variableModal": {
     "fillTitle": "Fill Variables",
@@ -466,5 +490,31 @@
     "home": "Home",
     "blog": "Blog",
     "docs": "Docs"
+  },
+  "shortcuts": {
+    "panelTitle": "Keyboard Shortcuts",
+    "navigation": "Navigation",
+    "editing": "Editing",
+    "treeOps": "Tree Operations",
+    "navUp": "Select previous node",
+    "navDown": "Select next node",
+    "navLeft": "Collapse folder / Go to parent",
+    "navRight": "Expand folder / First child",
+    "navEnter": "Open node",
+    "editRename": "Rename",
+    "editCopy": "Copy node",
+    "editCut": "Cut node",
+    "editPaste": "Paste node",
+    "editUndo": "Undo",
+    "treeNew": "New prompt",
+    "treeNewFolder": "New folder",
+    "treeDelete": "Delete node",
+    "treeSearch": "Search",
+    "treeSync": "Sync",
+    "treeCopyVar": "Copy with variables",
+    "treeOutline": "Toggle outline",
+    "treeMindmap": "Toggle mind map",
+    "treeFindReplace": "Find & Replace",
+    "treeShortcuts": "Show shortcuts"
   }
 }

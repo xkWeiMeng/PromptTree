@@ -5,7 +5,7 @@ import { useTreeStore } from '@/stores/tree'
 import { useSearch } from '@/composables/useSearch'
 import {
   Search, X, Folder, FileText, Plus,
-  ChevronsDownUp, ChevronsUpDown
+  ChevronsDownUp, ChevronsUpDown, ArrowUpDown
 } from 'lucide-vue-next'
 
 const { t } = useI18n()
@@ -19,6 +19,24 @@ const { query, results, hasQuery, selectResult, clear } = useSearch()
 
 // 新建菜单状态
 const showCreateMenu = ref(false)
+
+// 排序状态
+export type SortOption = 'default' | 'name-asc' | 'name-desc' | 'newest' | 'oldest'
+const sortOption = ref<SortOption>('default')
+const showSortMenu = ref(false)
+
+const sortOptions: { value: SortOption; labelKey: string }[] = [
+  { value: 'default', labelKey: 'tree.sortDefault' },
+  { value: 'name-asc', labelKey: 'tree.sortNameAsc' },
+  { value: 'name-desc', labelKey: 'tree.sortNameDesc' },
+  { value: 'newest', labelKey: 'tree.sortNewest' },
+  { value: 'oldest', labelKey: 'tree.sortOldest' }
+]
+
+function selectSort(option: SortOption) {
+  sortOption.value = option
+  showSortMenu.value = false
+}
 
 // 是否全部展开
 const isAllExpanded = computed(() => {
@@ -74,7 +92,7 @@ function focusSearch() {
   searchInputRef.value?.focus()
 }
 
-defineExpose({ focusSearch })
+defineExpose({ focusSearch, sortOption })
 </script>
 
 <template>
@@ -138,6 +156,36 @@ defineExpose({ focusSearch })
     
     <!-- 操作按钮 -->
     <div class="toolbar-actions">
+      <!-- 排序按钮 -->
+      <div class="sort-dropdown" @click.stop>
+        <button
+          class="toolbar-btn"
+          :class="{ active: sortOption !== 'default' }"
+          @click="showSortMenu = !showSortMenu"
+          :title="t('tree.sortBy')"
+          :aria-label="t('tree.sortBy')"
+          aria-haspopup="true"
+          :aria-expanded="showSortMenu"
+        >
+          <ArrowUpDown :size="16" />
+        </button>
+        <Transition name="popover">
+          <div v-if="showSortMenu" class="sort-menu" role="menu" @click.stop>
+            <button
+              v-for="opt in sortOptions"
+              :key="opt.value"
+              type="button"
+              class="menu-item"
+              :class="{ 'menu-item--active': sortOption === opt.value }"
+              role="menuitem"
+              @click="selectSort(opt.value)"
+            >
+              <span>{{ t(opt.labelKey) }}</span>
+            </button>
+          </div>
+        </Transition>
+      </div>
+
       <!-- 新建按钮 -->
       <div class="create-dropdown" @click.stop>
         <button 
@@ -367,6 +415,39 @@ defineExpose({ focusSearch })
 
 .toolbar-btn.primary:hover {
   background: var(--color-accent-hover);
+}
+
+.toolbar-btn.active {
+  color: var(--color-accent);
+}
+
+/* ===================
+   Sort Menu
+   =================== */
+.sort-dropdown {
+  position: relative;
+}
+
+.sort-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: var(--space-1);
+  background: var(--bg-popover);
+  -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
+  backdrop-filter: blur(var(--glass-blur-heavy));
+  border: 0.5px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-popover);
+  min-width: 140px;
+  z-index: var(--z-dropdown);
+  padding: var(--space-1);
+}
+
+.menu-item--active {
+  background: var(--accent-bg-subtle);
+  color: var(--color-accent) !important;
+  font-weight: var(--font-weight-medium);
 }
 
 /* ===================

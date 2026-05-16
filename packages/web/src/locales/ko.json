@@ -13,7 +13,10 @@
     "save": "저장",
     "confirm": "확인",
     "loading": "로딩 중...",
-    "skipToContent": "메인 콘텐츠로 건너뛰기"
+    "skipToContent": "메인 콘텐츠로 건너뛰기",
+    "undo": "실행 취소",
+    "undoSuccess": "실행 취소 완료",
+    "redo": "다시 실행"
   },
   "theme": {
     "label": "테마 전환",
@@ -310,7 +313,18 @@
     "nodeCopied": "클립보드에 복사됨",
     "nodePasted": "붙여넣기 완료",
     "nodeCut": "클립보드에 잘라내기",
-    "duplicate": "복제"
+    "duplicate": "복제",
+    "sortDefault": "기본 정렬",
+    "sortNameAsc": "이름 A-Z",
+    "sortNameDesc": "이름 Z-A",
+    "sortNewest": "최신 순",
+    "sortOldest": "오래된 순",
+    "sortBy": "정렬",
+    "multiSelect": "다중 선택",
+    "exitMultiSelect": "다중 선택 종료",
+    "deleteSelected": "선택 삭제",
+    "moveSelected": "선택 이동",
+    "selectedCount": "{count}개 선택됨"
   },
   "editor": {
     "titlePlaceholder": "제목 입력...",
@@ -326,7 +340,14 @@
     "saved": "저장됨 ✓",
     "saveFailed": "저장 실패",
     "clickToEdit": "클릭하여 편집",
-    "fillAllVariables": "모든 변수를 먼저 입력해 주세요"
+    "fillAllVariables": "모든 변수를 먼저 입력해 주세요",
+    "findReplace": "찾기 및 바꾸기",
+    "find": "찾기",
+    "replace": "바꾸기",
+    "replaceOne": "바꾸기",
+    "replaceAll": "모두 바꾸기",
+    "matchCount": "{count}개 일치",
+    "noMatches": "일치 항목 없음"
   },
   "view": {
     "editor": "편집기",
@@ -358,7 +379,8 @@
     "hoursAgo": "{n}시간 전",
     "syncingTitle": "동기화 중...",
     "clickToSync": "클릭하여 동기화",
-    "label": "동기화 상태"
+    "label": "동기화 상태",
+    "conflictsResolved": "{count}개 항목이 서버에서 업데이트됨"
   },
   "confirm": {
     "defaultTitle": "확인",
@@ -400,7 +422,9 @@
     "resetView": "뷰 초기화",
     "variables": "변수:",
     "clickToDrill": "클릭하여 드릴다운",
-    "clickToEdit": "클릭하여 편집"
+    "clickToEdit": "클릭하여 편집",
+    "collapse": "접기",
+    "expand": "펼치기"
   },
   "variableModal": {
     "fillTitle": "변수 채우기",
@@ -466,5 +490,31 @@
     "home": "홈",
     "blog": "블로그",
     "docs": "문서"
+  },
+  "shortcuts": {
+    "panelTitle": "키보드 단축키",
+    "navigation": "탐색",
+    "editing": "편집",
+    "treeOps": "트리 작업",
+    "navUp": "이전 노드 선택",
+    "navDown": "다음 노드 선택",
+    "navLeft": "폴더 접기 / 상위로 이동",
+    "navRight": "폴더 펼치기 / 첫 번째 하위",
+    "navEnter": "노드 열기",
+    "editRename": "이름 변경",
+    "editCopy": "노드 복사",
+    "editCut": "노드 잘라내기",
+    "editPaste": "노드 붙여넣기",
+    "editUndo": "실행 취소",
+    "treeNew": "새 프롬프트",
+    "treeNewFolder": "새 폴더",
+    "treeDelete": "노드 삭제",
+    "treeSearch": "검색",
+    "treeSync": "동기화",
+    "treeCopyVar": "변수 포함 복사",
+    "treeOutline": "개요 전환",
+    "treeMindmap": "마인드맵 전환",
+    "treeFindReplace": "찾기 및 바꾸기",
+    "treeShortcuts": "단축키 표시"
   }
 }

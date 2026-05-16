@@ -5,6 +5,8 @@ import * as dbOps from '@/db/operations'
 import { handleUnauthorized } from '@/api/client'
 import { useAuthStore } from './auth'
 import { useTreeStore } from './tree'
+import { useToast } from '@/composables/useToast'
+import { i18n } from '@/i18n'
 
 export type SyncStatus = 'idle' | 'syncing' | 'success' | 'error'
 
@@ -126,6 +128,12 @@ export const useSyncStore = defineStore('sync', () => {
         
         if (serverNodes.length > 0) {
           await treeStore.setNodes(serverNodes)
+          
+          // Show conflict notification
+          const toast = useToast()
+          toast.info(
+            i18n.global.t('sync.conflictsResolved', { count: serverNodes.length })
+          )
         }
       }
       
