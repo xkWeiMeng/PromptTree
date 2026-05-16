@@ -299,6 +299,7 @@ function truncateTitle(title: string, max = 16): string {
             v-if="treeStore.mindmapRootId"
             class="icon-btn"
             :title="t('mindmapView.goUpLevel')"
+            :aria-label="t('mindmapView.goUpLevel')"
             @click="goUpLevel"
           ><ArrowUp :size="14" /></button>
           <select

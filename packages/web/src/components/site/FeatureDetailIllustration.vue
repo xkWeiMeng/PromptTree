@@ -3,7 +3,8 @@ defineProps<{ name: string }>()
 </script>
 
 <template>
-  <svg v-if="name === 'tree'" data-scene="tree" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-if="name === 'tree'" data-scene="tree" class="feature-detail-scene" viewBox="0 0 320 240" role="img" aria-labelledby="fd-illust-tree-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="fd-illust-tree-title">Tree structure management detail</title>
     <defs>
       <linearGradient id="fd-tree-bg" x1="24" y1="18" x2="300" y2="228" gradientUnits="userSpaceOnUse">
         <stop stop-color="#7CCBFF" />
@@ -33,7 +34,8 @@ defineProps<{ name: string }>()
     <rect x="244" y="176" width="36" height="8" rx="4" fill="#007AFF" fill-opacity="0.2" />
   </svg>
 
-  <svg v-else-if="name === 'variable'" data-scene="variable" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'variable'" data-scene="variable" class="feature-detail-scene" viewBox="0 0 320 240" role="img" aria-labelledby="fd-illust-variable-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="fd-illust-variable-title">Variable filling detail</title>
     <defs>
       <linearGradient id="fd-var-bg" x1="16" y1="12" x2="302" y2="230" gradientUnits="userSpaceOnUse">
         <stop stop-color="#E2A8FF" />
@@ -63,7 +65,8 @@ defineProps<{ name: string }>()
     <path d="M202 104L209 110L202 116" stroke="#AF52DE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="scene-slide" />
   </svg>
 
-  <svg v-else-if="name === 'offline'" data-scene="offline" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'offline'" data-scene="offline" class="feature-detail-scene" viewBox="0 0 320 240" role="img" aria-labelledby="fd-illust-offline-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="fd-illust-offline-title">Offline-first detail</title>
     <defs>
       <linearGradient id="fd-off-bg" x1="20" y1="14" x2="300" y2="228" gradientUnits="userSpaceOnUse">
         <stop stop-color="#FFE07A" />
@@ -86,7 +89,8 @@ defineProps<{ name: string }>()
     <text x="136" y="199" fill="#C9342C" font-size="10" font-family="Inter, -apple-system, sans-serif">OFFLINE MODE</text>
   </svg>
 
-  <svg v-else-if="name === 'sync'" data-scene="sync" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'sync'" data-scene="sync" class="feature-detail-scene" viewBox="0 0 320 240" role="img" aria-labelledby="fd-illust-sync-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="fd-illust-sync-title">Multi-device sync detail</title>
     <defs>
       <linearGradient id="fd-sync-bg" x1="16" y1="12" x2="304" y2="232" gradientUnits="userSpaceOnUse">
         <stop stop-color="#9FF3CB" />
@@ -113,7 +117,8 @@ defineProps<{ name: string }>()
     <circle cx="232" cy="179" r="5" fill="#34C759" fill-opacity="0.34" class="scene-pulse scene-delay-2" />
   </svg>
 
-  <svg v-else-if="name === 'extension'" data-scene="extension" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'extension'" data-scene="extension" class="feature-detail-scene" viewBox="0 0 320 240" role="img" aria-labelledby="fd-illust-extension-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="fd-illust-extension-title">Browser extension detail</title>
     <defs>
       <linearGradient id="fd-ext-bg" x1="18" y1="12" x2="302" y2="230" gradientUnits="userSpaceOnUse">
         <stop stop-color="#9EE8FF" />
@@ -143,7 +148,8 @@ defineProps<{ name: string }>()
     <rect x="130" y="170" width="52" height="16" rx="8" fill="#0097E6" fill-opacity="0.2" class="scene-slide" />
   </svg>
 
-  <svg v-else-if="name === 'share'" data-scene="share" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'share'" data-scene="share" class="feature-detail-scene" viewBox="0 0 320 240" role="img" aria-labelledby="fd-illust-share-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="fd-illust-share-title">Sharing feature detail</title>
     <defs>
       <linearGradient id="fd-share-bg" x1="16" y1="10" x2="304" y2="232" gradientUnits="userSpaceOnUse">
         <stop stop-color="#87D5FF" />
@@ -171,7 +177,8 @@ defineProps<{ name: string }>()
     <path d="M230 163l8 8-8 8" stroke="#007AFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
   </svg>
 
-  <svg v-else-if="name === 'api'" data-scene="api" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'api'" data-scene="api" class="feature-detail-scene" viewBox="0 0 320 240" role="img" aria-labelledby="fd-illust-api-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="fd-illust-api-title">API access detail</title>
     <defs>
       <linearGradient id="fd-api-bg" x1="16" y1="14" x2="302" y2="230" gradientUnits="userSpaceOnUse">
         <stop stop-color="#A0F6D1" />
@@ -194,7 +201,8 @@ defineProps<{ name: string }>()
     <rect x="92" y="172" width="2.5" height="12" rx="1.25" fill="#A7F3D0" class="scene-blink" />
   </svg>
 
-  <svg v-else-if="name === 'mindmap'" data-scene="mindmap" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'mindmap'" data-scene="mindmap" class="feature-detail-scene" viewBox="0 0 320 240" role="img" aria-labelledby="fd-illust-mindmap-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="fd-illust-mindmap-title">Mind map view detail</title>
     <defs>
       <linearGradient id="fd-mm-bg" x1="14" y1="10" x2="306" y2="230" gradientUnits="userSpaceOnUse">
         <stop stop-color="#C1B9FF" />
@@ -219,7 +227,8 @@ defineProps<{ name: string }>()
     <circle cx="160" cy="188" r="10" fill="#5856D6" fill-opacity="0.18" class="scene-float scene-delay-2" />
   </svg>
 
-  <svg v-else-if="name === 'outline'" data-scene="outline" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'outline'" data-scene="outline" class="feature-detail-scene" viewBox="0 0 320 240" role="img" aria-labelledby="fd-illust-outline-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="fd-illust-outline-title">Outline view detail</title>
     <defs>
       <linearGradient id="fd-outline-bg" x1="16" y1="14" x2="304" y2="232" gradientUnits="userSpaceOnUse">
         <stop stop-color="#8FD9FF" />
@@ -246,7 +255,8 @@ defineProps<{ name: string }>()
     <rect x="46" y="90" width="228" height="14" rx="7" fill="#4E9BFF" fill-opacity="0.14" class="scene-scan" />
   </svg>
 
-  <svg v-else-if="name === 'dark'" data-scene="dark" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'dark'" data-scene="dark" class="feature-detail-scene" viewBox="0 0 320 240" role="img" aria-labelledby="fd-illust-dark-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="fd-illust-dark-title">Dark mode detail</title>
     <defs>
       <linearGradient id="fd-dark-bg" x1="16" y1="12" x2="304" y2="230" gradientUnits="userSpaceOnUse">
         <stop stop-color="#8A8DFF" />
@@ -269,7 +279,8 @@ defineProps<{ name: string }>()
     <path d="M222 100c0 7-6 13-13 13 5-2 8-7 8-13 0-6-3-11-8-13 7 0 13 6 13 13Z" fill="#E0E7FF" class="scene-pulse" />
   </svg>
 
-  <svg v-else-if="name === 'keyboard'" data-scene="keyboard" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'keyboard'" data-scene="keyboard" class="feature-detail-scene" viewBox="0 0 320 240" role="img" aria-labelledby="fd-illust-keyboard-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="fd-illust-keyboard-title">Keyboard shortcuts detail</title>
     <defs>
       <linearGradient id="fd-key-bg" x1="14" y1="10" x2="304" y2="230" gradientUnits="userSpaceOnUse">
         <stop stop-color="#A9F4D4" />
@@ -299,7 +310,8 @@ defineProps<{ name: string }>()
     <text x="238" y="136" fill="#228A3D" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">K</text>
   </svg>
 
-  <svg v-else data-scene="fallback" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else data-scene="fallback" class="feature-detail-scene" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fd-illust-fallback-title">
+    <title id="fd-illust-fallback-title">Feature illustration</title>
     <rect x="8" y="8" width="304" height="224" rx="26" fill="#8E8E93" />
     <rect x="24" y="24" width="272" height="192" rx="16" fill="#F5F5F7" />
     <circle cx="160" cy="120" r="48" fill="#8E8E93" fill-opacity="0.25" />

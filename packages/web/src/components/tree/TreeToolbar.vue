@@ -90,7 +90,7 @@ defineExpose({ focusSearch })
         aria-label="Search prompts"
       />
       <Search :size="14" class="search-icon" />
-      <button v-if="hasQuery" class="search-clear" @click="clear">
+      <button v-if="hasQuery" class="search-clear" :aria-label="t('tree.clearSearch')" @click="clear">
         <X :size="12" />
       </button>
       
@@ -144,6 +144,9 @@ defineExpose({ focusSearch })
           class="toolbar-btn primary"
           @click="showCreateMenu = !showCreateMenu"
           :title="t('tree.createNew')"
+          :aria-label="t('tree.createNew')"
+          aria-haspopup="true"
+          :aria-expanded="showCreateMenu"
         >
           <Plus :size="16" />
         </button>
@@ -166,6 +169,7 @@ defineExpose({ focusSearch })
         class="toolbar-btn"
         @click="toggleExpandAll"
         :title="isAllExpanded ? t('tree.collapseAll') : t('tree.expandAll')"
+        :aria-label="isAllExpanded ? t('tree.collapseAll') : t('tree.expandAll')"
       >
         <component :is="isAllExpanded ? ChevronsDownUp : ChevronsUpDown" :size="16" />
       </button>
@@ -411,8 +415,8 @@ defineExpose({ focusSearch })
 }
 
 .menu-item:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-accent);
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
 }
 
 .sr-only {

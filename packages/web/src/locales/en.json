@@ -12,7 +12,8 @@
     "copy": "Copy",
     "save": "Save",
     "confirm": "OK",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "skipToContent": "Skip to main content"
   },
   "theme": {
     "label": "Toggle theme",
@@ -296,7 +297,10 @@
     "nodeDeleted": "Deleted successfully",
     "nodeMoved": "Moved successfully",
     "favoriteAdded": "Added to favorites",
-    "favoriteRemoved": "Removed from favorites"
+    "favoriteRemoved": "Removed from favorites",
+    "expandFolder": "Expand folder",
+    "collapseFolder": "Collapse folder",
+    "clearSearch": "Clear search"
   },
   "editor": {
     "titlePlaceholder": "Enter title...",
@@ -324,7 +328,8 @@
     "offlineMode": "Offline Mode",
     "localUser": "Local User",
     "loginToSync": "Log in to Sync",
-    "logout": "Log Out"
+    "logout": "Log Out",
+    "menu": "Menu"
   },
   "sync": {
     "syncing": "Syncing...",
@@ -339,7 +344,8 @@
     "minutesAgo": "{n} min ago",
     "hoursAgo": "{n} hr ago",
     "syncingTitle": "Syncing...",
-    "clickToSync": "Click to sync"
+    "clickToSync": "Click to sync",
+    "label": "Sync status"
   },
   "confirm": {
     "defaultTitle": "Confirm",
@@ -369,7 +375,8 @@
     "emptyHint": "Create folders and Prompts on the left",
     "variableTag": "[var]",
     "varCount": "{count} variables",
-    "items": "{count} items"
+    "items": "{count} items",
+    "clearSearch": "Clear search"
   },
   "mindmapView": {
     "title": "Mind Map",

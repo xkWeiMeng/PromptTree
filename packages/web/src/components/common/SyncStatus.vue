@@ -53,7 +53,7 @@ function handleSync() {
   <button
     class="sync-status"
     :class="status"
-    :aria-label="`${t('sync.label', 'Sync status')}: ${statusText}`"
+    :aria-label="`${t('sync.label')}: ${statusText}`"
     :title="status === 'syncing' ? t('sync.syncingTitle') : t('sync.clickToSync')"
     @click="handleSync"
   >

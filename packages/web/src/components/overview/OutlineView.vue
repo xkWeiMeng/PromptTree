@@ -123,16 +123,17 @@ function collapseAllOutline() {
         <button
           v-if="searchQuery"
           class="clear-btn"
+          :aria-label="t('outline.clearSearch')"
           @click="searchQuery = ''"
         >
           <X :size="12" />
         </button>
       </div>
       <div class="toolbar-actions">
-        <button class="icon-btn" :title="t('tree.expandAll')" @click="expandAllOutline">
+        <button class="icon-btn" :title="t('tree.expandAll')" :aria-label="t('tree.expandAll')" @click="expandAllOutline">
           <ChevronsDownUp :size="14" />
         </button>
-        <button class="icon-btn" :title="t('tree.collapseAll')" @click="collapseAllOutline">
+        <button class="icon-btn" :title="t('tree.collapseAll')" :aria-label="t('tree.collapseAll')" @click="collapseAllOutline">
           <ChevronsUpDown :size="14" />
         </button>
       </div>
@@ -252,8 +253,8 @@ function collapseAllOutline() {
 }
 
 .search-input:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-accent);
-  border-color: var(--color-accent);
+  outline: 2px solid var(--color-accent);
+  outline-offset: -1px;
 }
 
 .search-input::placeholder {

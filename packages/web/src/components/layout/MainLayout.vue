@@ -115,13 +115,13 @@ onUnmounted(() => {
 <template>
   <div class="main-layout" :class="{ resizing: isResizing }">
     <!-- Skip to main content -->
-    <a href="#main-content" class="skip-link">Skip to content</a>
+    <a href="#main-content" class="skip-link">{{ t('common.skipToContent') }}</a>
 
     <!-- Mobile menu button -->
     <button
       v-if="isMobile"
       class="mobile-menu-btn"
-      :aria-label="t('layout.menu', 'Menu')"
+      :aria-label="t('layout.menu')"
       :aria-expanded="isMobileMenuOpen"
       @click="toggleMobileMenu"
     >
@@ -205,7 +205,7 @@ onUnmounted(() => {
           </button>
           <!-- 登录用户：同步 -->
           <template v-else>
-            <button class="icon-btn" :title="t('sync.sync')" @click="handleSync">
+            <button class="icon-btn" :title="t('sync.sync')" :aria-label="t('sync.sync')" @click="handleSync">
               <RefreshCw :size="15" />
             </button>
           </template>

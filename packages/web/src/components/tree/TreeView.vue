@@ -169,7 +169,7 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
     </div>
     
     <!-- 树节点列表 -->
-    <div v-else class="tree-list">
+    <div v-else class="tree-list" role="tree">
       <TreeNode
         v-for="node in rootNodes"
         :key="node.id"
@@ -320,8 +320,8 @@ function handleCreateRoot(type: 'folder' | 'prompt') {
 }
 
 .menu-item:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-accent);
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
 }
 
 .menu-item:hover {

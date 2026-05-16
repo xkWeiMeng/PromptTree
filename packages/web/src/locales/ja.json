@@ -12,7 +12,8 @@
     "copy": "コピー",
     "save": "保存",
     "confirm": "OK",
-    "loading": "読み込み中..."
+    "loading": "読み込み中...",
+    "skipToContent": "メインコンテンツへスキップ"
   },
   "theme": {
     "label": "テーマ切替",
@@ -296,7 +297,10 @@
     "nodeDeleted": "削除しました",
     "nodeMoved": "移動しました",
     "favoriteAdded": "お気に入りに追加しました",
-    "favoriteRemoved": "お気に入りから削除しました"
+    "favoriteRemoved": "お気に入りから削除しました",
+    "expandFolder": "フォルダを展開",
+    "collapseFolder": "フォルダを折りたたむ",
+    "clearSearch": "検索をクリア"
   },
   "editor": {
     "titlePlaceholder": "タイトルを入力...",
@@ -324,7 +328,8 @@
     "offlineMode": "オフラインモード",
     "localUser": "ローカルユーザー",
     "loginToSync": "ログインして同期",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "menu": "メニュー"
   },
   "sync": {
     "syncing": "同期中...",
@@ -339,7 +344,8 @@
     "minutesAgo": "{n} 分前",
     "hoursAgo": "{n} 時間前",
     "syncingTitle": "同期中...",
-    "clickToSync": "クリックして同期"
+    "clickToSync": "クリックして同期",
+    "label": "同期状態"
   },
   "confirm": {
     "defaultTitle": "確認",
@@ -369,7 +375,8 @@
     "emptyHint": "左側でフォルダとプロンプトを作成",
     "variableTag": "[変数]",
     "varCount": "{count} 個の変数",
-    "items": "{count} 項目"
+    "items": "{count} 項目",
+    "clearSearch": "検索をクリア"
   },
   "mindmapView": {
     "title": "マインドマップ",

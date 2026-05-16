@@ -12,7 +12,8 @@
     "copy": "복사",
     "save": "저장",
     "confirm": "확인",
-    "loading": "로딩 중..."
+    "loading": "로딩 중...",
+    "skipToContent": "메인 콘텐츠로 건너뛰기"
   },
   "theme": {
     "label": "테마 전환",
@@ -296,7 +297,10 @@
     "nodeDeleted": "삭제 완료",
     "nodeMoved": "이동 완료",
     "favoriteAdded": "즐겨찾기에 추가됨",
-    "favoriteRemoved": "즐겨찾기에서 제거됨"
+    "favoriteRemoved": "즐겨찾기에서 제거됨",
+    "expandFolder": "폴더 펼치기",
+    "collapseFolder": "폴더 접기",
+    "clearSearch": "검색 지우기"
   },
   "editor": {
     "titlePlaceholder": "제목 입력...",
@@ -324,7 +328,8 @@
     "offlineMode": "오프라인 모드",
     "localUser": "로컬 사용자",
     "loginToSync": "로그인하여 동기화",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "menu": "메뉴"
   },
   "sync": {
     "syncing": "동기화 중...",
@@ -339,7 +344,8 @@
     "minutesAgo": "{n}분 전",
     "hoursAgo": "{n}시간 전",
     "syncingTitle": "동기화 중...",
-    "clickToSync": "클릭하여 동기화"
+    "clickToSync": "클릭하여 동기화",
+    "label": "동기화 상태"
   },
   "confirm": {
     "defaultTitle": "확인",
@@ -369,7 +375,8 @@
     "emptyHint": "왼쪽에서 폴더와 프롬프트를 만드세요",
     "variableTag": "[변수]",
     "varCount": "{count}개 변수",
-    "items": "{count}개 항목"
+    "items": "{count}개 항목",
+    "clearSearch": "검색 지우기"
   },
   "mindmapView": {
     "title": "마인드맵",

@@ -12,7 +12,8 @@
     "copy": "复制",
     "save": "保存",
     "confirm": "确定",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "skipToContent": "跳至主内容"
   },
   "theme": {
     "label": "切换主题",
@@ -296,7 +297,10 @@
     "nodeDeleted": "删除成功",
     "nodeMoved": "移动成功",
     "favoriteAdded": "已添加收藏",
-    "favoriteRemoved": "已取消收藏"
+    "favoriteRemoved": "已取消收藏",
+    "expandFolder": "展开文件夹",
+    "collapseFolder": "折叠文件夹",
+    "clearSearch": "清除搜索"
   },
   "editor": {
     "titlePlaceholder": "输入标题...",
@@ -324,7 +328,8 @@
     "offlineMode": "离线模式",
     "localUser": "本地用户",
     "loginToSync": "登录以同步",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "menu": "菜单"
   },
   "sync": {
     "syncing": "同步中...",
@@ -339,7 +344,8 @@
     "minutesAgo": "{n} 分钟前",
     "hoursAgo": "{n} 小时前",
     "syncingTitle": "正在同步...",
-    "clickToSync": "点击同步"
+    "clickToSync": "点击同步",
+    "label": "同步状态"
   },
   "confirm": {
     "defaultTitle": "确认",
@@ -369,7 +375,8 @@
     "emptyHint": "在左侧创建文件夹和 Prompt",
     "variableTag": "[变量]",
     "varCount": "{count} 个变量",
-    "items": "{count} 项"
+    "items": "{count} 项",
+    "clearSearch": "清除搜索"
   },
   "mindmapView": {
     "title": "思维导图",

@@ -136,6 +136,8 @@ function handleDrop(e: DragEvent) {
       :class="{ selected: isSelected, folder: isFolder }"
       :style="{ paddingLeft: indent }"
       role="treeitem"
+      :aria-expanded="isFolder ? isExpanded : undefined"
+      :aria-selected="isSelected"
       aria-roledescription="draggable item"
       :draggable="true"
       @click="handleClick"
@@ -153,7 +155,7 @@ function handleDrop(e: DragEvent) {
         role="button"
         tabindex="0"
         :aria-expanded="isFolder ? isExpanded : undefined"
-        :aria-label="isFolder ? (isExpanded ? 'Collapse folder' : 'Expand folder') : undefined"
+        :aria-label="isFolder ? (isExpanded ? t('tree.collapseFolder') : t('tree.expandFolder')) : undefined"
         @click="handleToggle"
         @keydown.enter.prevent="handleToggle"
         @keydown.space.prevent="handleToggle"
@@ -190,7 +192,7 @@ function handleDrop(e: DragEvent) {
     </div>
     
     <!-- 子节点 -->
-    <div v-if="isFolder && isExpanded && hasChildren" class="children">
+    <div v-if="isFolder && isExpanded && hasChildren" class="children" role="group">
       <TreeNode
         v-for="child in node.children"
         :key="child.id"
@@ -291,7 +293,8 @@ function handleDrop(e: DragEvent) {
 }
 
 .rename-input:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-accent);
+  outline: 2px solid var(--color-accent);
+  outline-offset: -1px;
 }
 
 .children {

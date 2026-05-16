@@ -12,7 +12,8 @@
     "copy": "複製",
     "save": "儲存",
     "confirm": "確定",
-    "loading": "載入中..."
+    "loading": "載入中...",
+    "skipToContent": "跳至主內容"
   },
   "theme": {
     "label": "切換主題",
@@ -296,7 +297,10 @@
     "nodeDeleted": "刪除成功",
     "nodeMoved": "移動成功",
     "favoriteAdded": "已加入收藏",
-    "favoriteRemoved": "已取消收藏"
+    "favoriteRemoved": "已取消收藏",
+    "expandFolder": "展開資料夾",
+    "collapseFolder": "摺疊資料夾",
+    "clearSearch": "清除搜尋"
   },
   "editor": {
     "titlePlaceholder": "輸入標題...",
@@ -324,7 +328,8 @@
     "offlineMode": "離線模式",
     "localUser": "本機使用者",
     "loginToSync": "登入以同步",
-    "logout": "登出"
+    "logout": "登出",
+    "menu": "選單"
   },
   "sync": {
     "syncing": "同步中...",
@@ -339,7 +344,8 @@
     "minutesAgo": "{n} 分鐘前",
     "hoursAgo": "{n} 小時前",
     "syncingTitle": "正在同步...",
-    "clickToSync": "點擊同步"
+    "clickToSync": "點擊同步",
+    "label": "同步狀態"
   },
   "confirm": {
     "defaultTitle": "確認",
@@ -369,7 +375,8 @@
     "emptyHint": "在左側建立資料夾和 Prompt",
     "variableTag": "[變數]",
     "varCount": "{count} 個變數",
-    "items": "{count} 項"
+    "items": "{count} 項",
+    "clearSearch": "清除搜尋"
   },
   "mindmapView": {
     "title": "心智圖",

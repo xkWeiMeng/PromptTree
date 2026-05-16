@@ -4,7 +4,8 @@ defineProps<{ name: string }>()
 
 <template>
   <!-- 树形结构管理 -->
-  <svg v-if="name === 'tree'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-if="name === 'tree'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-tree-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-tree-title">Tree structure illustration</title>
     <defs>
       <linearGradient id="gt" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#64D2FF"/><stop offset="1" stop-color="#007AFF"/>
@@ -32,7 +33,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- 变量填充 -->
-  <svg v-else-if="name === 'variable'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'variable'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-variable-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-variable-title">Variable filling illustration</title>
     <defs>
       <linearGradient id="gvar" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#DA8FFF"/><stop offset="1" stop-color="#AF52DE"/>
@@ -53,7 +55,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- 离线优先 -->
-  <svg v-else-if="name === 'offline'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'offline'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-offline-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-offline-title">Offline-first illustration</title>
     <defs>
       <linearGradient id="goff" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#FFD60A"/><stop offset="1" stop-color="#FF9500"/>
@@ -73,7 +76,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- 多端同步 -->
-  <svg v-else-if="name === 'sync'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'sync'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-sync-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-sync-title">Multi-device sync illustration</title>
     <defs>
       <linearGradient id="gsync" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#8EEFC1"/><stop offset="1" stop-color="#34C759"/>
@@ -101,7 +105,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- 浏览器插件 -->
-  <svg v-else-if="name === 'extension'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'extension'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-extension-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-extension-title">Browser extension illustration</title>
     <defs>
       <linearGradient id="gext" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#70D7FF"/><stop offset="1" stop-color="#5AC8FA"/>
@@ -129,7 +134,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- 可分享 -->
-  <svg v-else-if="name === 'share'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'share'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-share-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-share-title">Sharing illustration</title>
     <defs>
       <linearGradient id="gshare" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#64D2FF"/><stop offset="1" stop-color="#007AFF"/>
@@ -147,7 +153,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- API Key 访问 -->
-  <svg v-else-if="name === 'api'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'api'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-api-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-api-title">API access illustration</title>
     <defs>
       <linearGradient id="gapi" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#8EEFC1"/><stop offset="1" stop-color="#34C759"/>
@@ -162,7 +169,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- Agent Skills -->
-  <svg v-else-if="name === 'skills'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'skills'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-skills-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-skills-title">Agent skills illustration</title>
     <defs>
       <linearGradient id="gskills" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#64D2FF"/><stop offset="1" stop-color="#5AC8FA"/>
@@ -183,7 +191,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- 思维导图 -->
-  <svg v-else-if="name === 'mindmap'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'mindmap'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-mindmap-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-mindmap-title">Mind map illustration</title>
     <defs>
       <linearGradient id="gmm" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#B8B0FF"/><stop offset="1" stop-color="#5856D6"/>
@@ -214,7 +223,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- 内容创作者 -->
-  <svg v-else-if="name === 'creator'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'creator'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-creator-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-creator-title">Content creator illustration</title>
     <defs>
       <linearGradient id="gcr" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#64D2FF"/><stop offset="1" stop-color="#007AFF"/>
@@ -238,7 +248,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- 开发者 -->
-  <svg v-else-if="name === 'developer'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'developer'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-developer-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-developer-title">Developer illustration</title>
     <defs>
       <linearGradient id="gdev" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#8EEFC1"/><stop offset="1" stop-color="#34C759"/>
@@ -262,7 +273,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- AI 研究者 -->
-  <svg v-else-if="name === 'researcher'" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'researcher'" viewBox="0 0 56 56" role="img" aria-labelledby="illust-researcher-title" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <title id="illust-researcher-title">AI researcher illustration</title>
     <defs>
       <linearGradient id="gres" x1="0" y1="0" x2="56" y2="56">
         <stop stop-color="#DA8FFF"/><stop offset="1" stop-color="#AF52DE"/>
@@ -289,7 +301,8 @@ defineProps<{ name: string }>()
   </svg>
 
   <!-- 兜底 -->
-  <svg v-else viewBox="0 0 56 56" fill="none">
+  <svg v-else viewBox="0 0 56 56" fill="none" role="img" aria-labelledby="illust-fallback-title">
+    <title id="illust-fallback-title">Illustration</title>
     <rect width="56" height="56" rx="14" fill="#8E8E93"/>
     <circle cx="28" cy="28" r="10" fill="#fff" opacity=".3"/>
   </svg>
